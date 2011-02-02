@@ -2,6 +2,14 @@ from zope.interface import Interface
 from zope.interface import Attribute
 
 
+class IAttachment(Interface):
+
+    filename = Attribute("Name of the file")
+    content_type = Attribute("Content type")
+    data = Attribute("Raw data")
+    disposition = Attribute("Content disposition")
+
+    
 class IMessage(Interface):
 
     sender = Attribute("Email from address")
