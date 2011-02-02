@@ -7,12 +7,6 @@ class IMessage(Interface):
     sender = Attribute("Email from address")
     recipients = Attribute("Iterable of 'to' addresses")
 
-    def validate(self):
-        """
-        Checks if message has valid headers etc.
-        Should raise exception if not.
-        """
-
     def to_message(self):
         """
         Should return "raw" email.Message instance.

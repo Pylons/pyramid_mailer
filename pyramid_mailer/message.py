@@ -77,9 +77,11 @@ class Message(object):
 
     def to_message(self):
         """
-        Returns raw email.Message instance
+        Returns raw email.Message instance.Validates message first.
         """
         
+        self.validate()
+
         return self.get_response().to_message()
 
     def get_response(self):

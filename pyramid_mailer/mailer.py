@@ -16,7 +16,6 @@ class DummyMailer(object):
     Keeps all sent messages internally in list as **outbox** property.
     Queued messages are instead added to **queue** property.
 
-    "Outgoing" messages are still validated for bad headers etc.
     """
 
     def __init__(self):
@@ -24,11 +23,9 @@ class DummyMailer(object):
         self.queue = []
 
     def send(self, message):    
-        message.validate()
         self.outbox.append(message)
 
     def send_to_queue(self, message):
-        message.validate()
         self.queue.append(message)
 
 
@@ -70,7 +67,6 @@ class Mailer(object):
     def prep_message(self, message):
 
         message.sender = message.sender or self.default_sender
-        message.validate()
 
         return (message.sender, 
                 message.recipients,
