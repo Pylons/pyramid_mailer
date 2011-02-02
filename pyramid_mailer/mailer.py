@@ -39,8 +39,6 @@ class Mailer(object):
 
     def send(self, message):
 
-        message.sender = message.sender or self.default_sender
-
         message.validate()
 
         return self.direct_delivery.send(message.sender,
@@ -52,8 +50,6 @@ class Mailer(object):
         if not self.queue_delivery:
             raise RuntimeError, "You must set mail:queue_path in your settings"
     
-        message.sender = message.sender or self.default_sender
-
         message.validate()
 
         return self.queue_delivery.send(message.sender,
