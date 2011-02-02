@@ -12,7 +12,7 @@ class TestMessage(unittest.TestCase):
 
     def test_initialize(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
 
         msg = Message(subject="subject",
                       sender="support@mysite.com",
@@ -25,7 +25,7 @@ class TestMessage(unittest.TestCase):
 
     def test_recipients_properly_initialized(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
 
         msg = Message(subject="subject")
 
@@ -43,7 +43,7 @@ class TestMessage(unittest.TestCase):
 
     def test_add_recipient(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
 
         msg = Message("testing")
         msg.add_recipient("to@example.com")
@@ -53,7 +53,7 @@ class TestMessage(unittest.TestCase):
     
     def test_sender_as_tuple(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
 
         msg = Message(subject="testing",
                       sender=("tester", "tester@example.com"))
@@ -61,7 +61,7 @@ class TestMessage(unittest.TestCase):
     
     def test_send_without_sender(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
         from pyramid_mailer import Mailer
 
         msg = Message(subject="testing",
@@ -76,8 +76,10 @@ class TestMessage(unittest.TestCase):
 
     def test_send_without_recipients(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
         from pyramid_mailer import Mailer
+
+        mailer = Mailer()
 
         msg = Message(subject="testing",
                       recipients=[],
@@ -87,7 +89,7 @@ class TestMessage(unittest.TestCase):
 
     def test_send_without_body(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
         from pyramid_mailer import Mailer
 
         msg = Message(subject="testing",
@@ -103,7 +105,7 @@ class TestMessage(unittest.TestCase):
 
     def test_bcc(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
 
         msg = Message(subject="testing",
                       recipients=["to@example.com"],
@@ -115,7 +117,7 @@ class TestMessage(unittest.TestCase):
 
     def test_cc(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
 
         msg = Message(subject="testing",
                       recipients=["to@example.com"],
@@ -127,7 +129,7 @@ class TestMessage(unittest.TestCase):
 
     def test_attach(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
 
         msg = Message(subject="testing",
                       recipients=["to@example.com"],
@@ -147,8 +149,10 @@ class TestMessage(unittest.TestCase):
 
     def test_bad_header_subject(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
         from pyramid_mailer import Mailer
+
+        from pyramid_mailer.exceptions import BadHeaders
 
         msg = Message(subject="testing\n\r",
                       sender="from@example.com",
@@ -157,12 +161,14 @@ class TestMessage(unittest.TestCase):
 
         mailer = Mailer()
 
-        self.assertRaises(BadHeaderError, mailer.send, msg)
+        self.assertRaises(BadHeaders, mailer.send, msg)
 
     def test_bad_header_sender(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
         from pyramid_mailer import Mailer
+
+        from pyramid_mailer.exceptions import BadHeaders
 
         mailer = Mailer()
 
@@ -171,12 +177,14 @@ class TestMessage(unittest.TestCase):
                       recipients=["to@example.com"],
                       body="testing")
 
-        self.assertRaises(BadHeaderError, mailer.send, msg)
+        self.assertRaises(BadHeaders, mailer.send, msg)
 
     def test_bad_header_recipient(self):
 
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
         from pyramid_mailer import Mailer
+
+        from pyramid_mailer.exceptions import BadHeaders
 
         mailer = Mailer()
 
@@ -187,15 +195,49 @@ class TestMessage(unittest.TestCase):
                           "to\r\n@example.com"],
                       body="testing")
 
-        self.assertRaises(BadHeaderError, mailer.send, msg)
+        self.assertRaises(BadHeaders, mailer.send, msg)
 
+    def test_send_to(self):
+
+        from pyramid_mailer.message import Message
+
+        msg = Message(subject="testing",
+                      sender="from@example.com",
+                      recipients=[
+                          "to@example.com"],
+                      cc=['somebodyelse@example.com', 
+                          'to@example.com'],
+                      bcc=['anotherperson@example.com'],
+                      body="testing")
+
+
+        self.assert_(msg.send_to == set(["to@example.com",
+                                        "somebodyelse@example.com",
+                                        "anotherperson@example.com"]))
+
+    def test_is_bad_headers_if_no_bad_headers(self):
+        msg = Message(subject="testing",
+                      sender="from@example.com",
+                      body="testing",
+                      recipients=["to@example.com"])
+
+        self.assert_(not(msg.is_bad_headers()))
+
+    def test_is_bad_headers_if_bad_headers(self):
+
+        msg = Message(subject="testing\n\r",
+                      sender="from@\nexample.com",
+                      body="testing",
+                      recipients=["to@example.com"])
+
+        self.assert_(msg.is_bad_headers())
 
 class TestMail(unittest.TestCase):
 
     def test_send(self):
 
         from pyramid_mailer import Mailer
-        from pyramid_mailer import Message
+        from pyramid_mailer.message import Message
 
         mailer = Mailer()
 
@@ -205,25 +247,17 @@ class TestMail(unittest.TestCase):
 
         mailer.send(msg)
 
-        assert len(outbox) == 1 
 
     def test_send_to_queue(self):
 
         from pyramid_mailer import Mailer
+        from pyramid_mailer.message import Message
 
-        mailer = Mailer()
+        mailer = Mailer({'mail:queue_path':'/tmp'})
 
-        mailer.send_message(subject="testing",
-                            recipients=["tester@example.com"],
-                            body="test")
+        msg = Message(subject="testing",
+                      recipients=["tester@example.com"],
+                      body="test")
 
-        assert len(outbox) == 1
-
-        msg = outbox[0]
-
-        assert msg.subject == "testing"
-        assert msg.recipients == ["tester@example.com"]
-        assert msg.body == "test"
-
-
+        mailer.send_to_queue(msg)
 

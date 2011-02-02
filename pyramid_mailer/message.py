@@ -1,8 +1,8 @@
 
 from lamson.mail import MailResponse
 
-class BadHeaderError(Exception): pass
-
+from pyramid_mailer.exceptions import BadHeaders
+from pyramid_mailer.exceptions import InvalidMessage
 
 class Attachment(object):
 
@@ -118,13 +118,18 @@ class Message(object):
         """
         Verifies and sends the message.
         """
-        
-        assert self.recipients, "No recipients have been added"
-        assert self.body or self.html, "No body or HTML has been set"
-        assert self.sender, "No sender address has been set"
+
+        if not self.recipients:
+            raise InvalidMessage, "No recipients have been added"
+
+        if not self.body or not self.html:
+            raise InvalidMessage, "No body has been set"
+
+        if not self.sender:
+            raise InvalidMessage, "No sender address has been set"
 
         if self.is_bad_headers():
-            raise BadHeaderError
+            raise BadHeaders
 
         mailer.send(self)
 
