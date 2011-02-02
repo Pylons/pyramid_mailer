@@ -43,6 +43,7 @@ class Message(object):
     :param sender: email sender address, or **DEFAULT_MAIL_SENDER** by default
     :param cc: CC list
     :param bcc: BCC list
+    :param extra_headers: dict of extra email headers
     :param attachments: list of Attachment instances
 
     
@@ -55,6 +56,7 @@ class Message(object):
                  sender=None,
                  cc=None,
                  bcc=None,
+                 extra_headers=None,
                  attachments=None):
 
 
@@ -67,6 +69,7 @@ class Message(object):
         self.attachments = attachments or []
         self.cc = cc or []
         self.bcc = bcc or []
+        self.extra_headers = extra_headers or {}
 
     @property
     def send_to(self):
@@ -103,6 +106,8 @@ class Message(object):
                             attachment.data, 
                             attachment.disposition)
 
+        response.update(self.extra_headers)
+
         return response
     
     def is_bad_headers(self):
@@ -110,7 +115,11 @@ class Message(object):
         Checks for bad headers i.e. newlines in subject, sender or recipients.
         """
        
-        for val in [self.subject, self.sender] + list(self.send_to):
+        headers = [self.subject, self.sender]
+        headers += list(self.send_to)
+        headers += self.extra_headers.values()
+
+        for val in headers:
             for c in '\r\n':
                 if c in val:
                     return True
