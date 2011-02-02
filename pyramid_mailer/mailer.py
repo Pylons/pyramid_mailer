@@ -37,22 +37,23 @@ class Mailer(object):
         else:
             self.queue_delivery = None
 
-    def send(self, message):
+    def prep_message(self, message):
 
+        message.sender = message.sender or self.default_sender
         message.validate()
 
-        return self.direct_delivery.send(message.sender,
-                                         message.recipients,
-                                         message.to_message())
+        return (message.sender, 
+                message.recipients,
+                message.to_message())
+
+    def send(self, message):
+
+        return self.direct_delivery.send(*self.prep_message(message))
         
     def send_to_queue(self, message):
 
         if not self.queue_delivery:
             raise RuntimeError, "You must set mail:queue_path in your settings"
     
-        message.validate()
-
-        return self.queue_delivery.send(message.sender,
-                                        message.recipients,
-                                        message.to_message())
+        return self.queue_delivery.send(*self.prep_message(message))
 
