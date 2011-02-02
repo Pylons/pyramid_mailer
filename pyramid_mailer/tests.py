@@ -128,13 +128,14 @@ class TestMessage(unittest.TestCase):
     def test_attach(self):
 
         from pyramid_mailer.message import Message
+        from pyramid_mailer.message import Attachment
 
         msg = Message(subject="testing",
                       recipients=["to@example.com"],
                       body="testing")
         
-        msg.attach(data="this is a test", 
-                   content_type="text/plain")
+        msg.attach(Attachment(data="this is a test", 
+                              content_type="text/plain"))
         
 
         a = msg.attachments[0]

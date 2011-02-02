@@ -163,22 +163,11 @@ class Message(object):
 
         self.bcc.append(recipient)
 
-    def attach(self, 
-               filename=None, 
-               content_type=None, 
-               data=None,
-               disposition=None):
+    def attach(self, attachment):
         
         """
-        Adds an attachment to the message.
-        
-        :param filename: filename of attachment
-        :param content_type: file mimetype
-        :param data: the raw file data
-        :param disposition: content-disposition (if any)
+        Adds an IAttachment instance to the message.
         """
-
-        attachment = Attachment(filename, content_type, data, disposition)
 
         self.attachments.append(attachment)
 
