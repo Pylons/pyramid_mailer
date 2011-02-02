@@ -16,8 +16,11 @@ class Attachment(object):
  
     """
 
-    def __init__(self, filename=None, content_type=None, data=None,
-        disposition=None): 
+    def __init__(self, 
+                 filename=None, 
+                 content_type=None, 
+                 data=None,
+                 disposition=None): 
 
         self.filename = filename
         self.content_type = content_type
@@ -60,15 +63,8 @@ class Message(object):
         self.cc = cc
         self.bcc = bcc 
 
-        if recipients is None:
-            recipients = []
-
-        self.recipients = list(recipients)
-        
-        if attachments is None:
-            attachments = []
-
-        self.attachments = attachments
+        self.recipients = list(recipients or [])
+        self.attachments = attachments or []
 
     @property
     def send_to(self):
@@ -158,4 +154,5 @@ class Message(object):
 
         self.attachments.append(
              Attachment(filename, content_type, data, disposition))
+
 
