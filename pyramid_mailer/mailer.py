@@ -31,6 +31,29 @@ class DummyMailer(object):
         self.queue.append(message)
 
 
+class SMTP_SSLMailer(SMTPMailer):
+    """
+    Subclass of SMTPMailer enabling SSL,
+    """
+
+    smtp = smtplib.SMTP_SSL
+
+    def __init__(self, *args, **kwargs):
+        self.keyfile = kwargs.pop('keyfile', None)
+        self.certfile = kwargs.pop('certfile', None)
+
+        super(SMTP_SSLMailer, self).__init__(*args, **kwargs)
+
+    def smtp_factory(self):
+
+        connection = self.smtp(self.hostname, str(self.port),
+                               keyfile=self.keyfile,
+                               certfile=self.certfile)
+
+        connection.set_debuglevel(self.debug_smtp)
+        return connection
+
+
 class Mailer(object):
     implements(IMailer)
 
@@ -51,21 +74,34 @@ class Mailer(object):
         password = settings.get('mail.password')
         tls = settings.get('mail.tls', False)
         ssl = settings.get('mail.ssl', False)
+        keyfile = settings.get('mail.keyfile')
+        certfile = settings.get('mail.certfile')
         queue_path = settings.get('mail.queue_path')
         debug_smtp = int(settings.get('debug_smtp', 0))
 
         self.default_sender = settings.get('mail.default_sender')
 
-        smtp_mailer = SMTPMailer(hostname=host, 
-                                 port=port, 
-                                 username=username, 
-                                 password=password, 
-                                 no_tls=not(tls), 
-                                 force_tls=tls, 
-                                 debug_smtp=debug_smtp)
-
         if ssl:
-            smtp_mailer.smtp = smtplib.SMTP_SSL
+
+            smtp_mailer = SMTP_SSLMailer(hostname=host,
+                                         port=port,
+                                         username=username,
+                                         password=password,
+                                         no_tls=not(tls),
+                                         force_tls=tls,
+                                         debug_smtp=debug_smtp,
+                                         keyfile=keyfile,
+                                         certfile=certfile)
+
+        else:
+
+            smtp_mailer = SMTPMailer(hostname=host, 
+                                     port=port, 
+                                     username=username, 
+                                     password=password, 
+                                     no_tls=not(tls), 
+                                     force_tls=tls, 
+                                     debug_smtp=debug_smtp)
 
         self.direct_delivery = DirectMailDelivery(smtp_mailer)
 
