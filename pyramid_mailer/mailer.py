@@ -2,8 +2,38 @@ from repoze.sendmail.mailer import SMTPMailer
 from repoze.sendmail.delivery import DirectMailDelivery
 from repoze.sendmail.delivery import QueuedMailDelivery
 
+from zope.interface import implements
+
+from pyramid_mailer.interfaces import IMailer
+
+class DummyMailer(object):
+    implements(IMailer)
+
+    """
+    Dummy mailing instance
+    Used for example in unit tests.
+
+    Keeps all sent messages internally in list as **outbox** property.
+    Queued messages are instead added to **queue** property.
+
+    "Outgoing" messages are still validated for bad headers etc.
+    """
+
+    def __init__(self):
+        self.outbox = []
+        self.queue = []
+
+    def send(self, message):    
+        message.validate()
+        self.outbox.append(message)
+
+    def send_to_queue(self, message):
+        message.validate()
+        self.queue.append(message)
+
 
 class Mailer(object):
+    implements(IMailer)
 
     """
     Usage: config.registry['mailer'] = Mailer(settings)

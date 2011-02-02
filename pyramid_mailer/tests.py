@@ -241,6 +241,40 @@ class TestMessage(unittest.TestCase):
 
 class TestMailer(unittest.TestCase):
 
+    def test_dummy_send(self):
+
+        from pyramid_mailer.mailer import DummyMailer
+        from pyramid_mailer.message import Message
+
+        mailer = DummyMailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send(msg)
+
+        self.assert_(len(mailer.outbox)) == 1
+
+    def test_dummy_send_to_queue(self):
+
+        from pyramid_mailer.mailer import DummyMailer
+        from pyramid_mailer.message import Message
+
+        mailer = DummyMailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_to_queue(msg)
+
+        self.assert_(len(mailer.queue)) == 1
+
+
+
     def test_send(self):
 
         from pyramid_mailer.mailer import Mailer
