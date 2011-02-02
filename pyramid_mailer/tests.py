@@ -62,7 +62,7 @@ class TestMessage(unittest.TestCase):
     def test_send_without_sender(self):
 
         from pyramid_mailer.message import Message
-        from pyramid_mailer import Mailer
+        from pyramid_mailer.mailer import Mailer
 
         msg = Message(subject="testing",
                       recipients=["to@example.com"],
@@ -77,7 +77,7 @@ class TestMessage(unittest.TestCase):
     def test_send_without_recipients(self):
 
         from pyramid_mailer.message import Message
-        from pyramid_mailer import Mailer
+        from pyramid_mailer.mailer import Mailer
 
         mailer = Mailer()
 
@@ -90,7 +90,7 @@ class TestMessage(unittest.TestCase):
     def test_send_without_body(self):
 
         from pyramid_mailer.message import Message
-        from pyramid_mailer import Mailer
+        from pyramid_mailer.mailer import Mailer
 
         msg = Message(subject="testing",
                       recipients=["to@example.com"])
@@ -150,7 +150,7 @@ class TestMessage(unittest.TestCase):
     def test_bad_header_subject(self):
 
         from pyramid_mailer.message import Message
-        from pyramid_mailer import Mailer
+        from pyramid_mailer.mailer import Mailer
 
         from pyramid_mailer.exceptions import BadHeaders
 
@@ -166,7 +166,7 @@ class TestMessage(unittest.TestCase):
     def test_bad_header_sender(self):
 
         from pyramid_mailer.message import Message
-        from pyramid_mailer import Mailer
+        from pyramid_mailer.mailer import Mailer
 
         from pyramid_mailer.exceptions import BadHeaders
 
@@ -182,7 +182,7 @@ class TestMessage(unittest.TestCase):
     def test_bad_header_recipient(self):
 
         from pyramid_mailer.message import Message
-        from pyramid_mailer import Mailer
+        from pyramid_mailer.mailer import Mailer
 
         from pyramid_mailer.exceptions import BadHeaders
 
@@ -236,7 +236,7 @@ class TestMail(unittest.TestCase):
 
     def test_send(self):
 
-        from pyramid_mailer import Mailer
+        from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
         mailer = Mailer()
@@ -250,7 +250,7 @@ class TestMail(unittest.TestCase):
 
     def test_send_to_queue(self):
 
-        from pyramid_mailer import Mailer
+        from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
         mailer = Mailer({'mail:queue_path':'/tmp'})
