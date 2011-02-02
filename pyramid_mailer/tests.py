@@ -96,6 +96,7 @@ class TestMessage(unittest.TestCase):
         from pyramid_mailer.exceptions import InvalidMessage
 
         msg = Message(subject="testing",
+                      sender="sender@example.com",
                       recipients=["to@example.com"])
 
         mailer = Mailer()
@@ -123,6 +124,7 @@ class TestMessage(unittest.TestCase):
         from pyramid_mailer.message import Message
 
         msg = Message(subject="testing",
+                      sender="sender@example.com",
                       recipients=["to@example.com"],
                       body="testing",
                       cc=["tosomeoneelse@example.com"])
@@ -247,6 +249,7 @@ class TestMail(unittest.TestCase):
         mailer = Mailer()
 
         msg = Message(subject="testing",
+                      sender="sender@example.com",
                       recipients=["tester@example.com"],
                       body="test")
 
@@ -271,6 +274,7 @@ class TestMail(unittest.TestCase):
         mailer = Mailer({'mail:queue_path':test_queue})
 
         msg = Message(subject="testing",
+                      sender="sender@example.com",
                       recipients=["tester@example.com"],
                       body="test")
 
