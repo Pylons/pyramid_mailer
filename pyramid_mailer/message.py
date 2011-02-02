@@ -113,9 +113,9 @@ class Message(object):
                     return True
         return False
         
-    def send(self, mailer):
+    def validate(self):
         """
-        Verifies and sends the message.
+        Checks if message is valid and raises appropriate exception.
         """
 
         if not self.recipients:
@@ -129,8 +129,6 @@ class Message(object):
 
         if self.is_bad_headers():
             raise BadHeaders
-
-        mailer.send(self)
 
     def add_recipient(self, recipient):
         """

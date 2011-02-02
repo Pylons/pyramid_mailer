@@ -35,12 +35,16 @@ class Mailer(object):
 
     def send(self, message):
 
+        message.validate()
+
         return self.direct_delivery.send(message.sender,
                                          message.recipients,
                                          message.to_message())
         
     def send_to_queue(self, message):
     
+        message.validate()
+
         return self.queue_delivery.send(message.sender,
                                         message.recipients,
                                         message.to_message())
