@@ -14,9 +14,9 @@ class TestMessage(unittest.TestCase):
                       recipients=["to@example.com"])
 
 
-        assert msg.subject == "subject"
-        assert msg.sender == "support@mysite.com"
-        assert msg.recipients == ["to@example.com"]
+        self.assert_(msg.subject == "subject")
+        self.assert_(msg.sender == "support@mysite.com")
+        self.assert_(msg.recipients == ["to@example.com"])
 
     def test_recipients_properly_initialized(self):
 
@@ -24,17 +24,17 @@ class TestMessage(unittest.TestCase):
 
         msg = Message(subject="subject")
 
-        assert msg.recipients == []
+        self.assert_(msg.recipients == [])
 
         msg2 = Message(subject="subject")
         msg2.add_recipient("somebody@here.com")
 
-        assert len(msg.recipients) == 0
+        self.assert_(len(msg.recipients) == 0)
 
         msg3 = Message(subject="subject")
         msg3.add_recipient("somebody@here.com")
 
-        assert len(msg.recipients) == 0
+        self.assert_(len(msg.recipients) == 0)
 
     def test_add_recipient(self):
 
@@ -43,7 +43,7 @@ class TestMessage(unittest.TestCase):
         msg = Message("testing")
         msg.add_recipient("to@example.com")
 
-        assert msg.recipients == ["to@example.com"]
+        self.assert_(msg.recipients == ["to@example.com"])
 
     def test_add_cc(self):
 
@@ -52,7 +52,7 @@ class TestMessage(unittest.TestCase):
         msg = Message("testing")
         msg.add_cc("to@example.com")
 
-        assert msg.cc == ["to@example.com"]
+        self.assert_(msg.cc == ["to@example.com"])
 
     def test_add_bcc(self):
 
@@ -61,7 +61,7 @@ class TestMessage(unittest.TestCase):
         msg = Message("testing")
         msg.add_bcc("to@example.com")
 
-        assert msg.bcc == ["to@example.com"]
+        self.assert_(msg.bcc == ["to@example.com"])
 
     
     def test_sender_as_tuple(self):
@@ -128,7 +128,7 @@ class TestMessage(unittest.TestCase):
                       bcc=["tosomeoneelse@example.com"])
 
         response = msg.get_response()
-        assert "Bcc: tosomeoneelse@example.com" in str(response)
+        self.assert_("Bcc: tosomeoneelse@example.com" in str(response))
 
     def test_cc(self):
 
@@ -141,7 +141,7 @@ class TestMessage(unittest.TestCase):
                       cc=["tosomeoneelse@example.com"])
 
         response = msg.get_response()
-        assert "Cc: tosomeoneelse@example.com" in str(response)
+        self.assert_("Cc: tosomeoneelse@example.com" in str(response))
 
     def test_attach(self):
 
@@ -158,10 +158,10 @@ class TestMessage(unittest.TestCase):
 
         a = msg.attachments[0]
         
-        assert a.filename is None
-        assert a.disposition == 'attachment'
-        assert a.content_type == "text/plain"
-        assert a.data == "this is a test"
+        self.assert_(a.filename is None)
+        self.assert_(a.disposition == 'attachment')
+        self.assert_(a.content_type == "text/plain")
+        self.assert_(a.data == "this is a test")
  
 
     def test_bad_header_subject(self):

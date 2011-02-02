@@ -77,7 +77,7 @@ class Mailer(object):
         keyfile = settings.get('mail.keyfile')
         certfile = settings.get('mail.certfile')
         queue_path = settings.get('mail.queue_path')
-        debug_smtp = int(settings.get('debug_smtp', 0))
+        debug_smtp = int(settings.get('mail.debug', 0))
 
         self.default_sender = settings.get('mail.default_sender')
 
