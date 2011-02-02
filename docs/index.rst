@@ -35,7 +35,7 @@ To get started create an instance of **Mailer**::
 
     mailer = Mailer()
 
-The **Mailer** class can take a number of optional settings, detailed below. It's a good idea to create a single **Mailer** instance for your application, and add it to your registry in your configuration setup::
+The **Mailer** class can take a number of optional settings, detailed in :ref:`configuration`.. It's a good idea to create a single **Mailer** instance for your application, and add it to your registry in your configuration setup::
 
     config = Configurator(settings=settings)
     config.registry['mailer'] = Mailer(settings)
@@ -62,8 +62,32 @@ or add it to your mail queue::
 
     mailer.send_to_queue(message)
 
+.. _configuration:
+
 Configuration
 -------------
+
++--------------------------+-------------------+--------------------------+
+| Setting                  | Default           | Description              | 
++=====================================+===================================+
+| **mail:hostname**        | ``localhost``     | SMTP host                |
++--------------------------+-------------------+--------------------------+
+| **mail:port**            | ``25``            | SMTP port                |
++--------------------------+-------------------+--------------------------+
+| **mail:username**        | **None**          | SMTP username            |
++--------------------------+-------------------+--------------------------+
+| **mail:password**        | **None**          | SMTP password            |
++--------------------------+-------------------+--------------------------+
+| **mail:no_tls**          | **True**          | Use TLS                  |
++--------------------------+-------------------+--------------------------+
+| **mail:force_tls**       | **False**         | Force TLS                |
++--------------------------+-------------------+--------------------------+
+| **mail:queue_path**      | **None**          | Location of maildir      |
++--------------------------+-------------------+--------------------------+
+| **mail:default_sender**  | **None**          | Default from address     |
++--------------------------+-------------------+--------------------------+
+| **debug_smtp**           | **False**         | Use SMTP debugging       |
++-------------------------------------------------------------------------+
 
 Transactions
 ------------
@@ -145,5 +169,5 @@ API
 
 .. _Bitbucket: http://bitbucket.org/danjac/pyramid_mailer
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
-.. _repoze.sendmail: http://pypi.python.org/pypi/repoze_sendmail/
+.. _repoze_sendmail: http://pypi.python.org/pypi/repoze_sendmail/
 .. _Lamson: http://pypi.python.org/pypi/lamson/
