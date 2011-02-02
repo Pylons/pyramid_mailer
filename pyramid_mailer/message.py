@@ -107,7 +107,7 @@ class Message(object):
         Checks for bad headers i.e. newlines in subject, sender or recipients.
         """
        
-        for val in [self.subject, self.sender] + self.send_to:
+        for val in [self.subject, self.sender] + list(self.send_to):
             for c in '\r\n':
                 if c in val:
                     return True

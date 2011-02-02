@@ -63,6 +63,7 @@ class TestMessage(unittest.TestCase):
 
         from pyramid_mailer.message import Message
         from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.exceptions import InvalidMessage
 
         msg = Message(subject="testing",
                       recipients=["to@example.com"],
@@ -71,13 +72,14 @@ class TestMessage(unittest.TestCase):
         mailer = Mailer()
 
         transaction.begin()
-        self.assertRaises(AssertionError, mailer.send, msg)
+        self.assertRaises(InvalidMessage, mailer.send, msg)
         transaction.commit()
 
     def test_send_without_recipients(self):
 
         from pyramid_mailer.message import Message
         from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.exceptions import InvalidMessage
 
         mailer = Mailer()
 
@@ -85,19 +87,20 @@ class TestMessage(unittest.TestCase):
                       recipients=[],
                       body="testing")
 
-        self.assertRaises(AssertionError, mailer.send, msg)
+        self.assertRaises(InvalidMessage, mailer.send, msg)
 
     def test_send_without_body(self):
 
         from pyramid_mailer.message import Message
         from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.exceptions import InvalidMessage
 
         msg = Message(subject="testing",
                       recipients=["to@example.com"])
 
         mailer = Mailer()
 
-        self.assertRaises(AssertionError, mailer.send, msg)
+        self.assertRaises(InvalidMessage, mailer.send, msg)
 
         msg.html = "<b>test</b>"
 
@@ -216,6 +219,7 @@ class TestMessage(unittest.TestCase):
                                         "anotherperson@example.com"]))
 
     def test_is_bad_headers_if_no_bad_headers(self):
+        from pyramid_mailer.message import Message
         msg = Message(subject="testing",
                       sender="from@example.com",
                       body="testing",
@@ -225,6 +229,7 @@ class TestMessage(unittest.TestCase):
 
     def test_is_bad_headers_if_bad_headers(self):
 
+        from pyramid_mailer.message import Message
         msg = Message(subject="testing\n\r",
                       sender="from@\nexample.com",
                       body="testing",
@@ -250,10 +255,20 @@ class TestMail(unittest.TestCase):
 
     def test_send_to_queue(self):
 
+        import os
+        import tempfile
+
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
-        mailer = Mailer({'mail:queue_path':'/tmp'})
+        test_queue = os.path.join(tempfile.gettempdir(), 'test_queue')
+        for dir in ('cur', 'new', 'tmp'):
+            try:
+                os.makedirs(os.path.join(test_queue, dir))
+            except OSError:
+                pass
+        
+        mailer = Mailer({'mail:queue_path':test_queue})
 
         msg = Message(subject="testing",
                       recipients=["tester@example.com"],
