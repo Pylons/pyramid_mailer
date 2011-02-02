@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-import transaction
 import unittest
-import mailbox
-
-from email import encoders
-
 
 class TestMessage(unittest.TestCase):
 
@@ -71,9 +66,7 @@ class TestMessage(unittest.TestCase):
 
         mailer = Mailer()
 
-        transaction.begin()
         self.assertRaises(InvalidMessage, mailer.send, msg)
-        transaction.commit()
 
     def test_send_without_recipients(self):
 

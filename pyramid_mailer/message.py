@@ -1,6 +1,8 @@
-
 from lamson.mail import MailResponse
 
+from zope.interface import implements
+
+from pyramid_mailer.interfaces import IMessage
 from pyramid_mailer.exceptions import BadHeaders
 from pyramid_mailer.exceptions import InvalidMessage
 
@@ -29,6 +31,7 @@ class Attachment(object):
 
 
 class Message(object):
+    implements(IMessage)
     
     """
     Encapsulates an email message.
