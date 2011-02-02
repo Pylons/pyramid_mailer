@@ -121,7 +121,7 @@ class Message(object):
         if not self.recipients:
             raise InvalidMessage, "No recipients have been added"
 
-        if not self.body or not self.html:
+        if not self.body and not self.html:
             raise InvalidMessage, "No body has been set"
 
         if not self.sender:
