@@ -70,21 +70,21 @@ Configuration
 +--------------------------+-------------------+--------------------------+
 | Setting                  | Default           | Description              | 
 +=====================================+===================================+
-| **mail:hostname**        | ``localhost``     | SMTP host                |
+| **mail.hostname**        | ``localhost``     | SMTP host                |
 +--------------------------+-------------------+--------------------------+
-| **mail:port**            | ``25``            | SMTP port                |
+| **mail.port**            | ``25``            | SMTP port                |
 +--------------------------+-------------------+--------------------------+
-| **mail:username**        | **None**          | SMTP username            |
+| **mail.username**        | **None**          | SMTP username            |
 +--------------------------+-------------------+--------------------------+
-| **mail:password**        | **None**          | SMTP password            |
+| **mail.password**        | **None**          | SMTP password            |
 +--------------------------+-------------------+--------------------------+
-| **mail:no_tls**          | **True**          | Use TLS                  |
+| **mail.no_tls**          | **True**          | Use TLS                  |
 +--------------------------+-------------------+--------------------------+
-| **mail:force_tls**       | **False**         | Force TLS                |
+| **mail.force_tls**       | **False**         | Force TLS                |
 +--------------------------+-------------------+--------------------------+
-| **mail:queue_path**      | **None**          | Location of maildir      |
+| **mail.queue_path**      | **None**          | Location of maildir      |
 +--------------------------+-------------------+--------------------------+
-| **mail:default_sender**  | **None**          | Default from address     |
+| **mail.default_sender**  | **None**          | Default from address     |
 +--------------------------+-------------------+--------------------------+
 | **debug_smtp**           | **False**         | Use SMTP debugging       |
 +-------------------------------------------------------------------------+

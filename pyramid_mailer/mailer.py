@@ -43,16 +43,16 @@ class Mailer(object):
 
         settings = settings or {}
 
-        hostname = settings.get('mail:hostname', 'localhost')
-        port = int(settings.get('mail:port', 25))
-        username = settings.get('mail:username')
-        password = settings.get('mail:password')
-        no_tls = not(settings.get('mail:tls'))
-        force_tls = settings.get('mail:force_tls')
-        queue_path = settings.get('mail:queue_path')
+        hostname = settings.get('mail.hostname', 'localhost')
+        port = int(settings.get('mail.port', 25))
+        username = settings.get('mail.username')
+        password = settings.get('mail.password')
+        no_tls = not(settings.get('mail.tls'))
+        force_tls = settings.get('mail.force_tls')
+        queue_path = settings.get('mail.queue_path')
         debug_smtp = settings.get('debug_smtp')
 
-        self.default_sender = settings.get('mail:default_from_address')
+        self.default_sender = settings.get('mail.default_sender')
 
         smtp_mailer = SMTPMailer(hostname, port, username, password, 
                                  no_tls, force_tls, debug_smtp)

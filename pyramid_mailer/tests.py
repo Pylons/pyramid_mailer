@@ -311,7 +311,7 @@ class TestMailer(unittest.TestCase):
             except OSError:
                 pass
         
-        mailer = Mailer({'mail:queue_path':test_queue})
+        mailer = Mailer({'mail.queue_path':test_queue})
 
         msg = Message(subject="testing",
                       sender="sender@example.com",
