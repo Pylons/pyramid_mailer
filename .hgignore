@@ -21,6 +21,7 @@ dist
 data
 build
 docs/output
+docs/_themes
 
 .git
 .gitignore

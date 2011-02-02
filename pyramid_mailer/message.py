@@ -47,7 +47,6 @@ class Message(object):
     :param bcc: BCC list
     :param extra_headers: dict of extra email headers
     :param attachments: list of Attachment instances
-
     
     """
 

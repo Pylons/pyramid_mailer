@@ -87,7 +87,6 @@ Configuration
 | **mail.certfile**        | **None**          | SSL certificate file     |
 +--------------------------+-------------------+--------------------------+
 | **mail.queue_path**      | **None**          | Location of maildir      |
-| **mail.queue_path**      | **None**          | Location of maildir      |
 +--------------------------+-------------------+--------------------------+
 | **mail.default_sender**  | **None**          | Default from address     |
 +--------------------------+-------------------+--------------------------+
@@ -97,8 +96,22 @@ Configuration
 Transactions
 ------------
 
+If you are using transaction management with your Pyramid application then **pyramid_mailer** will only send the emails (or add them to the mail queue) when the transactions are committed. 
+
 Attachments
 -----------
+
+Attachments are added using the **Attachment** class::
+
+    from pyramid_mailer.message import Attachment
+    from pyramid_mailer.message import Message
+
+    message = Message()
+
+    photo_data = open("photo.jpg", "rb").read()
+    attachment = Attachment("photo.jpg", "image/jpg", photo_data)
+
+    message.attach(attachment)
 
 
 Unit tests

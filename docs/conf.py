@@ -119,9 +119,9 @@ if book:
 # -----------------------
 
 # Add and use Pylons theme
-#sys.path.append(os.path.abspath('_themes'))
-#html_theme_path = ['_themes']
-#html_theme = 'pyramid'
+sys.path.append(os.path.abspath('_themes'))
+html_theme_path = ['_themes']
+html_theme = 'pyramid'
 
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths
@@ -130,7 +130,7 @@ if book:
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = 'Simple form library pyramid_mailer v%s' % release
+html_title = 'pyramid_mailer v%s' % release
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = 'Home'

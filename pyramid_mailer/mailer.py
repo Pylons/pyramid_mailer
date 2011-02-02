@@ -17,7 +17,6 @@ class DummyMailer(object):
 
     Keeps all sent messages internally in list as **outbox** property.
     Queued messages are instead added to **queue** property.
-
     """
 
     def __init__(self):
@@ -25,15 +24,27 @@ class DummyMailer(object):
         self.queue = []
 
     def send(self, message):    
+        """
+        Mocks sending a direct message. The message is added to the **outbox**
+        list.
+
+        :param message : a **pyramid_mailer.interfaces.IMessage** instance.
+        """
         self.outbox.append(message)
 
     def send_to_queue(self, message):
+        """
+        Mocks sending to a maildir queue. The message is added to the **queue**
+        list.
+
+        :param message : a **pyramid_mailer.interfaces.IMessage** instance.
+        """
         self.queue.append(message)
 
 
 class SMTP_SSLMailer(SMTPMailer):
     """
-    Subclass of SMTPMailer enabling SSL,
+    Subclass of SMTPMailer enabling SSL.
     """
 
     smtp = smtplib.SMTP_SSL
@@ -55,14 +66,14 @@ class SMTP_SSLMailer(SMTPMailer):
 
 
 class Mailer(object):
+    """
+    Manages sending of email messages.
+
+    :param settings : a settings dict. See documentation on the 
+                      individual settings required.
+    """
+
     implements(IMailer)
-
-    """
-    Usage: config.registry['mailer'] = Mailer(settings)
-
-    request.registry['mailer'].send(message)
-    request.registry['mailer'].send_to_queue(message)
-    """
 
     def __init__(self, settings=None):
 
@@ -111,10 +122,23 @@ class Mailer(object):
             self.queue_delivery = None
 
     def send(self, message):
+        """
+        Sends a message immediately.
+
+        :param message : a **pyramid_mailer.interfaces.IMessage** instance.
+        """
 
         return self.direct_delivery.send(*self._message_args(message))
         
     def send_to_queue(self, message):
+        """
+        Adds a message to a maildir queue.
+        
+        In order to handle this, the setting **mail.queue_path** must be 
+        provided and must point to a valid maildir.
+
+        :param message : a **pyramid_mailer.interfaces.IMessage** instance.
+        """
 
         if not self.queue_delivery:
             raise RuntimeError, "You must set mail:queue_path in your settings"
@@ -128,5 +152,4 @@ class Mailer(object):
         return (message.sender, 
                 message.recipients,
                 message.to_message())
-
 
