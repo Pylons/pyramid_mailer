@@ -255,6 +255,18 @@ class TestMail(unittest.TestCase):
 
         mailer.send(msg)
 
+    def test_send_to_queue_unconfigured(self):
+
+        from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.message import Message
+        
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+        mailer = Mailer()
+
+        self.assertRaises(RuntimeError, mailer.send_to_queue, msg)
 
     def test_send_to_queue(self):
 
