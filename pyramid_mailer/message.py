@@ -42,7 +42,7 @@ class Message(object):
     :param recipients: list of email addresses
     :param body: plain text message
     :param html: HTML message
-    :param sender: email sender address, or **DEFAULT_MAIL_SENDER** by default
+    :param sender: email sender address
     :param cc: CC list
     :param bcc: BCC list
     :param extra_headers: dict of extra email headers
