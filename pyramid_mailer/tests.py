@@ -239,7 +239,7 @@ class TestMessage(unittest.TestCase):
 
         self.assert_(msg.is_bad_headers())
 
-class TestMail(unittest.TestCase):
+class TestMailer(unittest.TestCase):
 
     def test_send(self):
 

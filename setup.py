@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(
-    name='pyramid_mail',
+    name='pyramid_mailer',
     version='0.1',
     url='',
     license='BSD',
@@ -11,7 +11,7 @@ setup(
     description='',
     long_description=__doc__,
     packages=[
-        'pyramid_mail',
+        'pyramid_mailer',
     ],
     test_suite='nose.collector',
     zip_safe=False,
