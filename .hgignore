@@ -1,0 +1,26 @@
+syntax: glob
+
+*.coverage
+*.egg-info
+*.egg
+*.log
+*.pyc
+*.db
+*.swp
+*.swo
+*.zip
+*.orig
+*.cfg
+*.tox
+
+
+*~
+
+
+dist
+data
+build
+docs/output
+
+.git
+.gitignore
