@@ -1,3 +1,5 @@
+import smtplib
+
 from repoze.sendmail.mailer import SMTPMailer
 from repoze.sendmail.delivery import DirectMailDelivery
 from repoze.sendmail.delivery import QueuedMailDelivery
@@ -48,6 +50,7 @@ class Mailer(object):
         username = settings.get('mail.username')
         password = settings.get('mail.password')
         tls = settings.get('mail.tls', False)
+        ssl = settings.get('mail.ssl', False)
         queue_path = settings.get('mail.queue_path')
         debug_smtp = int(settings.get('debug_smtp', 0))
 
@@ -60,6 +63,9 @@ class Mailer(object):
                                  no_tls=not(tls), 
                                  force_tls=tls, 
                                  debug_smtp=debug_smtp)
+
+        if ssl:
+            smtp_mailer.smtp = smtplib.SMTP_SSL
 
         self.direct_delivery = DirectMailDelivery(smtp_mailer)
 

@@ -45,6 +45,24 @@ class TestMessage(unittest.TestCase):
 
         assert msg.recipients == ["to@example.com"]
 
+    def test_add_cc(self):
+
+        from pyramid_mailer.message import Message
+
+        msg = Message("testing")
+        msg.add_cc("to@example.com")
+
+        assert msg.cc == ["to@example.com"]
+
+    def test_add_bcc(self):
+
+        from pyramid_mailer.message import Message
+
+        msg = Message("testing")
+        msg.add_bcc("to@example.com")
+
+        assert msg.bcc == ["to@example.com"]
+
     
     def test_sender_as_tuple(self):
 
@@ -319,4 +337,14 @@ class TestMailer(unittest.TestCase):
                       body="test")
 
         mailer.send_to_queue(msg)
+
+    def test_use_ssl_mailer(self):
+
+        from smtplib import SMTP_SSL
+        from pyramid_mailer.mailer import Mailer
+
+        mailer = Mailer({'mail.ssl' : True})
+        self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+                           
+
 
