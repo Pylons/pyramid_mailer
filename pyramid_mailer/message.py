@@ -60,11 +60,10 @@ class Message(object):
         self.body = body
         self.html = html
 
-        self.cc = cc
-        self.bcc = bcc 
-
-        self.recipients = list(recipients or [])
+        self.recipients = recipients or []
         self.attachments = attachments or []
+        self.cc = cc or []
+        self.bcc = bcc or []
 
     @property
     def send_to(self):
@@ -108,7 +107,7 @@ class Message(object):
         Checks for bad headers i.e. newlines in subject, sender or recipients.
         """
        
-        for val in [self.subject, self.sender] + self.recipients:
+        for val in [self.subject, self.sender] + self.send_to:
             for c in '\r\n':
                 if c in val:
                     return True
@@ -142,6 +141,14 @@ class Message(object):
         
         self.recipients.append(recipient)
 
+    def add_cc(self, recipient):
+
+        self.cc.append(recipient)
+
+    def add_bcc(self, recipient):
+
+        self.bcc.append(recipient)
+
     def attach(self, 
                filename=None, 
                content_type=None, 
@@ -157,7 +164,8 @@ class Message(object):
         :param disposition: content-disposition (if any)
         """
 
-        self.attachments.append(
-             Attachment(filename, content_type, data, disposition))
+        attachment = Attachment(filename, content_type, data, disposition)
+
+        self.attachments.append(attachment)
 
 
