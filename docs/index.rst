@@ -26,6 +26,16 @@ If installing from source, untar/unzip, cd into the directory and do **python se
 
 The source repository is on `Bitbucket`_. Please report any bugs, issues or queries there. 
 
+Installing on Windows
+---------------------
+
+Some Windows users have reported issues installing `Lamson`_ due to some dependencies that do not work on Windows.
+
+The best way to install on Windows is to install the individual packages using the `no dependencies` option::
+
+    easy_install -N lamson chardet repoze.sendmail pyramid_mailer
+
+
 Getting started
 ---------------
 
