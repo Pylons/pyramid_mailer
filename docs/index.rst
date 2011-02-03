@@ -11,7 +11,7 @@ pyramid_mailer
 3. Wrapping email sending in the transaction manager. If you have a view that sends a customer an email for example, and there is an
    error in that view (for example, a database error) then this ensures that the email is not sent.
 
-4. A :class:`pyramid_mailer.mailer.DummyMailer` class to help with writing unit tests, or other situations where you want to avoid emails being sent accidentally
+4. A ``DummyMailer`` class to help with writing unit tests, or other situations where you want to avoid emails being sent accidentally
    from a non-production install.
 
 **pyramid_mailer** uses the `repoze_sendmail`_ package for general email sending, queuing and transaction management, and the `Lamson`_
@@ -45,7 +45,7 @@ To get started create an instance of :class:`pyramid_mailer.mailer.Mailer`::
 
     mailer = Mailer()
 
-The :class:`pyramid_mailer.mailer.Mailer` class can take a number of optional settings, detailed in :ref:`configuration`. It's a good idea to create a single :class:`pyramid_mailer.mailer.Mailer` instance for your application, and add it to your registry in your configuration setup::
+The ``Mailer`` class can take a number of optional settings, detailed in :ref:`configuration`. It's a good idea to create a single ``Mailer`` instance for your application, and add it to your registry in your configuration setup::
 
     config = Configurator(settings=settings)
     config.registry['mailer'] = Mailer.from_settings(settings)
@@ -64,7 +64,7 @@ To send a message, you must first create a :class:`pyramid_mailer.message.Messag
                       recipients=["arthur.dent@gmail.com"],
                       body="hello, arthur")
 
-The :class:`pyramid_mailer.message.Message` is then passed to the :class:`pyramid_mailer.mailer.Mailer` instance. You can either send the message right away::
+The ``Message`` is then passed to the ``Mailer`` instance. You can either send the message right away::
 
     mailer.send(message)
 
@@ -73,14 +73,14 @@ or add it to your mail queue (a maildir on disk)::
     mailer.send_to_queue(message)
 
 
-Usually you provide the **sender** to your :class:`pyramid_mailer.message.Message` instance. Often however a site might just use a single from address. If that is the case you can provide the **mail.default_sender** in your configuration and this will be used in throughout your application as the default if the **sender** is not otherwise provided.
+Usually you provide the ``sender`` to your ``Message`` instance. Often however a site might just use a single from address. If that is the case you can provide the ``default_sender`` to your ``Mailer`` and this will be used in throughout your application as the default if the ``sender`` is not otherwise provided.
 
 .. _configuration:
 
 Configuration
 -------------
 
-If you create your :class:`pyramid_mailer.mailer.Mailer` instance using :meth:`pyramid_mailer.mailer.Mailer.from_settings`, you can pass the settings from your .ini file or other source. By default, the prefix is assumed to be `mail.` although you can use another prefix if you wish.
+If you create your ``Mailer`` instance using :meth:`pyramid_mailer.mailer.Mailer.from_settings`, you can pass the settings from your .ini file or other source. By default, the prefix is assumed to be `mail.` although you can use another prefix if you wish.
 
 =========================  ===============    =====================
 Setting                    Default            Description              
@@ -183,7 +183,7 @@ In either case, the :class:`pyramid_mailer.mailer.DummyMailer` can be used::
             request = DummyRequest()
             response = some_view(request)
 
-The :class:`pyramid_mailer.mailer.DummyMailer` instance keeps track of emails "sent" in two properties: `queue` for emails send via :meth:`pyramid_mailer.mailer.Mailer.send_to_queue` and `outbox` for emails sent via :meth:`pyramid_mailer.mailer.Mailer.send`. Each stores the individual :class:`pyramid_mailer.message.Message` instances::
+The ``DummyMailer`` instance keeps track of emails "sent" in two properties: `queue` for emails send via :meth:`pyramid_mailer.mailer.Mailer.send_to_queue` and `outbox` for emails sent via :meth:`pyramid_mailer.mailer.Mailer.send`. Each stores the individual :class:`pyramid_mailer.message.Message` instances::
 
     self.assertEqual(len(mailer.outbox) == 1)
     self.assertEqual(mailer.outbox[0].subject == "hello world")
