@@ -1,6 +1,7 @@
 from lamson.mail import MailResponse
 
 from zope.interface import implements
+from zope.interface.verify import verifyObject
 
 from pyramid_mailer.interfaces import IMessage
 from pyramid_mailer.interfaces import IAttachment
@@ -175,8 +176,10 @@ class Message(object):
         """
         Adds an attachment to the message.
 
-        :param attachment: a **pyramid_mailer.interfaces.IAttachment** instance.
+        :param attachment: a **pyramid_mailer.interfaces.IAttachment** 
+                           instance.
         """
+        verifyObject(IAttachment, attachment)
 
         self.attachments.append(attachment)
 
