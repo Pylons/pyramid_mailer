@@ -35,7 +35,7 @@ To get started create an instance of **Mailer**::
 
     mailer = Mailer()
 
-The **Mailer** class can take a number of optional settings, detailed in :ref:`configuration`.. It's a good idea to create a single **Mailer** instance for your application, and add it to your registry in your configuration setup::
+The **Mailer** class can take a number of optional settings, detailed in :ref:`configuration`. It's a good idea to create a single **Mailer** instance for your application, and add it to your registry in your configuration setup::
 
     config = Configurator(settings=settings)
     config.registry['mailer'] = Mailer(settings)
@@ -62,41 +62,54 @@ or add it to your mail queue::
 
     mailer.send_to_queue(message)
 
+
+Usually you provide the **sender** to your **Message** instance. Often however a site might just use a single from address. If that is the case you can provide the **mail.default_sender** in your configuration and this will be used in throughout your application as the default if the **sender** is not otherwise provided.
+
 .. _configuration:
 
 Configuration
 -------------
 
-+--------------------------+-------------------+--------------------------+
-| Setting                  | Default           | Description              | 
-+=====================================+===================================+
-| **mail.host**            | ``localhost``     | SMTP host                |
-+--------------------------+-------------------+--------------------------+
-| **mail.port**            | ``25``            | SMTP port                |
-+--------------------------+-------------------+--------------------------+
-| **mail.username**        | **None**          | SMTP username            |
-+--------------------------+-------------------+--------------------------+
-| **mail.password**        | **None**          | SMTP password            |
-+--------------------------+-------------------+--------------------------+
-| **mail.tls**             | **False**         | Use TLS                  |
-+--------------------------+-------------------+--------------------------+
-| **mail.ssl**             | **False**         | Use SSL                  |
-+--------------------------+-------------------+--------------------------+
-| **mail.keyfile**         | **None**          | SSL key file             |
-+--------------------------+-------------------+--------------------------+
-| **mail.certfile**        | **None**          | SSL certificate file     |
-+--------------------------+-------------------+--------------------------+
-| **mail.queue_path**      | **None**          | Location of maildir      |
-+--------------------------+-------------------+--------------------------+
-| **mail.default_sender**  | **None**          | Default from address     |
-+--------------------------+-------------------+--------------------------+
-| **mail.debug**           | **False**         | SMTP debug level         |
-+-------------------------------------------------------------------------+
+=========================  ===============    =====================
+Setting                    Default            Description              
+=========================  ===============    =====================
+**mail.host**              ``localhost``      SMTP host                
+**mail.port**              ``25``             SMTP port                
+**mail.username**          **None**           SMTP username            
+**mail.password**          **None**           SMTP password           
+**mail.tls**               **False**          Use TLS                  
+**mail.ssl**               **False**          Use SSL                  
+**mail.keyfile**           **None**           SSL key file             
+**mail.certfile**          **None**           SSL certificate file     
+**mail.queue_path**        **None**           Location of maildir      
+**mail.default_sender**    **None**           Default from address     
+**mail.debug**             **False**          SMTP debug level         
+=========================  ===============    =====================
 
 Transactions
 ------------
 
 If you are using transaction management with your Pyramid application then **pyramid_mailer** will only send the emails (or add them to the mail queue) when the transactions are committed. 
+
+For example::
+
+    import transaction
+
+    from pyramid_mailer.mailer import Mailer
+    from pyramid_mailer.message import Message
+
+    mailer = Mailer()
+    message = Message(subject="hello arthur",
+                      sender="ford.prefect@gmail.com",
+                      recipients=['arthur.dent@gmail.com'],
+                      body="hello from ford")
+
+
+    mailer.send(message)
+    transaction.commit()
+
+
+The email is not actually sent until the transaction is committed. 
 
 Attachments
 -----------

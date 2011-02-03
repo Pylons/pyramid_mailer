@@ -28,7 +28,7 @@ class DummyMailer(object):
         Mocks sending a direct message. The message is added to the **outbox**
         list.
 
-        :param message : a **pyramid_mailer.interfaces.IMessage** instance.
+        :param message: a **pyramid_mailer.interfaces.IMessage** instance.
         """
         self.outbox.append(message)
 
@@ -37,7 +37,7 @@ class DummyMailer(object):
         Mocks sending to a maildir queue. The message is added to the **queue**
         list.
 
-        :param message : a **pyramid_mailer.interfaces.IMessage** instance.
+        :param message: a **pyramid_mailer.interfaces.IMessage** instance.
         """
         self.queue.append(message)
 
@@ -69,7 +69,7 @@ class Mailer(object):
     """
     Manages sending of email messages.
 
-    :param settings : a settings dict. See documentation on the 
+    :param settings: a settings dict. See documentation on the 
                       individual settings required.
     """
 
@@ -125,7 +125,7 @@ class Mailer(object):
         """
         Sends a message immediately.
 
-        :param message : a **pyramid_mailer.interfaces.IMessage** instance.
+        :param message: a **pyramid_mailer.interfaces.IMessage** instance.
         """
 
         return self.direct_delivery.send(*self._message_args(message))
@@ -137,7 +137,7 @@ class Mailer(object):
         In order to handle this, the setting **mail.queue_path** must be 
         provided and must point to a valid maildir.
 
-        :param message : a **pyramid_mailer.interfaces.IMessage** instance.
+        :param message: a **pyramid_mailer.interfaces.IMessage** instance.
         """
 
         if not self.queue_delivery:

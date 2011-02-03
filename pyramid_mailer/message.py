@@ -8,8 +8,6 @@ from pyramid_mailer.exceptions import BadHeaders
 from pyramid_mailer.exceptions import InvalidMessage
 
 class Attachment(object):
-    implements(IAttachment)
-
     """
     Encapsulates file attachment information.
 
@@ -19,6 +17,8 @@ class Attachment(object):
     :param disposition: content-disposition (if any)
  
     """
+
+    implements(IAttachment)
 
     def __init__(self, 
                  filename=None, 
@@ -33,8 +33,6 @@ class Attachment(object):
 
 
 class Message(object):
-    implements(IMessage)
-    
     """
     Encapsulates an email message.
 
@@ -47,8 +45,9 @@ class Message(object):
     :param bcc: BCC list
     :param extra_headers: dict of extra email headers
     :param attachments: list of Attachment instances
-    
     """
+
+    implements(IMessage)
 
     def __init__(self, subject, 
                  recipients=None, 
@@ -155,17 +154,28 @@ class Message(object):
         self.recipients.append(recipient)
 
     def add_cc(self, recipient):
+        """
+        Adds an email address to the CC list. 
+
+        :param recipient: email address of recipient.
+        """
 
         self.cc.append(recipient)
 
     def add_bcc(self, recipient):
+        """
+        Adds an email address to the BCC list. 
+
+        :param recipient: email address of recipient.
+        """
 
         self.bcc.append(recipient)
 
     def attach(self, attachment):
-        
         """
-        Adds an IAttachment instance to the message.
+        Adds an attachment to the message.
+
+        :param attachment: a **pyramid_mailer.interfaces.IAttachment** instance.
         """
 
         self.attachments.append(attachment)
