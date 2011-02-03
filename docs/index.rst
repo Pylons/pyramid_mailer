@@ -68,7 +68,7 @@ The **Message** is then passed to the **Mailer** instance. You can either send t
 
     mailer.send(message)
 
-or add it to your mail queue::
+or add it to your mail queue (a maildir on disk)::
 
     mailer.send_to_queue(message)
 
@@ -121,6 +121,13 @@ For example::
 
 The email is not actually sent until the transaction is committed. 
 
+When the `repoze.tm2 <http://pypi.python.org/pypi/repoze.tm2>`_ ``tm``
+middleware is in your Pyramid WSGI pipeline, transactions are already managed
+for you, so you don't need to explicitly commit or abort within code that
+sends mail.  Instead, if an exception is raised, the transaction will
+implicitly be aborted and mail will not be sent; otherwise it will be
+committed, and mail will be sent.
+
 Attachments
 -----------
 
@@ -169,6 +176,28 @@ The **DummyMailer** instance keeps track of emails "sent" in two properties: `qu
     self.assertEqual(len(mailer.queue) == 1)
     self.assertEqual(mailer.queue[0].subject == "hello world")
 
+Queue
+-----
+
+When you send mail to a queue via
+:meth:`pyramid_mailer.Mailer.send_to_queue`, the mail will be placed into a
+``maildir`` directory specified by the ``mail.queue_path`` setting.  A
+separate process will need to be launched to monitor this maildir and take
+actions based on its state.  Such a program comes as part of
+``repoze.sendmail`` (a dependency of the ``pyramid_mailer`` package).  It is
+known as ``qp``.  ``qp`` will be installed into your Python (or virtualenv)
+``bin`` or ``Scripts`` directory when you install ``repoze_mailer``.
+
+You'll need to arrange for ``qp`` to be a long-running process that monitors
+the maildir state.::
+
+  $ bin/qp /path/to/mail/queue
+
+This will attempt to use the localhost SMTP server to send any messages in
+the queue over time.  ``qp`` has other options that allow you to choose
+different settings.  Use it's ``--help`` parameter to see more::
+
+  $ bin/qp --help
         
 API
 ---
