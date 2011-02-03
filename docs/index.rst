@@ -183,7 +183,7 @@ In either case, the :class:`pyramid_mailer.mailer.DummyMailer` can be used::
             request = DummyRequest()
             response = some_view(request)
 
-The ``DummyMailer`` instance keeps track of emails "sent" in two properties: `queue` for emails send via :meth:`pyramid_mailer.mailer.Mailer.send_to_queue` and `outbox` for emails sent via :meth:`pyramid_mailer.mailer.Mailer.send`. Each stores the individual :class:`pyramid_mailer.message.Message` instances::
+The ``DummyMailer`` instance keeps track of emails "sent" in two properties: `queue` for emails send via :meth:`pyramid_mailer.mailer.Mailer.send_to_queue` and `outbox` for emails sent via :meth:`pyramid_mailer.mailer.Mailer.send`. Each stores the individual ``Message`` instances::
 
     self.assertEqual(len(mailer.outbox) == 1)
     self.assertEqual(mailer.outbox[0].subject == "hello world")
