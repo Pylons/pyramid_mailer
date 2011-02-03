@@ -24,7 +24,7 @@ class DummyMailer(object):
         Mocks sending a direct message. The message is added to the **outbox**
         list.
 
-        :param message: a **pyramid_mailer.interfaces.IMessage** instance.
+        :param message: a **Message** instance.
         """
         self.outbox.append(message)
 
@@ -33,7 +33,7 @@ class DummyMailer(object):
         Mocks sending to a maildir queue. The message is added to the **queue**
         list.
 
-        :param message: a **pyramid_mailer.interfaces.IMessage** instance.
+        :param message: a **Message** instance.
         """
         self.queue.append(message)
 
@@ -69,22 +69,19 @@ class Mailer(object):
                       individual settings required.
     """
 
-    def __init__(self, settings=None):
+    def __init__(self, 
+                 host='localhost', 
+                 port=25, 
+                 username=None,
+                 password=None, 
+                 tls=False,
+                 ssl=False,
+                 keyfile=None,
+                 certfile=None,
+                 queue_path=None,
+                 default_sender=None,
+                 debug=0):
 
-        settings = settings or {}
-
-        host = settings.get('mail.host', 'localhost')
-        port = int(settings.get('mail.port', 25))
-        username = settings.get('mail.username')
-        password = settings.get('mail.password')
-        tls = settings.get('mail.tls', False)
-        ssl = settings.get('mail.ssl', False)
-        keyfile = settings.get('mail.keyfile')
-        certfile = settings.get('mail.certfile')
-        queue_path = settings.get('mail.queue_path')
-        debug_smtp = int(settings.get('mail.debug', 0))
-
-        self.default_sender = settings.get('mail.default_sender')
 
         if ssl:
 
@@ -94,7 +91,7 @@ class Mailer(object):
                                          password=password,
                                          no_tls=not(tls),
                                          force_tls=tls,
-                                         debug_smtp=debug_smtp,
+                                         debug_smtp=debug,
                                          keyfile=keyfile,
                                          certfile=certfile)
 
@@ -106,7 +103,7 @@ class Mailer(object):
                                      password=password, 
                                      no_tls=not(tls), 
                                      force_tls=tls, 
-                                     debug_smtp=debug_smtp)
+                                     debug_smtp=debug)
 
         self.direct_delivery = DirectMailDelivery(smtp_mailer)
 
@@ -114,6 +111,31 @@ class Mailer(object):
             self.queue_delivery = QueuedMailDelivery(queue_path)
         else:
             self.queue_delivery = None
+
+        self.default_sender = default_sender
+
+    @classmethod
+    def from_settings(cls, settings, prefix='mail.'):
+        """
+        Creates a new instance of **Message** from settings dict.
+
+        :param settings: a settings dict-like
+        :param prefix: prefix separating **pyramid_mailer** settings
+        """
+
+        settings = settings or {}
+
+        kwarg_names = [prefix + k for k in (
+                       'host', 'port', 'username',
+                       'password', 'tls', 'ssl', 'keyfile', 
+                       'certfile', 'queue_path', 'debug')]
+        
+        size = len(prefix)
+
+        kwargs = dict(((k[size:], settings[k]) for k in settings.keys() if
+                        k in kwarg_names))
+
+        return cls(**kwargs)
 
     def send(self, message):
         """
@@ -135,7 +157,7 @@ class Mailer(object):
         """
 
         if not self.queue_delivery:
-            raise RuntimeError, "You must set mail:queue_path in your settings"
+            raise RuntimeError, "No queue_path provided"
     
         return self.queue_delivery.send(*self._message_args(message))
 

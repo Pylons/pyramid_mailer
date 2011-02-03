@@ -3,6 +3,24 @@
 
 import unittest
 
+class TestAttachment(unittest.TestCase):
+
+    def test_data_from_string(self):
+
+        from pyramid_mailer.message import Attachment
+
+        a = Attachment(data="foo")
+        self.assert_(a.data == "foo")
+
+    def test_data_from_file_obj(self):
+
+        from StringIO import StringIO
+        from pyramid_mailer.message import Attachment
+
+        a = Attachment(data=StringIO("foo"))
+        self.assert_(a.data == "foo")
+
+
 class TestMessage(unittest.TestCase):
 
     def test_initialize(self):
@@ -62,15 +80,6 @@ class TestMessage(unittest.TestCase):
         msg.add_bcc("to@example.com")
 
         self.assert_(msg.bcc == ["to@example.com"])
-
-    
-    def test_sender_as_tuple(self):
-
-        from pyramid_mailer.message import Message
-
-        msg = Message(subject="testing",
-                      sender=("tester", "tester@example.com"))
-
     
     def test_send_without_sender(self):
 
@@ -329,7 +338,7 @@ class TestMailer(unittest.TestCase):
             except OSError:
                 pass
         
-        mailer = Mailer({'mail.queue_path':test_queue})
+        mailer = Mailer(queue_path=test_queue)
 
         msg = Message(subject="testing",
                       sender="sender@example.com",
@@ -343,8 +352,41 @@ class TestMailer(unittest.TestCase):
         from smtplib import SMTP_SSL
         from pyramid_mailer.mailer import Mailer
 
-        mailer = Mailer({'mail.ssl' : True})
+        mailer = Mailer(ssl=True)
         self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
                            
+    def test_from_settings(self):
+        
+        from smtplib import SMTP_SSL
+
+        from pyramid_mailer.mailer import Mailer
+
+        settings = {'mymail.host' : 'my.server.com',
+                    'mymail.port' : 123,
+                    'mymail.username' : 'tester',
+                    'mymail.password' : 'test',
+                    'mymail.tls' : True,
+                    'mymail.ssl' : True,
+                    'mymail.keyfile' : 'ssl.key',
+                    'mymail.certfile' : 'ssl.crt',
+                    'mymail.queue_path' : '/tmp',
+                    'mymail.debug' : 1}
+
+        mailer = Mailer.from_settings(settings, prefix='mymail.')
+
+        self.assert_(mailer.direct_delivery.mailer.hostname=='my.server.com')
+        self.assert_(mailer.direct_delivery.mailer.port==123)
+        self.assert_(mailer.direct_delivery.mailer.username=='tester')
+        self.assert_(mailer.direct_delivery.mailer.password=='test')
+        self.assert_(mailer.direct_delivery.mailer.force_tls==True)
+        self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+        self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
+        self.assert_(mailer.direct_delivery.mailer.certfile == 'ssl.crt')
+        self.assert_(mailer.queue_delivery.queuePath == '/tmp')
+        self.assert_(mailer.direct_delivery.mailer.debug_smtp == 1)
+
+
+
+
 
 

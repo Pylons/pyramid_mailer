@@ -9,7 +9,7 @@ class Attachment(object):
 
     :param filename: filename of attachment
     :param content_type: file mimetype
-    :param data: the raw file data
+    :param data: the raw file data, either as string or file obj
     :param disposition: content-disposition (if any)
     """
 
@@ -21,8 +21,15 @@ class Attachment(object):
 
         self.filename = filename
         self.content_type = content_type
-        self.data = data
         self.disposition = disposition or 'attachment'
+        self._data = data
+
+    @property
+    def data(self):
+        if isinstance(self._data, basestring):
+            return self._data
+        self._data = self._data.read()
+        return self._data
 
 
 class Message(object):
