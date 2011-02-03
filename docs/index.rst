@@ -11,7 +11,7 @@ pyramid_mailer
 3. Wrapping email sending in the transaction manager. If you have a view that sends a customer an email for example, and there is an
    error in that view (for example, a database error) then this ensures that the email is not sent.
 
-4. A **DummyMailer** class to help with writing unit tests, or other situations where you want to avoid emails being sent accidentally
+4. A :class:`pyramid_mailer.mailer.DummyMailer` class to help with writing unit tests, or other situations where you want to avoid emails being sent accidentally
    from a non-production install.
 
 **pyramid_mailer** uses the `repoze_sendmail`_ package for general email sending, queuing and transaction management, and the `Lamson`_
@@ -39,23 +39,23 @@ The best way to install on Windows is to install the individual packages using t
 Getting started
 ---------------
 
-To get started create an instance of **Mailer**::
+To get started create an instance of :class:`pyramid_mailer.mailer.Mailer`::
 
     from pyramid_mailer.mailer import Mailer
 
     mailer = Mailer()
 
-The **Mailer** class can take a number of optional settings, detailed in :ref:`configuration`. It's a good idea to create a single **Mailer** instance for your application, and add it to your registry in your configuration setup::
+The :class:`pyramid_mailer.mailer.Mailer` class can take a number of optional settings, detailed in :ref:`configuration`. It's a good idea to create a single :class:`pyramid_mailer.mailer.Mailer` instance for your application, and add it to your registry in your configuration setup::
 
     config = Configurator(settings=settings)
-    config.registry['mailer'] = Mailer(settings)
+    config.registry['mailer'] = Mailer.from_settings(settings)
 
 You can then access your mailer in a view::
 
     def my_view(request):
         mailer = request.registry['mailer']
 
-To send a message, you must first create a **Message** instance::
+To send a message, you must first create a :class:`pyramid_mailer.message.Message` instance::
 
     from pyramid.mailer.message import Message
 
@@ -64,7 +64,7 @@ To send a message, you must first create a **Message** instance::
                       recipients=["arthur.dent@gmail.com"],
                       body="hello, arthur")
 
-The **Message** is then passed to the **Mailer** instance. You can either send the message right away::
+The :class:`pyramid_mailer.message.Message` is then passed to the :class:`pyramid_mailer.mailer.Mailer` instance. You can either send the message right away::
 
     mailer.send(message)
 
@@ -73,12 +73,14 @@ or add it to your mail queue (a maildir on disk)::
     mailer.send_to_queue(message)
 
 
-Usually you provide the **sender** to your **Message** instance. Often however a site might just use a single from address. If that is the case you can provide the **mail.default_sender** in your configuration and this will be used in throughout your application as the default if the **sender** is not otherwise provided.
+Usually you provide the **sender** to your :class:`pyramid_mailer.message.Message` instance. Often however a site might just use a single from address. If that is the case you can provide the **mail.default_sender** in your configuration and this will be used in throughout your application as the default if the **sender** is not otherwise provided.
 
 .. _configuration:
 
 Configuration
 -------------
+
+If you create your :class:`pyramid_mailer.mailer.Mailer` instance using :meth:`pyramid_mailer.mailer.Mailer.from_settings`, you can pass the settings from your .ini file or other source. By default, the prefix is assumed to be `mail.` although you can use another prefix if you wish.
 
 =========================  ===============    =====================
 Setting                    Default            Description              
@@ -131,7 +133,7 @@ committed, and mail will be sent.
 Attachments
 -----------
 
-Attachments are added using the **Attachment** class::
+Attachments are added using the :class:`pyramid_mailer.message.Attachment` class::
 
     from pyramid_mailer.message import Attachment
     from pyramid_mailer.message import Message
@@ -143,6 +145,19 @@ Attachments are added using the **Attachment** class::
 
     message.attach(attachment)
 
+You can pass the data either as a string or file object, so the above code could be rewritten::
+
+    from pyramid_mailer.message import Attachment
+    from pyramid_mailer.message import Message
+
+    message = Message()
+
+    attachment = Attachment("photo.jpg", "image/jpg", 
+                            open("photo.jpg", "rb"))
+
+    message.attach(attachment)
+
+
 
 Unit tests
 ----------
@@ -151,7 +166,7 @@ When running unit tests you probably don't want to actually send any emails inad
 
 Another case is if your site is in development and you want to avoid accidental sending of any emails to customers.
 
-In either case, the **DummyMailer** can be used::
+In either case, the :class:`pyramid_mailer.mailer.DummyMailer` can be used::
 
     class TestViews(unittest.TestCase):
 
@@ -168,7 +183,7 @@ In either case, the **DummyMailer** can be used::
             request = DummyRequest()
             response = some_view(request)
 
-The **DummyMailer** instance keeps track of emails "sent" in two properties: `queue` for emails send via **send_to_queue()** and `outbox` for emails sent via **send()**. Each stores the individual **Message** instances::
+The :class:`pyramid_mailer.mailer.DummyMailer` instance keeps track of emails "sent" in two properties: `queue` for emails send via :meth:`pyramid_mailer.mailer.Mailer.send_to_queue` and `outbox` for emails sent via :meth:`pyramid_mailer.mailer.Mailer.send`. Each stores the individual :class:`pyramid_mailer.message.Message` instances::
 
     self.assertEqual(len(mailer.outbox) == 1)
     self.assertEqual(mailer.outbox[0].subject == "hello world")
@@ -181,12 +196,12 @@ Queue
 
 When you send mail to a queue via
 :meth:`pyramid_mailer.Mailer.send_to_queue`, the mail will be placed into a
-``maildir`` directory specified by the ``mail.queue_path`` setting.  A
+``maildir`` directory specified by the ``queue_path`` parameter or setting to :class:`pyramid_mailer.mailer.Mailer`.  A
 separate process will need to be launched to monitor this maildir and take
 actions based on its state.  Such a program comes as part of
-``repoze.sendmail`` (a dependency of the ``pyramid_mailer`` package).  It is
+`repoze_sendmail`_ (a dependency of the ``pyramid_mailer`` package).  It is
 known as ``qp``.  ``qp`` will be installed into your Python (or virtualenv)
-``bin`` or ``Scripts`` directory when you install ``repoze_mailer``.
+``bin`` or ``Scripts`` directory when you install ``repoze_sendmail``.
 
 You'll need to arrange for ``qp`` to be a long-running process that monitors
 the maildir state.::
