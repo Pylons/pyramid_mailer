@@ -1,10 +1,5 @@
 from lamson.mail import MailResponse
 
-from zope.interface import implements
-from zope.interface.verify import verifyObject
-
-from pyramid_mailer.interfaces import IMessage
-from pyramid_mailer.interfaces import IAttachment
 from pyramid_mailer.exceptions import BadHeaders
 from pyramid_mailer.exceptions import InvalidMessage
 
@@ -16,10 +11,7 @@ class Attachment(object):
     :param content_type: file mimetype
     :param data: the raw file data
     :param disposition: content-disposition (if any)
- 
     """
-
-    implements(IAttachment)
 
     def __init__(self, 
                  filename=None, 
@@ -47,8 +39,6 @@ class Message(object):
     :param extra_headers: dict of extra email headers
     :param attachments: list of Attachment instances
     """
-
-    implements(IMessage)
 
     def __init__(self, subject, 
                  recipients=None, 
@@ -176,10 +166,8 @@ class Message(object):
         """
         Adds an attachment to the message.
 
-        :param attachment: a **pyramid_mailer.interfaces.IAttachment** 
-                           instance.
+        :param attachment: an **Attachment** instance.
         """
-        verifyObject(IAttachment, attachment)
 
         self.attachments.append(attachment)
 

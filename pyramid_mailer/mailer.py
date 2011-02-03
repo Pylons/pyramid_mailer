@@ -4,14 +4,8 @@ from repoze.sendmail.mailer import SMTPMailer
 from repoze.sendmail.delivery import DirectMailDelivery
 from repoze.sendmail.delivery import QueuedMailDelivery
 
-from zope.interface import implements
-from zope.interface.verify import verifyObject
-
-from pyramid_mailer.interfaces import IMailer
-from pyramid_mailer.interfaces import IMessage
 
 class DummyMailer(object):
-    implements(IMailer)
 
     """
     Dummy mailing instance
@@ -32,7 +26,6 @@ class DummyMailer(object):
 
         :param message: a **pyramid_mailer.interfaces.IMessage** instance.
         """
-        verifyObject(IMessage, message)
         self.outbox.append(message)
 
     def send_to_queue(self, message):
@@ -42,7 +35,6 @@ class DummyMailer(object):
 
         :param message: a **pyramid_mailer.interfaces.IMessage** instance.
         """
-        verifyObject(IMessage, message)
         self.queue.append(message)
 
 
@@ -76,8 +68,6 @@ class Mailer(object):
     :param settings: a settings dict. See documentation on the 
                       individual settings required.
     """
-
-    implements(IMailer)
 
     def __init__(self, settings=None):
 
@@ -129,9 +119,8 @@ class Mailer(object):
         """
         Sends a message immediately.
 
-        :param message: a **pyramid_mailer.interfaces.IMessage** instance.
+        :param message: a **Message** instance.
         """
-        verifyObject(IMessage, message)
 
         return self.direct_delivery.send(*self._message_args(message))
         
@@ -142,9 +131,8 @@ class Mailer(object):
         In order to handle this, the setting **mail.queue_path** must be 
         provided and must point to a valid maildir.
 
-        :param message: a **pyramid_mailer.interfaces.IMessage** instance.
+        :param message: a **Message** instance.
         """
-        verifyObject(IMessage, message)
 
         if not self.queue_delivery:
             raise RuntimeError, "You must set mail:queue_path in your settings"
