@@ -65,8 +65,17 @@ class Mailer(object):
     """
     Manages sending of email messages.
 
-    :param settings: a settings dict. See documentation on the 
-                      individual settings required.
+    :param host: SMTP hostname
+    :param port: SMTP port
+    :param username: SMTP username
+    :param password: SMPT password
+    :param tls: use TLS
+    :param ssl: use SSL
+    :param keyfile: SSL key file 
+    :param certfile: SSL certificate file
+    :param queue_path: path to maildir for queued messages
+    :param default_sender: default "from" address
+    :param debug: SMTP debug level
     """
 
     def __init__(self, 
