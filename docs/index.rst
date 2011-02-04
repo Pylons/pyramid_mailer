@@ -57,7 +57,7 @@ You can then access your mailer in a view::
 
 To send a message, you must first create a :class:`pyramid_mailer.message.Message` instance::
 
-    from pyramid.mailer.message import Message
+    from pyramid_mailer.message import Message
 
     message = Message(subject="hello world",
                       sender="admin@mysite.com",

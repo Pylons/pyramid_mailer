@@ -25,7 +25,6 @@ Links
 * `development version
   <http://bitbucket.org/danjac/pyramid_mailer/get/tip.gz#egg=pyramid_mailer>`_
 
-
 """
 
 from setuptools import setup
@@ -33,7 +32,7 @@ from setuptools import setup
 
 setup(
     name='pyramid_mailer',
-    version='0.1',
+    version='0.1.1',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
