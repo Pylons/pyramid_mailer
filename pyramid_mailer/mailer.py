@@ -44,10 +44,10 @@ class SMTP_SSLMailer(SMTPMailer):
     """
 
     try:
-        # support disabled if pre-2.5
+        # support disabled if pre-2.6
         smtp = smtplib.SMTP_SSL
         ssl_support = True
-    except ImportError:
+    except AttributeError:
         smtp = smtplib.SMTP
         ssl_support = False
 
