@@ -366,8 +366,12 @@ class TestMailer(unittest.TestCase):
                            
     def test_from_settings(self):
         
-        from smtplib import SMTP_SSL
-
+        try:
+            from smtplib import SMTP_SSL
+            ssl_enabled = True
+        except ImportError:
+            from smtplib import SMTP
+            ssl_enabled = False
         from pyramid_mailer.mailer import Mailer
 
         settings = {'mymail.host' : 'my.server.com',
@@ -388,7 +392,11 @@ class TestMailer(unittest.TestCase):
         self.assert_(mailer.direct_delivery.mailer.username=='tester')
         self.assert_(mailer.direct_delivery.mailer.password=='test')
         self.assert_(mailer.direct_delivery.mailer.force_tls==True)
-        self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+        if ssl_enabled:
+            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+        else:
+            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
+
         self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
         self.assert_(mailer.direct_delivery.mailer.certfile == 'ssl.crt')
         self.assert_(mailer.queue_delivery.queuePath == '/tmp')
