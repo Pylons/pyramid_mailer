@@ -43,7 +43,13 @@ class SMTP_SSLMailer(SMTPMailer):
     Subclass of SMTPMailer enabling SSL.
     """
 
-    smtp = smtplib.SMTP_SSL
+    try:
+        # support disabled if pre-2.5
+        smtp = smtplib.SMTP_SSL
+        ssl_support = True
+    except ImportError:
+        smtp = smtplib.SMTP
+        ssl_support = False
 
     def __init__(self, *args, **kwargs):
         self.keyfile = kwargs.pop('keyfile', None)
@@ -52,6 +58,9 @@ class SMTP_SSLMailer(SMTPMailer):
         super(SMTP_SSLMailer, self).__init__(*args, **kwargs)
 
     def smtp_factory(self):
+
+        if ssl_support is False:
+            return super(SMTP_SSLMailer, self).smtp_factory()
 
         connection = self.smtp(self.hostname, str(self.port),
                                keyfile=self.keyfile,
