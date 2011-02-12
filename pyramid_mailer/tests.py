@@ -172,6 +172,9 @@ class TestMessage(unittest.TestCase):
         self.assert_(a.content_type == "text/plain")
         self.assert_(a.data == "this is a test")
  
+        response = msg.get_response()
+        
+        self.assert_(len(response.attachments) == 1)
 
     def test_bad_header_subject(self):
 
@@ -360,10 +363,17 @@ class TestMailer(unittest.TestCase):
         mailer = Mailer(ssl=True)
         if ssl_enabled:
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+            from ssl import SSLError
+            try:
+                self.assert_(mailer.direct_delivery.mailer.smtp_factory())
+            except SSLError:
+                pass
+
         else:
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
+            self.assert_(mailer.direct_delivery.mailer.smtp_factory())
 
-                           
+                          
     def test_from_settings(self):
         
         try:
