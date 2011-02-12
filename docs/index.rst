@@ -245,5 +245,5 @@ API
 
 .. _Bitbucket: http://bitbucket.org/danjac/pyramid_mailer
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
-.. _repoze_sendmail: http://pypi.python.org/pypi/repoze_sendmail/
+.. _repoze_sendmail: http://pypi.python.org/pypi/repoze.sendmail/
 .. _Lamson: http://pypi.python.org/pypi/lamson/
