@@ -98,6 +98,8 @@ Setting                    Default            Description
 **mail.debug**             **False**          SMTP debug level         
 =========================  ===============    =====================
 
+**Note:** SSL will only work with **pyramid_mailer** if you are using Python **2.6** or higher, as it uses the SSL additions to the ``smtplib`` package. While it may be possible to work around this if you have to use Python 2.5 or lower, **pyramid_mailer** does not support this out of the box.
+
 Transactions
 ------------
 
