@@ -59,7 +59,7 @@ class SMTP_SSLMailer(SMTPMailer):
 
     def smtp_factory(self):
 
-        if ssl_support is False:
+        if self.ssl_support is False:
             return super(SMTP_SSLMailer, self).smtp_factory()
 
         connection = self.smtp(self.hostname, str(self.port),
