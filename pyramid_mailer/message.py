@@ -59,7 +59,7 @@ class Message(object):
                  attachments=None):
 
 
-        self.subject = subject
+        self.subject = subject or ''
         self.sender = sender
         self.body = body
         self.html = html
