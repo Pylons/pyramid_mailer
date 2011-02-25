@@ -368,7 +368,7 @@ class TestMailer(unittest.TestCase):
                       recipients=["tester@example.com"],
                       body="test")
 
-        self.assert_(mailer.send_immediately(msg, True))
+        mailer.send_immediately(msg, True)
  
     def test_send(self):
 

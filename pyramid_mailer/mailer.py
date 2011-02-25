@@ -30,7 +30,9 @@ class DummyMailer(object):
         """
         Mocks sending an immediate (non-transactional) message. The message
         is added to the **outbox** list.
+
         :param message: a **Message** instance.
+        :param fail_silently: swallow connection errors (ignored here)
         """
         self.outbox.append(message)
 
