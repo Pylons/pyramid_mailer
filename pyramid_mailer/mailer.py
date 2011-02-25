@@ -6,10 +6,8 @@ from repoze.sendmail.delivery import QueuedMailDelivery
 
 
 class DummyMailer(object):
-
     """
-    Dummy mailing instance
-    Used for example in unit tests.
+    Dummy mailing instance, used for example in unit tests.
 
     Keeps all sent messages internally in list as **outbox** property.
     Queued messages are instead added to **queue** property.

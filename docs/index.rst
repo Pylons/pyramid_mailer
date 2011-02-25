@@ -50,6 +50,11 @@ The ``Mailer`` class can take a number of optional settings, detailed in :ref:`c
     config = Configurator(settings=settings)
     config.registry['mailer'] = Mailer.from_settings(settings)
 
+or alternatively::
+
+    from pyramid_mailer import mailer_factory_from_settings
+    config.registry['mailer'] = mailer_factory_from_settings(settings)
+
 You can then access your mailer in a view::
 
     def my_view(request):
@@ -218,6 +223,10 @@ different settings.  Use it's ``--help`` parameter to see more::
         
 API
 ---
+
+.. module:: pyramid_mailer
+    
+.. autofunction:: mailer_factory_from_settings
 
 .. module:: pyramid_mailer.mailer
 

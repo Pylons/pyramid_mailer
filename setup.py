@@ -32,7 +32,7 @@ from setuptools import setup
 
 setup(
     name='pyramid_mailer',
-    version='0.2.1',
+    version='0.2.2',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',

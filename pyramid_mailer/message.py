@@ -47,7 +47,8 @@ class Message(object):
     :param attachments: list of Attachment instances
     """
 
-    def __init__(self, subject, 
+    def __init__(self, 
+                 subject=None, 
                  recipients=None, 
                  body=None, 
                  html=None, 
