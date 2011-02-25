@@ -253,6 +253,14 @@ class TestMessage(unittest.TestCase):
 
         self.assert_(not(msg.is_bad_headers()))
 
+    def test_is_bad_headers_if_subject_empty(self):
+        from pyramid_mailer.message import Message
+        msg = Message(sender="from@example.com",
+                      body="testing",
+                      recipients=["to@example.com"])
+
+        self.assert_(not(msg.is_bad_headers()))
+
     def test_is_bad_headers_if_bad_headers(self):
 
         from pyramid_mailer.message import Message
