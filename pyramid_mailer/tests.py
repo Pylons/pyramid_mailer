@@ -366,7 +366,7 @@ class TestMailer(unittest.TestCase):
             from ssl import SSLError
             try:
                 self.assert_(mailer.direct_delivery.mailer.smtp_factory())
-            except SSLError:
+            except (IOError, SSLError):
                 pass
 
         else:
@@ -374,6 +374,45 @@ class TestMailer(unittest.TestCase):
             self.assert_(mailer.direct_delivery.mailer.smtp_factory())
 
                           
+    def test_from_settings_factory(self):
+
+        try:
+            from smtplib import SMTP_SSL
+            ssl_enabled = True
+        except ImportError:
+            from smtplib import SMTP
+            ssl_enabled = False
+        from pyramid_mailer import mailer_factory_from_settings
+
+        settings = {'mymail.host' : 'my.server.com',
+                    'mymail.port' : 123,
+                    'mymail.username' : 'tester',
+                    'mymail.password' : 'test',
+                    'mymail.tls' : True,
+                    'mymail.ssl' : True,
+                    'mymail.keyfile' : 'ssl.key',
+                    'mymail.certfile' : 'ssl.crt',
+                    'mymail.queue_path' : '/tmp',
+                    'mymail.debug' : 1}
+
+        mailer = mailer_factory_from_settings(settings, prefix='mymail.')
+
+        self.assert_(mailer.direct_delivery.mailer.hostname=='my.server.com')
+        self.assert_(mailer.direct_delivery.mailer.port==123)
+        self.assert_(mailer.direct_delivery.mailer.username=='tester')
+        self.assert_(mailer.direct_delivery.mailer.password=='test')
+        self.assert_(mailer.direct_delivery.mailer.force_tls==True)
+        if ssl_enabled:
+            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+        else:
+            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
+
+        self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
+        self.assert_(mailer.direct_delivery.mailer.certfile == 'ssl.crt')
+        self.assert_(mailer.queue_delivery.queuePath == '/tmp')
+        self.assert_(mailer.direct_delivery.mailer.debug_smtp == 1)
+
+
     def test_from_settings(self):
         
         try:
@@ -411,9 +450,4 @@ class TestMailer(unittest.TestCase):
         self.assert_(mailer.direct_delivery.mailer.certfile == 'ssl.crt')
         self.assert_(mailer.queue_delivery.queuePath == '/tmp')
         self.assert_(mailer.direct_delivery.mailer.debug_smtp == 1)
-
-
-
-
-
 
