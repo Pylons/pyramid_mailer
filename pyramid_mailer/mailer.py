@@ -19,9 +19,17 @@ class DummyMailer(object):
 
     def send(self, message):    
         """
-        Mocks sending a direct message. The message is added to the **outbox**
-        list.
+        Mocks sending a transactional message. The message is added to the 
+        **outbox** list.
 
+        :param message: a **Message** instance.
+        """
+        self.outbox.append(message)
+
+    def send_immediately(self, message, fail_silently=False):
+        """
+        Mocks sending an immediate (non-transactional) message. The message
+        is added to the **outbox** list.
         :param message: a **Message** instance.
         """
         self.outbox.append(message)
@@ -101,27 +109,29 @@ class Mailer(object):
 
         if ssl:
 
-            smtp_mailer = SMTP_SSLMailer(hostname=host,
-                                         port=port,
-                                         username=username,
-                                         password=password,
-                                         no_tls=not(tls),
-                                         force_tls=tls,
-                                         debug_smtp=debug,
-                                         keyfile=keyfile,
-                                         certfile=certfile)
+            self.smtp_mailer = SMTP_SSLMailer(
+                hostname=host,
+                port=port,
+                username=username,
+                password=password,
+                no_tls=not(tls),
+                force_tls=tls,
+                debug_smtp=debug,
+                keyfile=keyfile,
+                certfile=certfile)
 
         else:
 
-            smtp_mailer = SMTPMailer(hostname=host, 
-                                     port=port, 
-                                     username=username, 
-                                     password=password, 
-                                     no_tls=not(tls), 
-                                     force_tls=tls, 
-                                     debug_smtp=debug)
+            self.smtp_mailer = SMTPMailer(
+                hostname=host, 
+                port=port, 
+                username=username, 
+                password=password, 
+                no_tls=not(tls), 
+                force_tls=tls, 
+                debug_smtp=debug)
 
-        self.direct_delivery = DirectMailDelivery(smtp_mailer)
+        self.direct_delivery = DirectMailDelivery(self.smtp_mailer)
 
         if queue_path:
             self.queue_delivery = QueuedMailDelivery(queue_path)
@@ -155,13 +165,33 @@ class Mailer(object):
 
     def send(self, message):
         """
-        Sends a message immediately.
+        Sends a message. The message is handled inside a transaction, so 
+        in case of failure (or the message fails) the message will not be sent.
 
         :param message: a **Message** instance.
         """
 
         return self.direct_delivery.send(*self._message_args(message))
-        
+
+    def send_immediately(self, message, fail_silently=False):
+        """
+        Sends a message immediately, outside the transaction manager. 
+
+        If there is a connection error to the mail server this will have to 
+        be handled manually. However if you pass ``fail_silently`` the error
+        will be swallowed.
+
+        :param message: a **Message** instance.
+
+        :param fail_silently: silently handle connection errors.
+        """
+
+        try:
+            return self.smtp_mailer.send(*self._message_args(message))
+        except smtplib.socket.error, e:
+            if not fail_silently:
+                raise
+
     def send_to_queue(self, message):
         """
         Adds a message to a maildir queue.

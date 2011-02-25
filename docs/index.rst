@@ -80,6 +80,13 @@ or add it to your mail queue (a maildir on disk)::
 
 Usually you provide the ``sender`` to your ``Message`` instance. Often however a site might just use a single from address. If that is the case you can provide the ``default_sender`` to your ``Mailer`` and this will be used in throughout your application as the default if the ``sender`` is not otherwise provided.
 
+
+If you don't want to use transactions, you can side-step them by using **send_immediately**::
+
+    mailer.send_immediately(message, fail_silently=False)
+
+This will send the email immediately, outwith the transaction, so if it fails you have to deal with it manually. The ``fail_silently`` flag will swallow any connection errors silently - if it's not important whether the email gets sent.
+
 .. _configuration:
 
 Configuration

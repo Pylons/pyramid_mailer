@@ -273,6 +273,39 @@ class TestMessage(unittest.TestCase):
 
 class TestMailer(unittest.TestCase):
 
+    def dummy_test_send_immediately(self):
+
+        from pyramid_mailer.mailer import DummyMailer
+        from pyramid_mailer.message import Message
+
+        mailer = DummyMailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_immediately(msg)
+
+        self.assert_(len(mailer.outbox)) == 1
+ 
+
+    def dummy_test_send_immediately_and_fail_silently(self):
+
+        from pyramid_mailer.mailer import DummyMailer
+        from pyramid_mailer.message import Message
+
+        mailer = DummyMailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_immediately(msg, True)
+
+        self.assert_(len(mailer.outbox)) == 1
+ 
     def test_dummy_send(self):
 
         from pyramid_mailer.mailer import DummyMailer
@@ -305,8 +338,38 @@ class TestMailer(unittest.TestCase):
 
         self.assert_(len(mailer.queue)) == 1
 
+    def test_send_immediately(self):
 
+        import socket
 
+        from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.message import Message
+
+        mailer = Mailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        self.assertRaises(socket.error, 
+                          mailer.send_immediately,
+                          msg)
+            
+    def test_send_immediately_and_fail_silently(self):
+
+        from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.message import Message
+
+        mailer = Mailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        self.assert_(mailer.send_immediately(msg, True))
+ 
     def test_send(self):
 
         from pyramid_mailer.mailer import Mailer
