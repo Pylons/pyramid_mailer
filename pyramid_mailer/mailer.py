@@ -31,6 +31,8 @@ class DummyMailer(object):
         Mocks sending an immediate (non-transactional) message. The message
         is added to the **outbox** list.
 
+        :versionadded: 0.3
+
         :param message: a **Message** instance.
         :param fail_silently: swallow connection errors (ignored here)
         """
@@ -182,6 +184,8 @@ class Mailer(object):
         If there is a connection error to the mail server this will have to 
         be handled manually. However if you pass ``fail_silently`` the error
         will be swallowed.
+
+        :versionadded: 0.3
 
         :param message: a **Message** instance.
 
