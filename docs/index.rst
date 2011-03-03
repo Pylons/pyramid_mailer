@@ -128,7 +128,7 @@ You can then access your mailer in a view::
         mailer = request.registry['mailer']
 
 Note that the ``pyramid_mailer.get_mailer()`` API will not work if you
-construct and seat your own mailer in this way.
+construct and set your own mailer in this way.
 
 .. _configuration:
 
