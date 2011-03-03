@@ -1,0 +1,16 @@
+Next release
+------------
+
+- ``pyramid_mailer.includeme`` function added for
+  ``config.include('pyramid_mailer')`` support
+
+- ``pyramid_mailer.testing`` module added for
+  ``config.include('pyramid_mailer.testing')`` support.
+
+- ``pyramid_mailer.get_mailer`` API added (see docs).
+
+- ``pyramid_mailer.interfaces`` module readded (with marker IMailer interface
+  for ZCA registration).
+
+- ``setup.cfg`` added with coverage parameters to allow for ``setup.py
+  nosetests --with-coverage``.
