@@ -3,8 +3,6 @@
 
 import unittest
 
-from pyramid import testing
-
 class TestAttachment(unittest.TestCase):
 
     def test_data_from_string(self):
