@@ -77,7 +77,7 @@ class SMTP_SSLMailer(SMTPMailer):
                                certfile=self.certfile)
 
         connection.set_debuglevel(self.debug_smtp)
-        return connection
+        return connection # pragma: no cover
 
 
 class Mailer(object):
