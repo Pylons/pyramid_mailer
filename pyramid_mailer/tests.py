@@ -522,15 +522,17 @@ class TestMailer(unittest.TestCase):
         self.assert_(mailer.queue_delivery.queuePath == '/tmp')
         self.assert_(mailer.direct_delivery.mailer.debug_smtp == 1)
 
-class Test_get_mailer(unittest.TestCase):
-    def _callFUT(self, arg):
+
+class TestGetMailer(unittest.TestCase):
+
+    def _get_mailer(self, arg):
         from pyramid_mailer import get_mailer
         return get_mailer(arg)
 
     def test_arg_is_registry(self):
         mailer = object()
         registry = DummyRegistry(mailer)
-        result = self._callFUT(registry)
+        result = self._get_mailer(registry)
         self.assertEqual(result, mailer)
 
     def test_arg_is_request(self):
@@ -540,44 +542,45 @@ class Test_get_mailer(unittest.TestCase):
         registry = DummyRegistry(mailer)
         request = Dummy()
         request.registry = registry
-        result = self._callFUT(request)
+        result = self._get_mailer(request)
         self.assertEqual(result, mailer)
 
+
 class Test_includeme(unittest.TestCase):
-    def _callFUT(self, config):
+    def _do_includeme(self, config):
         from pyramid_mailer import includeme
         includeme(config)
 
-    def test_it_default_prefix(self):
+    def test_with_default_prefix(self):
         from pyramid_mailer.interfaces import IMailer
         registry = DummyRegistry()
         settings = {'mail.default_sender':'sender'}
         config = DummyConfig(registry, settings)
-        self._callFUT(config)
+        self._do_includeme(config)
         self.assertEqual(registry.registered[IMailer].default_sender, 'sender')
 
-    def test_it_specified_prefix(self):
+    def test_with_specified_prefix(self):
         from pyramid_mailer.interfaces import IMailer
         registry = DummyRegistry()
         settings = {'pyramid_mailer.prefix':'foo.',
                     'foo.default_sender':'sender'}
         config = DummyConfig(registry, settings)
-        self._callFUT(config)
+        self._do_includeme(config)
         self.assertEqual(registry.registered[IMailer].default_sender, 'sender')
 
-class Test_testing_includeme(unittest.TestCase):
-    def _callFUT(self, config):
-        from pyramid_mailer.testing import includeme
-        includeme(config)
 
-    def test_it(self):
+class TestIncludemeTesting(unittest.TestCase):
+    def test_includeme(self):
         from pyramid_mailer.interfaces import IMailer
         from pyramid_mailer.mailer import DummyMailer
+        from pyramid_mailer.testing import includeme
+
         registry = DummyRegistry()
         config = DummyConfig(registry, {})
-        self._callFUT(config)
+        includeme(config)
         self.assertEqual(registry.registered[IMailer].__class__, DummyMailer)
         
+
 class DummyConfig(object):
     def __init__(self, registry, settings):
         self.registry = registry
