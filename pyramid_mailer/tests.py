@@ -3,6 +3,8 @@
 
 import unittest
 
+from pyramid import testing
+
 class TestAttachment(unittest.TestCase):
 
     def test_data_from_string(self):
@@ -579,15 +581,34 @@ class TestIncludemeTesting(unittest.TestCase):
         config = DummyConfig(registry, {})
         includeme(config)
         self.assertEqual(registry.registered[IMailer].__class__, DummyMailer)
-        
+
+class TestFunctional(unittest.TestCase):
+    def setUp(self):
+        self.config = testing.setUp()
+
+    def tearDown(self):
+        testing.tearDown()
+
+    def test_get_mailer_realthing(self):
+        from pyramid_mailer import get_mailer
+        from pyramid_mailer.mailer import Mailer
+        self.config.include('pyramid_mailer')
+        request = testing.DummyRequest()
+        mailer = get_mailer(request)
+        self.assertEqual(mailer.__class__, Mailer)
+
+    def test_get_mailer_dummy(self):
+        from pyramid_mailer import get_mailer
+        from pyramid_mailer.testing import DummyMailer
+        self.config.include('pyramid_mailer.testing')
+        request = testing.DummyRequest()
+        mailer = get_mailer(request)
+        self.assertEqual(mailer.__class__, DummyMailer)
 
 class DummyConfig(object):
     def __init__(self, registry, settings):
         self.registry = registry
-        self.settings = settings
-
-    def get_settings(self):
-        return self.settings
+        self.registry.settings = settings
 
 
 class DummyRegistry(object):
