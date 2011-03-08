@@ -17,11 +17,10 @@ def includeme(config):
 
     :versionadded: 0.4
     """
-    settings = config.settings
+    settings = config.get_settings()
     prefix = settings.get('pyramid_mailer.prefix', 'mail.')
     mailer = mailer_factory_from_settings(settings, prefix=prefix)
     config.registry.registerUtility(mailer, IMailer)
-    # mailer.registry = config.registry
 
 
 def get_mailer(request):

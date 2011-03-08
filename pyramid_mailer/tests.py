@@ -586,6 +586,10 @@ class DummyConfig(object):
         self.registry = registry
         self.settings = settings
 
+    def get_settings(self):
+        return self.settings
+
+
 class DummyRegistry(object):
     def __init__(self, result=None):
         self.result = result
