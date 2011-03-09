@@ -135,16 +135,38 @@ construct and set your own mailer in this way.
 Configuration
 -------------
 
-If you create your ``Mailer`` instance using
+If you configure a ``Mailer`` using
 :meth:`pyramid_mailer.mailer.Mailer.from_settings` or
 ``config.include('pyramid_mailer')``, you can pass the settings from your
-.ini file or other source. By default, the prefix is assumed to be `mail.`.
-If you use the ``config.include`` mechanism, to set another prefix, use the
-``pyramid_mailer.prefix`` key in the config file,
-e.g. ``pyramid_mailer.prefix = foo.``.  If you use the
-:meth:`pyramid_mailer.Mailer.Mailer.from_settings` or
+Paste ``.ini`` file.  For example::
+
+  [app:myproject]
+  mail.host = localhost
+  mail.port = 25
+
+By default, the prefix for is assumed to be `mail.`.  If you use the
+``config.include`` mechanism, to set another prefix, use the
+``pyramid_mailer.prefix`` key in the config file.  For example::
+
+  [app:myproject]
+  foo.host = localhost
+  foo.port = 25
+  pyramid_mailer.prefix = foo.
+
+If you use the :meth:`pyramid_mailer.Mailer.Mailer.from_settings` or
 :func:`pyramid_mailer.mailer_factory_from_settings` API, these accept a
-prefix directly.
+prefix directly; for example::
+
+  mailer_factory_from_settings(settings, prefix='foo.')
+
+If you don't use Paste, just pass the settings directly into your Pyramid
+``Configurator``::
+
+   settings = {'mail.host':'localhost', 'mail.port':'25'}
+   Configurator(settings=settings)
+   config.include('pyramid_mailer')
+
+The available settings are listed below.
 
 =========================  ===============    =====================
 Setting                    Default            Description              
@@ -220,6 +242,7 @@ class::
 
 You can pass the data either as a string or file object, so the above code
 could be rewritten::
+
 
     from pyramid_mailer.message import Attachment
     from pyramid_mailer.message import Message
