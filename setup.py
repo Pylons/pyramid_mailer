@@ -15,8 +15,8 @@ This includes:
 4. Features to help with unit testing.
 
 pyramid_mailer uses the repoze_sendmail library for managing email sending
-and transacton management, and Lamson for wrapping email messages. You do
-not need to install a Lamson service to use pyramid_mailer.
+and transacton management, and borrows code from Zed Shaw's Lamson for
+wrapping email messages.
 
 Links
 `````
@@ -46,7 +46,6 @@ setup(
     platforms='any',
     install_requires=[
         'pyramid',
-        'Lamson',
         'repoze.sendmail',
     ],
     tests_require=[

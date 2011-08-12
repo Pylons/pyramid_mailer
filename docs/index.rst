@@ -21,9 +21,9 @@ maildir.
    non-production install.
 
 **pyramid_mailer** uses the `repoze_sendmail`_ package for general email
-sending, queuing and transaction management, and the `Lamson`_ library for
-low-level multipart message encoding and wrapping. You do not have to install
-or run a Lamson mail service.
+sending, queuing and transaction management, and it borrows code from Zed
+Shaw's `Lamson`_ library for low-level multipart message encoding and
+wrapping.
 
 Installation
 ------------
@@ -36,18 +36,6 @@ setup.py install**.
 
 The source repository is on `Bitbucket`_. Please report any bugs, issues or
 queries there.
-
-Installing on Windows
----------------------
-
-Some Windows users have reported issues installing `Lamson`_ due to some
-dependencies that do not work on Windows.
-
-The best way to install on Windows is to install the individual packages
-using the `no dependencies` option::
-
-    easy_install -N lamson chardet repoze.sendmail pyramid_mailer
-
 
 Getting Started (The Easier Way)
 --------------------------------
@@ -218,11 +206,12 @@ For example::
 The email is not actually sent until the transaction is committed. 
 
 When the `repoze.tm2 <http://pypi.python.org/pypi/repoze.tm2>`_ ``tm``
-middleware is in your Pyramid WSGI pipeline, transactions are already managed
-for you, so you don't need to explicitly commit or abort within code that
-sends mail.  Instead, if an exception is raised, the transaction will
-implicitly be aborted and mail will not be sent; otherwise it will be
-committed, and mail will be sent.
+middleware is in your Pyramid WSGI pipeline or if you've included the
+``pyramid_tm`` package in your Pyramid configuration, transactions are
+already managed for you, so you don't need to explicitly commit or abort
+within code that sends mail.  Instead, if an exception is raised, the
+transaction will implicitly be aborted and mail will not be sent; otherwise
+it will be committed, and mail will be sent.
 
 Attachments
 -----------

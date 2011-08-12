@@ -76,7 +76,7 @@ class SMTP_SSLMailer(SMTPMailer):
                                keyfile=self.keyfile,
                                certfile=self.certfile)
 
-        connection.set_debuglevel(self.debug_smtp)
+        connection.set_debuglevel(self.debug_smtp) # pragma: no cover
         return connection # pragma: no cover
 
 
@@ -194,7 +194,7 @@ class Mailer(object):
 
         try:
             return self.smtp_mailer.send(*self._message_args(message))
-        except smtplib.socket.error, e:
+        except smtplib.socket.error:
             if not fail_silently:
                 raise
 

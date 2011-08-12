@@ -1,4 +1,4 @@
-from lamson.mail import MailResponse
+from pyramid_mailer.response import MailResponse
 
 from pyramid_mailer.exceptions import BadHeaders
 from pyramid_mailer.exceptions import InvalidMessage
