@@ -38,6 +38,7 @@ setup(
     author_email='danjac354@gmail.com',
     description='Sendmail package for Pyramid',
     long_description=__doc__,
+    url="http://docs.pylonsproject.org",
     packages=[
         'pyramid_mailer',
     ],
