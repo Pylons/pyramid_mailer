@@ -76,7 +76,7 @@ copyright = '%s, Dan Jacob' % datetime.datetime.now().year
 # other places throughout the built documents.
 #
 # The short X.Y version.
-version = '0.4'
+version = '0.5'
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -92,6 +92,9 @@ today_fmt = '%B %d, %Y'
 # List of directories, relative to source directories, that shouldn't be searched
 # for source files.
 #exclude_dirs = []
+
+# directories to ignore when looking for source files.
+exclude_patterns = ['_themes/README.rst',]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -122,6 +125,7 @@ if book:
 sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']
 html_theme = 'pyramid'
+html_theme_options = dict(github_url='http://github.com/Pylons/pyramid_mailer')
 
 # The style sheet to use for HTML and HTML Help pages. A file of that name
 # must exist either in Sphinx' static/ path, or in one of the custom paths

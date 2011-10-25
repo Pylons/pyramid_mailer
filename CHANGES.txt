@@ -1,5 +1,5 @@
-Next release
-------------
+0.5 (2011-10-24)
+----------------
 
 - Drop Lamson dependency by copying Lamson's MailResponse and dependent code
   into ``pyramid_mailer.response``.

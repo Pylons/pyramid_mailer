@@ -15,5 +15,4 @@ dist
 data
 build
 docs/output
-docs/_themes
 docs/_build
