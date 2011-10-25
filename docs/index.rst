@@ -271,6 +271,7 @@ make the current mailer an instance of the
 
         def test_some_view(self):
             from pyramid.testing import DummyRequest
+            from pyramid_mailer import get_mailer
             request = DummyRequest()
             mailer = get_mailer(request)
             response = some_view(request)
