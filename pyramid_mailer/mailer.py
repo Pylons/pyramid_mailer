@@ -218,6 +218,6 @@ class Mailer(object):
         message.sender = message.sender or self.default_sender
 
         return (message.sender, 
-                message.recipients,
+                message.send_to,
                 message.to_message())
 
