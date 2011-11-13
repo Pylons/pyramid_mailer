@@ -21,7 +21,8 @@ wrapping email messages.
 Links
 `````
 
-* `documentation <http://packages.python.org/pyramid_mailer/>`_
+* `documentation
+  <http://docs.pylonsproject.org/projects/pyramid_mailer/dev/>`_
 * `development version
   <https://github.com/Pylons/pyramid_mailer>`_
 
@@ -32,7 +33,7 @@ from setuptools import setup
 
 setup(
     name='pyramid_mailer',
-    version='0.5',
+    version='0.5.1',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
