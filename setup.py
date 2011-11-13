@@ -23,7 +23,7 @@ Links
 
 * `documentation <http://packages.python.org/pyramid_mailer/>`_
 * `development version
-  <http://bitbucket.org/danjac/pyramid_mailer/get/tip.gz#egg=pyramid_mailer>`_
+  <https://github.com/Pylons/pyramid_mailer>`_
 
 """
 
@@ -38,7 +38,7 @@ setup(
     author_email='danjac354@gmail.com',
     description='Sendmail package for Pyramid',
     long_description=__doc__,
-    url="http://docs.pylonsproject.org",
+    url="http://docs.pylonsproject.org/projects/pyramid_mailer/dev/",
     packages=[
         'pyramid_mailer',
     ],

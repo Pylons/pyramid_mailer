@@ -1,7 +1,7 @@
 pyramid_mailer
 ==================
 
-**pyramid_mailer** is a package for the Pyramid framework to take the pain
+**pyramid_mailer** is a package for the `Pyramid`_ framework to take the pain
   out of sending emails. It has the following features:
 
 1. A wrapper around the low-level email functionality of standard
@@ -34,7 +34,7 @@ pyramid_mailer**.
 If installing from source, untar/unzip, cd into the directory and do **python
 setup.py install**.
 
-The source repository is on `Bitbucket`_. Please report any bugs, issues or
+The source repository is on `Github`_. Please report any bugs, issues or
 queries there.
 
 Getting Started (The Easier Way)
@@ -345,7 +345,7 @@ API
 .. autoclass:: BadHeaders
    :members:
 
-.. _Bitbucket: http://bitbucket.org/danjac/pyramid_mailer
+.. _Github: https://github.com/Pylons/pyramid_mailer
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
 .. _repoze_sendmail: http://pypi.python.org/pypi/repoze.sendmail/
 .. _Lamson: http://pypi.python.org/pypi/lamson/
