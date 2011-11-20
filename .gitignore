@@ -10,7 +10,6 @@ coverage.xml
 *.swo
 *.zip
 *.orig
-*.cfg
 *.tox
 env26/
 dist

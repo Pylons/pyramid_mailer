@@ -43,16 +43,13 @@ setup(
     packages=[
         'pyramid_mailer',
     ],
-    test_suite='nose.collector',
     zip_safe=False,
     platforms='any',
     install_requires=[
         'pyramid',
         'repoze.sendmail',
     ],
-    tests_require=[
-        'nose',
-    ],
+    test_suite='pyramid_mailer',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
