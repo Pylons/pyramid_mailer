@@ -273,7 +273,7 @@ class TestMessage(unittest.TestCase):
 
 class TestMailer(unittest.TestCase):
 
-    def dummy_test_send_immediately(self):
+    def test_dummy_send_immediately(self):
 
         from pyramid_mailer.mailer import DummyMailer
         from pyramid_mailer.message import Message
@@ -290,7 +290,7 @@ class TestMailer(unittest.TestCase):
         self.assert_(len(mailer.outbox)) == 1
  
 
-    def dummy_test_send_immediately_and_fail_silently(self):
+    def test_dummy_send_immediately_and_fail_silently(self):
 
         from pyramid_mailer.mailer import DummyMailer
         from pyramid_mailer.message import Message
@@ -426,7 +426,7 @@ class TestMailer(unittest.TestCase):
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
-        except ImportError:
+        except ImportError: # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer.mailer import Mailer
@@ -440,9 +440,14 @@ class TestMailer(unittest.TestCase):
             except (IOError, SSLError):
                 pass
 
-        else:
+        else: # pragma: no cover
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
-            self.assert_(mailer.direct_delivery.mailer.smtp_factory())
+            import socket
+            try:
+                self.assert_(mailer.direct_delivery.mailer.smtp_factory())
+            except socket.error, e:
+                # smtp mailer might fail to resolve hostname
+                self.assert_(e.args[0] == 61)
 
                           
     def test_from_settings_factory(self):
@@ -450,7 +455,7 @@ class TestMailer(unittest.TestCase):
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
-        except ImportError:
+        except ImportError: # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer import mailer_factory_from_settings
@@ -475,7 +480,7 @@ class TestMailer(unittest.TestCase):
         self.assert_(mailer.direct_delivery.mailer.force_tls==True)
         if ssl_enabled:
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
-        else:
+        else: # pragma: no cover
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
 
         self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
@@ -489,7 +494,7 @@ class TestMailer(unittest.TestCase):
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
-        except ImportError:
+        except ImportError: # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer.mailer import Mailer
@@ -514,7 +519,7 @@ class TestMailer(unittest.TestCase):
         self.assert_(mailer.direct_delivery.mailer.force_tls==True)
         if ssl_enabled:
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
-        else:
+        else: # pragma: no cover
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
 
         self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
@@ -844,8 +849,6 @@ class TestMailResponse(unittest.TestCase):
     def test_to_message_with_parts2(self):
         import os
         this = os.path.abspath(__file__)
-        if this.endswith('c'):
-            this = this[:-1]
         from pyramid_mailer.response import MIMEPart
         response = self._makeOne(To='To', From='From', Subject='Subject')
         response.multipart = True
