@@ -22,7 +22,7 @@ Links
 `````
 
 * `documentation
-  <http://docs.pylonsproject.org/projects/pyramid_mailer/dev/>`_
+  <http://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/>`_
 * `development version
   <https://github.com/Pylons/pyramid_mailer>`_
 
@@ -39,7 +39,7 @@ setup(
     author_email='danjac354@gmail.com',
     description='Sendmail package for Pyramid',
     long_description=__doc__,
-    url="http://docs.pylonsproject.org/projects/pyramid_mailer/dev/",
+    url="http://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/",
     packages=[
         'pyramid_mailer',
     ],
