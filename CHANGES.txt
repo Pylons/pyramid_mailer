@@ -1,3 +1,9 @@
+0.5.1 (2011-11-13)
+------------------
+
+- Fixed a bug where the mailer was only sending email to addresses in
+  the "TO" field.
+
 0.5 (2011-10-24)
 ----------------
 
