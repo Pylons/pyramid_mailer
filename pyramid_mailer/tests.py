@@ -458,6 +458,8 @@ class TestMailer(unittest.TestCase):
         except ImportError: # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
+        from pyramid_mailer.mailer import (Mailer, DummyMailer, SMTP_SSLMailer,
+                                          SMTPMailer)
         from pyramid_mailer import mailer_factory_from_settings
 
         settings = {'mymail.host' : 'my.server.com',
@@ -487,6 +489,31 @@ class TestMailer(unittest.TestCase):
         self.assert_(mailer.direct_delivery.mailer.certfile == 'ssl.crt')
         self.assert_(mailer.queue_delivery.queuePath == '/tmp')
         self.assert_(mailer.direct_delivery.mailer.debug_smtp == 1)
+
+    def test_mailer_class_from_settings_factory(self):
+        from pyramid_mailer.mailer import (Mailer, DummyMailer, SMTP_SSLMailer,
+                                          SMTPMailer)
+        from pyramid_mailer import mailer_factory_from_settings
+
+        settings = {'mymail.mailer': 'Mailer'}
+        mailer = mailer_factory_from_settings(settings, prefix='mymail.')
+        self.assertIsInstance(mailer, Mailer)
+
+        settings = {'mymail.mailer': 'DummyMailer'}
+        mailer = mailer_factory_from_settings(settings, prefix='mymail.')
+        self.assertIsInstance(mailer, DummyMailer)
+
+        settings = {'mymail.mailer': 'SMTP_SSLMailer'}
+        mailer = mailer_factory_from_settings(settings, prefix='mymail.')
+        self.assertIsInstance(mailer, SMTP_SSLMailer)
+
+        settings = {'mymail.mailer': 'SMTPMailer'}
+        mailer = mailer_factory_from_settings(settings, prefix='mymail.')
+        self.assertIsInstance(mailer, SMTPMailer)
+
+        settings = {'mymail.mailer': 'InvalidMailer'}
+        self.assertRaises(NameError, mailer_factory_from_settings, settings,
+                          prefix='mymail.')
 
 
     def test_from_settings(self):

@@ -13,7 +13,7 @@ class DummyMailer(object):
     Queued messages are instead added to **queue** property.
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.outbox = []
         self.queue = []
 

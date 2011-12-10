@@ -1,4 +1,4 @@
-from pyramid_mailer.mailer import Mailer
+from pyramid_mailer import mailer
 from pyramid_mailer.interfaces import IMailer
 
 def mailer_factory_from_settings(settings, prefix='mail.'):
@@ -8,7 +8,25 @@ def mailer_factory_from_settings(settings, prefix='mail.'):
 
     :versionadded: 0.2.2
     """
-    return Mailer.from_settings(settings, prefix)
+    mailer_classname = settings.pop(prefix + 'mailer', 'Mailer')
+    try:
+        MailerClass = getattr(mailer, mailer_classname)
+    except AttributeError:
+        raise NameError("Invalid value for `mail.mailer` in config")
+
+    settings = settings or {}
+
+    kwarg_names = [prefix + k for k in (
+                   'host', 'port', 'username',
+                   'password', 'tls', 'ssl', 'keyfile',
+                   'certfile', 'queue_path', 'debug', 'default_sender')]
+
+    size = len(prefix)
+
+    kwargs = dict(((k[size:], settings[k]) for k in settings.keys() if
+                    k in kwarg_names))
+
+    return MailerClass(**kwargs)
 
 
 def includeme(config):
