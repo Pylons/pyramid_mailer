@@ -8,9 +8,19 @@ def mailer_factory_from_settings(settings, prefix='mail.'):
 
     :versionadded: 0.2.2
     """
-    mailer_classname = settings.pop(prefix + 'mailer', 'Mailer')
+    import importlib
+
+    mailer_import_path = settings.pop(prefix + 'mailer',
+                                      'pyramid_mailer.mailer.Mailer')
+    import_parts = mailer_import_path.split('.')
+    mailer_classname = import_parts.pop(-1)
+    import_path = '.'.join(import_parts)
+
     try:
-        MailerClass = getattr(mailer, mailer_classname)
+        module = importlib.import_module(import_path)
+        Mailer = getattr(module, mailer_classname)
+    except (ImportError, ValueError):
+        raise ImportError("Can't import module `%s`" % (import_path))
     except AttributeError:
         raise NameError("Invalid value for `mail.mailer` in config")
 
@@ -26,7 +36,7 @@ def mailer_factory_from_settings(settings, prefix='mail.'):
     kwargs = dict(((k[size:], settings[k]) for k in settings.keys() if
                     k in kwarg_names))
 
-    return MailerClass(**kwargs)
+    return Mailer(**kwargs)
 
 
 def includeme(config):

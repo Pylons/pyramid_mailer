@@ -271,6 +271,102 @@ class TestMessage(unittest.TestCase):
 
         self.assert_(msg.is_bad_headers())
 
+
+class TestLoggingMailer(unittest.TestCase):
+
+    def _get_handler(self):
+        import logging
+
+        class MockLoggingHandler(logging.Handler):
+            "Mock logging handler to check for expected logs."
+            def emit(self, record):
+                self.last_log_levelname = record.levelname.lower()
+                self.last_log_message = record.getMessage()
+
+        return MockLoggingHandler(level=logging.INFO)
+
+
+    def test_dummy_send(self):
+        import logging
+        from pyramid_mailer.mailer import LoggingMailer
+        from pyramid_mailer.message import Message
+
+        mailer = LoggingMailer()
+        mailer.logger.setLevel(logging.INFO)
+        handler = self._get_handler()
+        mailer.logger.addHandler(handler)
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send(msg)
+
+        self.assertEqual('info', handler.last_log_levelname)
+        self.assertEqual(str(msg.to_message()), handler.last_log_message)
+
+    def test_dummy_send_immediately(self):
+        import logging
+        from pyramid_mailer.mailer import LoggingMailer
+        from pyramid_mailer.message import Message
+
+        mailer = LoggingMailer()
+        mailer.logger.setLevel(logging.INFO)
+        handler = self._get_handler()
+        mailer.logger.addHandler(handler)
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_immediately(msg)
+
+        self.assertEqual('info', handler.last_log_levelname)
+        self.assertEqual(str(msg.to_message()), handler.last_log_message)
+
+    def test_dummy_send_immediately_and_fail_silently(self):
+        import logging
+        from pyramid_mailer.mailer import LoggingMailer
+        from pyramid_mailer.message import Message
+
+        mailer = LoggingMailer()
+        mailer.logger.setLevel(logging.INFO)
+        handler = self._get_handler()
+        mailer.logger.addHandler(handler)
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_immediately(msg, True)
+
+        self.assertEqual('info', handler.last_log_levelname)
+        self.assertEqual(str(msg.to_message()), handler.last_log_message)
+
+    def test_dummy_send_to_queue(self):
+        import logging
+        from pyramid_mailer.mailer import LoggingMailer
+        from pyramid_mailer.message import Message
+
+        mailer = LoggingMailer()
+        mailer.logger.setLevel(logging.INFO)
+        handler = self._get_handler()
+        mailer.logger.addHandler(handler)
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_to_queue(msg)
+
+        self.assertEqual('info', handler.last_log_levelname)
+        self.assertEqual(str(msg.to_message()), handler.last_log_message)
+
+
 class TestMailer(unittest.TestCase):
 
     def test_dummy_send_immediately(self):
@@ -459,7 +555,7 @@ class TestMailer(unittest.TestCase):
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer.mailer import (Mailer, DummyMailer, SMTP_SSLMailer,
-                                          SMTPMailer)
+                                          SMTPMailer, LoggingMailer)
         from pyramid_mailer import mailer_factory_from_settings
 
         settings = {'mymail.host' : 'my.server.com',
@@ -492,27 +588,35 @@ class TestMailer(unittest.TestCase):
 
     def test_mailer_class_from_settings_factory(self):
         from pyramid_mailer.mailer import (Mailer, DummyMailer, SMTP_SSLMailer,
-                                          SMTPMailer)
+                                          SMTPMailer, LoggingMailer)
         from pyramid_mailer import mailer_factory_from_settings
 
-        settings = {'mymail.mailer': 'Mailer'}
+        settings = {'mymail.mailer': 'pyramid_mailer.mailer.Mailer'}
         mailer = mailer_factory_from_settings(settings, prefix='mymail.')
         self.assertIsInstance(mailer, Mailer)
 
-        settings = {'mymail.mailer': 'DummyMailer'}
+        settings = {'mymail.mailer': 'pyramid_mailer.mailer.DummyMailer'}
         mailer = mailer_factory_from_settings(settings, prefix='mymail.')
         self.assertIsInstance(mailer, DummyMailer)
 
-        settings = {'mymail.mailer': 'SMTP_SSLMailer'}
+        settings = {'mymail.mailer': 'pyramid_mailer.mailer.SMTP_SSLMailer'}
         mailer = mailer_factory_from_settings(settings, prefix='mymail.')
         self.assertIsInstance(mailer, SMTP_SSLMailer)
 
-        settings = {'mymail.mailer': 'SMTPMailer'}
+        settings = {'mymail.mailer': 'pyramid_mailer.mailer.SMTPMailer'}
         mailer = mailer_factory_from_settings(settings, prefix='mymail.')
         self.assertIsInstance(mailer, SMTPMailer)
 
-        settings = {'mymail.mailer': 'InvalidMailer'}
+        settings = {'mymail.mailer': 'pyramid_mailer.mailer.LoggingMailer'}
+        mailer = mailer_factory_from_settings(settings, prefix='mymail.')
+        self.assertIsInstance(mailer, LoggingMailer)
+
+        settings = {'mymail.mailer': 'pyramid_mailer.mailer.InvalidMailer'}
         self.assertRaises(NameError, mailer_factory_from_settings, settings,
+                          prefix='mymail.')
+
+        settings = {'mymail.mailer': 'invalid.module'}
+        self.assertRaises(ImportError, mailer_factory_from_settings, settings,
                           prefix='mymail.')
 
 

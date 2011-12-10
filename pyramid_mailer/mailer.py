@@ -1,8 +1,60 @@
+import logging
 import smtplib
 
 from repoze.sendmail.mailer import SMTPMailer
 from repoze.sendmail.delivery import DirectMailDelivery
 from repoze.sendmail.delivery import QueuedMailDelivery
+
+
+class LoggingMailer(object):
+    """
+    A dummy mailing instance that writes messages to a log instead of sending
+    them.
+
+    By default, the logger name used is `pyramid_mailer` (but is configurable
+    throught the option `mail.logger_name`), with it, it's up to you to
+    configure the logging as you want. A brief example could be:
+    (in file development.ini)
+    ...
+    [loggers]
+    keys = root, sqalchemy, pyramid_mailer
+    ...
+    [logger_pyramid_mailer]
+    level = INFO
+    handlers = console
+    qualname = pyramid_mailer
+    ...
+    """
+    logger_name = 'pyramid_mailer'
+
+    def __init__(self, *args, **kwargs):
+        logger_name = kwargs.pop('logger_name', self.logger_name)
+        self.logger = logging.getLogger(logger_name)
+
+    def send(self, message):
+        """
+        Logs sending a transactional message.
+
+        :param message: a **Message** instance.
+        """
+        self.logger.info(message.to_message())
+
+    def send_immediately(self, message, fail_silently=False):
+        """
+        Logs sending an immediate (non-transactional) message.
+
+        :param message: a **Message** instance.
+        :param fail_silently: swallow connection errors (ignored here)
+        """
+        self.send(message)
+
+    def send_to_queue(self, message):
+        """
+        Logs sending to a maildir queue.
+
+        :param message: a **Message** instance.
+        """
+        self.send(message)
 
 
 class DummyMailer(object):
