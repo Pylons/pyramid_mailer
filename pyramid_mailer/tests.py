@@ -80,7 +80,7 @@ class TestMessage(unittest.TestCase):
         msg.add_bcc("to@example.com")
 
         self.assert_(msg.bcc == ["to@example.com"])
-    
+
     def test_send_without_sender(self):
 
         from pyramid_mailer.message import Message
@@ -160,20 +160,20 @@ class TestMessage(unittest.TestCase):
         msg = Message(subject="testing",
                       recipients=["to@example.com"],
                       body="testing")
-        
-        msg.attach(Attachment(data="this is a test", 
+
+        msg.attach(Attachment(data="this is a test",
                               content_type="text/plain"))
-        
+
 
         a = msg.attachments[0]
-        
+
         self.assert_(a.filename is None)
         self.assert_(a.disposition == 'attachment')
         self.assert_(a.content_type == "text/plain")
         self.assert_(a.data == "this is a test")
- 
+
         response = msg.get_response()
-        
+
         self.assert_(len(response.attachments) == 1)
 
     def test_bad_header_subject(self):
@@ -234,7 +234,7 @@ class TestMessage(unittest.TestCase):
                       sender="from@example.com",
                       recipients=[
                           "to@example.com"],
-                      cc=['somebodyelse@example.com', 
+                      cc=['somebodyelse@example.com',
                           'to@example.com'],
                       bcc=['anotherperson@example.com'],
                       body="testing")
@@ -288,7 +288,7 @@ class TestMailer(unittest.TestCase):
         mailer.send_immediately(msg)
 
         self.assert_(len(mailer.outbox)) == 1
- 
+
 
     def test_dummy_send_immediately_and_fail_silently(self):
 
@@ -305,7 +305,7 @@ class TestMailer(unittest.TestCase):
         mailer.send_immediately(msg, True)
 
         self.assert_(len(mailer.outbox)) == 1
- 
+
     def test_dummy_send(self):
 
         from pyramid_mailer.mailer import DummyMailer
@@ -352,10 +352,10 @@ class TestMailer(unittest.TestCase):
                       recipients=["tester@example.com"],
                       body="test")
 
-        self.assertRaises(socket.error, 
+        self.assertRaises(socket.error,
                           mailer.send_immediately,
                           msg)
-            
+
     def test_send_immediately_and_fail_silently(self):
 
         from pyramid_mailer.mailer import Mailer
@@ -369,7 +369,7 @@ class TestMailer(unittest.TestCase):
                       body="test")
 
         mailer.send_immediately(msg, True)
- 
+
     def test_send(self):
 
         from pyramid_mailer.mailer import Mailer
@@ -388,7 +388,7 @@ class TestMailer(unittest.TestCase):
 
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
-        
+
         msg = Message(subject="testing",
                       sender="sender@example.com",
                       recipients=["tester@example.com"],
@@ -411,7 +411,7 @@ class TestMailer(unittest.TestCase):
                 os.makedirs(os.path.join(test_queue, dir))
             except OSError:
                 pass
-        
+
         mailer = Mailer(queue_path=test_queue)
 
         msg = Message(subject="testing",
@@ -449,7 +449,7 @@ class TestMailer(unittest.TestCase):
                 # smtp mailer might fail to resolve hostname
                 self.assert_(e.args[0] == 61)
 
-                          
+
     def test_from_settings_factory(self):
 
         try:
@@ -490,7 +490,7 @@ class TestMailer(unittest.TestCase):
 
 
     def test_from_settings(self):
-        
+
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
@@ -651,7 +651,7 @@ class TestMailBase(unittest.TestCase):
     def test___getitem__hit(self):
         base = self._makeOne([('Content-Type', 'text/html')])
         self.assertEqual(base['content-type'], 'text/html')
-        
+
     def test___getitem__miss(self):
         base = self._makeOne([('Content-Type', 'text/html')])
         self.assertEqual(base['Wrong'], None)
@@ -677,11 +677,11 @@ class TestMailBase(unittest.TestCase):
         base = self._makeOne()
         base.body = 'body'
         self.assertTrue(base)
-        
+
     def test___nonzero__true_headers(self):
         base = self._makeOne([('Content-Type', 'text/html')])
         self.assertTrue(base)
-        
+
     def test___nonzero__true_parts(self):
         base = self._makeOne()
         base.parts = [True]
@@ -738,11 +738,11 @@ class TestMailResponse(unittest.TestCase):
     def test___contains__(self):
         response = self._makeOne(To='To')
         self.assertTrue('To' in response)
-        
+
     def test___getitem__(self):
         response = self._makeOne(To='To')
         self.assertEqual(response['To'], 'To')
-        
+
     def test___setitem__(self):
         response = self._makeOne(To='To')
         response['To'] = 'To2'
@@ -764,7 +764,7 @@ class TestMailResponse(unittest.TestCase):
         self.assertEqual(attachment['filename'], this)
         self.assertEqual(attachment['content_type'], 'content_type')
         self.assertEqual(attachment['data'], 'data')
-        self.assertEqual(attachment['disposition'], 'disposition') 
+        self.assertEqual(attachment['disposition'], 'disposition')
 
     def test_attach_no_content_type(self):
         import os
@@ -776,7 +776,7 @@ class TestMailResponse(unittest.TestCase):
         self.assertEqual(attachment['filename'], this)
         self.assertTrue('python' in attachment['content_type'])
         self.assertEqual(attachment['data'], 'data')
-        self.assertEqual(attachment['disposition'], 'disposition') 
+        self.assertEqual(attachment['disposition'], 'disposition')
 
     def test_attach_part(self):
         response = self._makeOne()
@@ -876,7 +876,7 @@ class TestMailResponse(unittest.TestCase):
     def test_all_parts(self):
         response = self._makeOne()
         self.assertEqual(response.all_parts(), [])
-        
+
     def test_keys(self):
         response = self._makeOne()
         self.assertEqual(response.keys(), ['From', 'Subject', 'To'])
@@ -980,4 +980,3 @@ class DummyPart(object):
 
     def keys(self):
         return []
-        
