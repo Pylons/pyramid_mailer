@@ -884,6 +884,24 @@ class TestMailResponse(unittest.TestCase):
         response = self._makeOne()
         self.assertEqual(response.keys(), ['From', 'Subject', 'To'])
 
+    def test_recipients_separator(self):
+        sep = '; '
+        mails = ['one@domain.com', 'two@domain.com']
+        response = self._makeOne(To=mails,
+                                 From='From', Subject='Test',
+                                 separator=sep)
+        msg = response.to_message()
+        self.assertTrue(sep.join(mails) in msg.__str__())
+
+    def test_recipients_alternative_separator(self):
+        sep = ', '
+        mails = ['one@domain.com', 'two@domain.com']
+        response = self._makeOne(To=mails,
+                                 From='From', Subject='Test',
+                                 separator=sep)
+        msg = response.to_message()
+        self.assertTrue(sep.join(mails) in msg.__str__())
+
 
 class Test_to_message(unittest.TestCase):
     def _callFUT(self, mail):
