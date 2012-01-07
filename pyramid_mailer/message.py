@@ -3,6 +3,7 @@ from pyramid_mailer.response import MailResponse
 from pyramid_mailer.exceptions import BadHeaders
 from pyramid_mailer.exceptions import InvalidMessage
 
+
 class Attachment(object):
     """
     Encapsulates file attachment information.
@@ -45,6 +46,8 @@ class Message(object):
     :param bcc: BCC list
     :param extra_headers: dict of extra email headers
     :param attachments: list of Attachment instances
+    :param recipients_separator: alternative separator for any of
+        'From', 'To', 'Delivered-To', 'Cc', 'Bcc' fields
     """
 
     def __init__(self,
@@ -56,8 +59,8 @@ class Message(object):
                  cc=None,
                  bcc=None,
                  extra_headers=None,
-                 attachments=None):
-
+                 attachments=None,
+                 recipients_separator="; "):
 
         self.subject = subject or ''
         self.sender = sender
@@ -69,6 +72,8 @@ class Message(object):
         self.cc = cc or []
         self.bcc = bcc or []
         self.extra_headers = extra_headers or {}
+
+        self.recipients_separator = recipients_separator
 
     @property
     def send_to(self):
@@ -92,7 +97,8 @@ class Message(object):
                                 To=self.recipients,
                                 From=self.sender,
                                 Body=self.body,
-                                Html=self.html)
+                                Html=self.html,
+                                separator=self.recipients_separator)
 
         if self.bcc:
             response.base['Bcc'] = self.bcc

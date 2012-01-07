@@ -3,6 +3,7 @@ import unittest
 
 from pyramid import testing
 
+
 class TestAttachment(unittest.TestCase):
 
     def test_data_from_string(self):
@@ -164,7 +165,6 @@ class TestMessage(unittest.TestCase):
         msg.attach(Attachment(data="this is a test",
                               content_type="text/plain"))
 
-
         a = msg.attachments[0]
 
         self.assert_(a.filename is None)
@@ -239,7 +239,6 @@ class TestMessage(unittest.TestCase):
                       bcc=['anotherperson@example.com'],
                       body="testing")
 
-
         self.assert_(msg.send_to == set(["to@example.com",
                                         "somebodyelse@example.com",
                                         "anotherperson@example.com"]))
@@ -271,6 +270,7 @@ class TestMessage(unittest.TestCase):
 
         self.assert_(msg.is_bad_headers())
 
+
 class TestMailer(unittest.TestCase):
 
     def test_dummy_send_immediately(self):
@@ -288,7 +288,6 @@ class TestMailer(unittest.TestCase):
         mailer.send_immediately(msg)
 
         self.assert_(len(mailer.outbox)) == 1
-
 
     def test_dummy_send_immediately_and_fail_silently(self):
 
@@ -426,7 +425,7 @@ class TestMailer(unittest.TestCase):
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
-        except ImportError: # pragma: no cover
+        except ImportError:  # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer.mailer import Mailer
@@ -440,7 +439,7 @@ class TestMailer(unittest.TestCase):
             except (IOError, SSLError):
                 pass
 
-        else: # pragma: no cover
+        else:  # pragma: no cover
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
             import socket
             try:
@@ -448,7 +447,6 @@ class TestMailer(unittest.TestCase):
             except socket.error, e:
                 # smtp mailer might fail to resolve hostname
                 self.assert_(e.args[0] == 61)
-
 
     def test_from_settings_factory(self):
 
@@ -480,7 +478,7 @@ class TestMailer(unittest.TestCase):
         self.assert_(mailer.direct_delivery.mailer.force_tls==True)
         if ssl_enabled:
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
-        else: # pragma: no cover
+        else:  # pragma: no cover
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
 
         self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
@@ -488,38 +486,37 @@ class TestMailer(unittest.TestCase):
         self.assert_(mailer.queue_delivery.queuePath == '/tmp')
         self.assert_(mailer.direct_delivery.mailer.debug_smtp == 1)
 
-
     def test_from_settings(self):
 
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
-        except ImportError: # pragma: no cover
+        except ImportError:  # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer.mailer import Mailer
 
-        settings = {'mymail.host' : 'my.server.com',
-                    'mymail.port' : 123,
-                    'mymail.username' : 'tester',
-                    'mymail.password' : 'test',
-                    'mymail.tls' : True,
-                    'mymail.ssl' : True,
-                    'mymail.keyfile' : 'ssl.key',
-                    'mymail.certfile' : 'ssl.crt',
-                    'mymail.queue_path' : '/tmp',
-                    'mymail.debug' : 1}
+        settings = {'mymail.host' :'my.server.com',
+                    'mymail.port' :123,
+                    'mymail.username' :'tester',
+                    'mymail.password' :'test',
+                    'mymail.tls' :True,
+                    'mymail.ssl' :True,
+                    'mymail.keyfile' :'ssl.key',
+                    'mymail.certfile' :'ssl.crt',
+                    'mymail.queue_path' :'/tmp',
+                    'mymail.debug' :1}
 
         mailer = Mailer.from_settings(settings, prefix='mymail.')
 
-        self.assert_(mailer.direct_delivery.mailer.hostname=='my.server.com')
-        self.assert_(mailer.direct_delivery.mailer.port==123)
-        self.assert_(mailer.direct_delivery.mailer.username=='tester')
-        self.assert_(mailer.direct_delivery.mailer.password=='test')
-        self.assert_(mailer.direct_delivery.mailer.force_tls==True)
+        self.assert_(mailer.direct_delivery.mailer.hostname == 'my.server.com')
+        self.assert_(mailer.direct_delivery.mailer.port == 123)
+        self.assert_(mailer.direct_delivery.mailer.username == 'tester')
+        self.assert_(mailer.direct_delivery.mailer.password == 'test')
+        self.assert_(mailer.direct_delivery.mailer.force_tls == True)
         if ssl_enabled:
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
-        else: # pragma: no cover
+        else:  # pragma: no cover
             self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
 
         self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
@@ -585,6 +582,7 @@ class TestIncludemeTesting(unittest.TestCase):
         includeme(config)
         self.assertEqual(registry.registered[IMailer].__class__, DummyMailer)
 
+
 class TestFunctional(unittest.TestCase):
     def setUp(self):
         self.config = testing.setUp()
@@ -608,6 +606,7 @@ class TestFunctional(unittest.TestCase):
         mailer = get_mailer(request)
         self.assertEqual(mailer.__class__, DummyMailer)
 
+
 class DummyConfig(object):
     def __init__(self, registry, settings):
         self.registry = registry
@@ -625,6 +624,7 @@ class DummyRegistry(object):
     def registerUtility(self, impl, iface):
         self.registered[iface] = impl
 
+
 class TestEncodingError(unittest.TestCase):
     def _makeOne(self):
         from pyramid_mailer.response import EncodingError
@@ -634,6 +634,7 @@ class TestEncodingError(unittest.TestCase):
         inst = self._makeOne()
         self.assertTrue(isinstance(inst, Exception))
 
+
 class Test_normalize_header(unittest.TestCase):
     def _callFUT(self, header):
         from pyramid_mailer.response import normalize_header
@@ -642,6 +643,7 @@ class Test_normalize_header(unittest.TestCase):
     def test_it(self):
         result = self._callFUT('content-type')
         self.assertEqual(result, 'Content-Type')
+
 
 class TestMailBase(unittest.TestCase):
     def _makeOne(self, items=()):
@@ -698,9 +700,9 @@ class TestMailBase(unittest.TestCase):
         self.assertEqual(len(base.parts), 1)
         part = base.parts[0]
         self.assertEqual(part.content_encoding['Content-Type'],
-                         ('ctype', {'name':'filename'}))
+                         ('ctype', {'name': 'filename'}))
         self.assertEqual(part.content_encoding['Content-Disposition'],
-                         ('inline', {'filename':'filename'}))
+                         ('inline', {'filename': 'filename'}))
         self.assertEqual(part.body, 'data')
 
     def test_attach_text(self):
@@ -718,6 +720,7 @@ class TestMailBase(unittest.TestCase):
         base1.parts = [base2]
         base2.parts = [base3]
         self.assertEqual(list(base1.walk()), [base2, base3])
+
 
 class TestMailResponse(unittest.TestCase):
     def _makeOne(self, **kw):
@@ -881,6 +884,7 @@ class TestMailResponse(unittest.TestCase):
         response = self._makeOne()
         self.assertEqual(response.keys(), ['From', 'Subject', 'To'])
 
+
 class Test_to_message(unittest.TestCase):
     def _callFUT(self, mail):
         from pyramid_mailer.response import to_message
@@ -902,6 +906,7 @@ class Test_to_message(unittest.TestCase):
         mail.parts = []
         result = self._callFUT(mail)
         self.assertEqual(result.__class__, MIMEPart)
+
 
 class TestMIMEPart(unittest.TestCase):
     def _makeOne(self, type, **params):
@@ -933,6 +938,7 @@ class TestMIMEPart(unittest.TestCase):
             result,
             "<MIMEPart 'html/text': 'text/html', None, multipart=False>")
 
+
 class Test_properly_encode_header(unittest.TestCase):
     def _callFUT(self, value, encoder, not_email):
         from pyramid_mailer.response import properly_encode_header
@@ -944,6 +950,7 @@ class Test_properly_encode_header(unittest.TestCase):
 
     def test_not_ascii_encodable_email(self):
         la = unicode('LaPe\xc3\xb1a@plope.com', 'utf-8')
+
         class Encoder(object):
             def header_encode(self, val):
                 return 'encoded'
@@ -960,8 +967,10 @@ class Test_properly_encode_header(unittest.TestCase):
         result = self._callFUT(la, encoder, False)
         self.assertEqual(result,  'encoded')
 
+
 class Dummy(object):
     pass
+
 
 class DummyMailRequest(object):
     def __init__(self):
@@ -971,10 +980,11 @@ class DummyMailRequest(object):
     def all_parts(self):
         return [self]
 
+
 class DummyPart(object):
     def __init__(self):
-        self.content_encoding = {'Content-Type':('text/html', {}),
-                                 'Content-Disposition':('inline', {})}
+        self.content_encoding = {'Content-Type': ('text/html', {}),
+                                 'Content-Disposition': ('inline', {})}
         self.parts = []
         self.body = 'body'
 

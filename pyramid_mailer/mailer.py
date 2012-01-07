@@ -57,7 +57,7 @@ class SMTP_SSLMailer(SMTPMailer):
         # support disabled if pre-2.6
         smtp = smtplib.SMTP_SSL
         ssl_support = True
-    except AttributeError: # pragma: no cover
+    except AttributeError:  # pragma: no cover
         smtp = smtplib.SMTP
         ssl_support = False
 
@@ -69,15 +69,15 @@ class SMTP_SSLMailer(SMTPMailer):
 
     def smtp_factory(self):
 
-        if self.ssl_support is False: # pragma: no cover
+        if self.ssl_support is False:  # pragma: no cover
             return super(SMTP_SSLMailer, self).smtp_factory()
 
         connection = self.smtp(self.hostname, str(self.port),
                                keyfile=self.keyfile,
                                certfile=self.certfile)
 
-        connection.set_debuglevel(self.debug_smtp) # pragma: no cover
-        return connection # pragma: no cover
+        connection.set_debuglevel(self.debug_smtp)  # pragma: no cover
+        return connection  # pragma: no cover
 
 
 class Mailer(object):
@@ -109,7 +109,6 @@ class Mailer(object):
                  queue_path=None,
                  default_sender=None,
                  debug=0):
-
 
         if ssl:
 

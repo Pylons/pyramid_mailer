@@ -1,6 +1,7 @@
 from pyramid_mailer.mailer import Mailer
 from pyramid_mailer.interfaces import IMailer
 
+
 def mailer_factory_from_settings(settings, prefix='mail.'):
     """
     Factory function to create a Mailer instance from settings.
