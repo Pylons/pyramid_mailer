@@ -3,6 +3,7 @@ from pyramid_mailer.response import MailResponse
 from pyramid_mailer.exceptions import BadHeaders
 from pyramid_mailer.exceptions import InvalidMessage
 
+
 class Attachment(object):
     """
     Encapsulates file attachment information.
@@ -13,11 +14,11 @@ class Attachment(object):
     :param disposition: content-disposition (if any)
     """
 
-    def __init__(self, 
-                 filename=None, 
-                 content_type=None, 
+    def __init__(self,
+                 filename=None,
+                 content_type=None,
                  data=None,
-                 disposition=None): 
+                 disposition=None):
 
         self.filename = filename
         self.content_type = content_type
@@ -45,19 +46,21 @@ class Message(object):
     :param bcc: BCC list
     :param extra_headers: dict of extra email headers
     :param attachments: list of Attachment instances
+    :param recipients_separator: alternative separator for any of
+        'From', 'To', 'Delivered-To', 'Cc', 'Bcc' fields
     """
 
-    def __init__(self, 
-                 subject=None, 
-                 recipients=None, 
-                 body=None, 
-                 html=None, 
+    def __init__(self,
+                 subject=None,
+                 recipients=None,
+                 body=None,
+                 html=None,
                  sender=None,
                  cc=None,
                  bcc=None,
                  extra_headers=None,
-                 attachments=None):
-
+                 attachments=None,
+                 recipients_separator="; "):
 
         self.subject = subject or ''
         self.sender = sender
@@ -70,6 +73,8 @@ class Message(object):
         self.bcc = bcc or []
         self.extra_headers = extra_headers or {}
 
+        self.recipients_separator = recipients_separator
+
     @property
     def send_to(self):
         return set(self.recipients) | set(self.bcc or ()) | set(self.cc or ())
@@ -78,7 +83,7 @@ class Message(object):
         """
         Returns raw email.Message instance.Validates message first.
         """
-        
+
         self.validate()
 
         return self.get_response().to_message()
@@ -88,11 +93,12 @@ class Message(object):
         Creates a Lamson MailResponse instance
         """
 
-        response = MailResponse(Subject=self.subject, 
+        response = MailResponse(Subject=self.subject,
                                 To=self.recipients,
                                 From=self.sender,
                                 Body=self.body,
-                                Html=self.html)
+                                Html=self.html,
+                                separator=self.recipients_separator)
 
         if self.bcc:
             response.base['Bcc'] = self.bcc
@@ -102,20 +108,20 @@ class Message(object):
 
         for attachment in self.attachments:
 
-            response.attach(attachment.filename, 
-                            attachment.content_type, 
-                            attachment.data, 
+            response.attach(attachment.filename,
+                            attachment.content_type,
+                            attachment.data,
                             attachment.disposition)
 
         response.update(self.extra_headers)
 
         return response
-    
+
     def is_bad_headers(self):
         """
         Checks for bad headers i.e. newlines in subject, sender or recipients.
         """
-       
+
         headers = [self.subject, self.sender]
         headers += list(self.send_to)
         headers += self.extra_headers.values()
@@ -125,7 +131,7 @@ class Message(object):
                 if c in val:
                     return True
         return False
-        
+
     def validate(self):
         """
         Checks if message is valid and raises appropriate exception.
@@ -146,15 +152,15 @@ class Message(object):
     def add_recipient(self, recipient):
         """
         Adds another recipient to the message.
-        
+
         :param recipient: email address of recipient.
         """
-        
+
         self.recipients.append(recipient)
 
     def add_cc(self, recipient):
         """
-        Adds an email address to the CC list. 
+        Adds an email address to the CC list.
 
         :param recipient: email address of recipient.
         """
@@ -163,7 +169,7 @@ class Message(object):
 
     def add_bcc(self, recipient):
         """
-        Adds an email address to the BCC list. 
+        Adds an email address to the BCC list.
 
         :param recipient: email address of recipient.
         """
@@ -178,5 +184,3 @@ class Message(object):
         """
 
         self.attachments.append(attachment)
-
-

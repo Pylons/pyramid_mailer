@@ -17,9 +17,9 @@ class DummyMailer(object):
         self.outbox = []
         self.queue = []
 
-    def send(self, message):    
+    def send(self, message):
         """
-        Mocks sending a transactional message. The message is added to the 
+        Mocks sending a transactional message. The message is added to the
         **outbox** list.
 
         :param message: a **Message** instance.
@@ -57,7 +57,7 @@ class SMTP_SSLMailer(SMTPMailer):
         # support disabled if pre-2.6
         smtp = smtplib.SMTP_SSL
         ssl_support = True
-    except AttributeError: # pragma: no cover
+    except AttributeError:  # pragma: no cover
         smtp = smtplib.SMTP
         ssl_support = False
 
@@ -69,15 +69,15 @@ class SMTP_SSLMailer(SMTPMailer):
 
     def smtp_factory(self):
 
-        if self.ssl_support is False: # pragma: no cover
+        if self.ssl_support is False:  # pragma: no cover
             return super(SMTP_SSLMailer, self).smtp_factory()
 
         connection = self.smtp(self.hostname, str(self.port),
                                keyfile=self.keyfile,
                                certfile=self.certfile)
 
-        connection.set_debuglevel(self.debug_smtp) # pragma: no cover
-        return connection # pragma: no cover
+        connection.set_debuglevel(self.debug_smtp)  # pragma: no cover
+        return connection  # pragma: no cover
 
 
 class Mailer(object):
@@ -90,18 +90,18 @@ class Mailer(object):
     :param password: SMPT password
     :param tls: use TLS
     :param ssl: use SSL
-    :param keyfile: SSL key file 
+    :param keyfile: SSL key file
     :param certfile: SSL certificate file
     :param queue_path: path to maildir for queued messages
     :param default_sender: default "from" address
     :param debug: SMTP debug level
     """
 
-    def __init__(self, 
-                 host='localhost', 
-                 port=25, 
+    def __init__(self,
+                 host='localhost',
+                 port=25,
                  username=None,
-                 password=None, 
+                 password=None,
                  tls=False,
                  ssl=False,
                  keyfile=None,
@@ -109,7 +109,6 @@ class Mailer(object):
                  queue_path=None,
                  default_sender=None,
                  debug=0):
-
 
         if ssl:
 
@@ -127,12 +126,12 @@ class Mailer(object):
         else:
 
             self.smtp_mailer = SMTPMailer(
-                hostname=host, 
-                port=port, 
-                username=username, 
-                password=password, 
-                no_tls=not(tls), 
-                force_tls=tls, 
+                hostname=host,
+                port=port,
+                username=username,
+                password=password,
+                no_tls=not(tls),
+                force_tls=tls,
                 debug_smtp=debug)
 
         self.direct_delivery = DirectMailDelivery(self.smtp_mailer)
@@ -157,9 +156,9 @@ class Mailer(object):
 
         kwarg_names = [prefix + k for k in (
                        'host', 'port', 'username',
-                       'password', 'tls', 'ssl', 'keyfile', 
+                       'password', 'tls', 'ssl', 'keyfile',
                        'certfile', 'queue_path', 'debug', 'default_sender')]
-        
+
         size = len(prefix)
 
         kwargs = dict(((k[size:], settings[k]) for k in settings.keys() if
@@ -169,7 +168,7 @@ class Mailer(object):
 
     def send(self, message):
         """
-        Sends a message. The message is handled inside a transaction, so 
+        Sends a message. The message is handled inside a transaction, so
         in case of failure (or the message fails) the message will not be sent.
 
         :param message: a **Message** instance.
@@ -179,9 +178,9 @@ class Mailer(object):
 
     def send_immediately(self, message, fail_silently=False):
         """
-        Sends a message immediately, outside the transaction manager. 
+        Sends a message immediately, outside the transaction manager.
 
-        If there is a connection error to the mail server this will have to 
+        If there is a connection error to the mail server this will have to
         be handled manually. However if you pass ``fail_silently`` the error
         will be swallowed.
 
@@ -201,8 +200,8 @@ class Mailer(object):
     def send_to_queue(self, message):
         """
         Adds a message to a maildir queue.
-        
-        In order to handle this, the setting **mail.queue_path** must be 
+
+        In order to handle this, the setting **mail.queue_path** must be
         provided and must point to a valid maildir.
 
         :param message: a **Message** instance.
@@ -210,14 +209,13 @@ class Mailer(object):
 
         if not self.queue_delivery:
             raise RuntimeError, "No queue_path provided"
-    
+
         return self.queue_delivery.send(*self._message_args(message))
 
     def _message_args(self, message):
 
         message.sender = message.sender or self.default_sender
 
-        return (message.sender, 
+        return (message.sender,
                 message.send_to,
                 message.to_message())
-
