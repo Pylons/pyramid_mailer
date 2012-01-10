@@ -11,7 +11,7 @@ coverage.xml
 *.zip
 *.orig
 *.tox
-env26/
+env*/
 dist
 data
 build
