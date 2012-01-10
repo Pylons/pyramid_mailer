@@ -1,3 +1,12 @@
+Next release
+------------
+
+- Use ',' as an email header field separator rather than ';' when multiple
+  values are in the same header (as per RFC822).
+
+- Allow lists of recipient emails to be tuples or lists (previously it was
+  just lists).
+
 0.5.1 (2011-11-13)
 ------------------
 

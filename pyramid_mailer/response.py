@@ -407,8 +407,8 @@ def header_to_mime_encoding(value, not_email=False):
     if not value: return ""
 
     encoder = Charset(DEFAULT_ENCODING)
-    if type(value) == list:
-        return "; ".join(properly_encode_header(
+    if hasattr(value, '__iter__'): # not a string
+        return ", ".join(properly_encode_header(
             v, encoder, not_email) for v in value)
     else:
         return properly_encode_header(value, encoder, not_email)

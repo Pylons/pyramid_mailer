@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import unittest
+import os
 
 from pyramid import testing
+
+here = os.path.dirname(os.path.abspath(__file__))
 
 class TestAttachment(unittest.TestCase):
 
@@ -825,6 +828,14 @@ class TestMailResponse(unittest.TestCase):
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 
+    def test_to_message_multiple_to_recipients(self):
+        response = self._makeOne(
+            To=['chrism@plope.com', 'billg@microsoft.com'],
+            From='From', Subject='Subject',
+            Body='Body', Html='Html')
+        message = response.to_message()
+        self.assertEqual(message['To'], 'chrism@plope.com, billg@microsoft.com')
+
     def test_to_message_multipart(self):
         from pyramid_mailer.response import MIMEPart
         response = self._makeOne(To='To', From='From', Subject='Subject',
@@ -847,8 +858,7 @@ class TestMailResponse(unittest.TestCase):
         self.assertEqual(message.__class__, MIMEPart)
 
     def test_to_message_with_parts2(self):
-        import os
-        this = os.path.abspath(__file__)
+        this = os.path.join(here, 'tests.py')
         from pyramid_mailer.response import MIMEPart
         response = self._makeOne(To='To', From='From', Subject='Subject')
         response.multipart = True
@@ -870,6 +880,16 @@ class TestMailResponse(unittest.TestCase):
         response.multipart = True
         response.base.content_encoding['Content-Type'] = ('text/html', None)
         response.attachments = [{'data':'data', 'content_type':'text/html'}]
+        message = response.to_message()
+        self.assertEqual(message.__class__, MIMEPart)
+
+    def test_to_message_with_parts5(self):
+        from pyramid_mailer.response import MIMEPart
+        response = self._makeOne(To='To', From='From', Subject='Subject')
+        response.multipart = True
+        data = os.urandom(100)
+        response.attachments = [{'data': data,
+                                 'content_type':'application/octet-stream'}]
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 
@@ -932,6 +952,25 @@ class TestMIMEPart(unittest.TestCase):
         self.assertEqual(
             result,
             "<MIMEPart 'html/text': 'text/html', None, multipart=False>")
+
+class Test_header_to_mime_encoding(unittest.TestCase):
+    def _callFUT(self, value, not_email=False):
+        from pyramid_mailer.response import header_to_mime_encoding
+        return header_to_mime_encoding(value, not_email=not_email)
+
+    def test_empty_value(self):
+        result = self._callFUT('')
+        self.assertEqual(result, '')
+
+    def test_list_value(self):
+        L = ['chrism@plope.com', 'billg@microsoft.com']
+        result = self._callFUT(L)
+        self.assertEqual(result, 'chrism@plope.com, billg@microsoft.com')
+
+    def test_nonempty_nonlist_value(self):
+        val = 'chrism@plope.com'
+        result = self._callFUT(val)
+        self.assertEqual(result, 'chrism@plope.com')
 
 class Test_properly_encode_header(unittest.TestCase):
     def _callFUT(self, value, encoder, not_email):
