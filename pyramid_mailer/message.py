@@ -94,9 +94,6 @@ class Message(object):
                                 Body=self.body,
                                 Html=self.html)
 
-        if self.bcc:
-            response.base['Bcc'] = self.bcc
-
         if self.cc:
             response.base['Cc'] = self.cc
 

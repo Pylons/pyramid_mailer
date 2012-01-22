@@ -130,18 +130,6 @@ class TestMessage(unittest.TestCase):
 
         mailer.send(msg)
 
-    def test_bcc(self):
-
-        from pyramid_mailer.message import Message
-
-        msg = Message(subject="testing",
-                      recipients=["to@example.com"],
-                      body="testing",
-                      bcc=["tosomeoneelse@example.com"])
-
-        response = msg.get_response()
-        self.assert_("Bcc: tosomeoneelse@example.com" in str(response))
-
     def test_cc(self):
 
         from pyramid_mailer.message import Message
