@@ -41,7 +41,7 @@ from email.charset import Charset
 from email.utils import parseaddr
 from email.mime.base import MIMEBase
 
-ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc', 'Bcc']
+ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc']
 DEFAULT_ENCODING = "utf-8"
 VALUE_IS_EMAIL_ADDRESS = lambda v: '@' in v
 
