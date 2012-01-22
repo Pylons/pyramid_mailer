@@ -7,6 +7,9 @@ Next release
 - Allow lists of recipient emails to be tuples or lists (previously it was
   just lists).
 
+- Don't include ``Bcc`` header in mail messages (breaks secrecy of BCC).
+  See https://github.com/Pylons/pyramid_mailer/pull/10
+
 0.5.1 (2011-11-13)
 ------------------
 
