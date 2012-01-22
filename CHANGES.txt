@@ -1,5 +1,5 @@
-Next release
-------------
+0.6 (2012-01-22)
+----------------
 
 - Use ',' as an email header field separator rather than ';' when multiple
   values are in the same header (as per RFC822).
