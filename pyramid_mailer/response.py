@@ -34,6 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import os
+import sys
 import mimetypes
 import string
 from email import encoders
@@ -365,12 +366,23 @@ class MIMEPart(MIMEBase):
 
     def add_text(self, content):
         # this is text, so encode it in canonical form
-        try:
-            encoded = content.encode('ascii')
-            charset = 'ascii'
-        except UnicodeError:
-            encoded = content.encode('utf-8')
-            charset = 'utf-8'
+        charset = 'ascii'
+        if not isinstance(content, str):
+            # Python 3 str or Python 2 unicode
+            try:
+                encoded = content.encode(charset)
+            except UnicodeError:
+                encoded = content.encode('utf-8')
+                charset = 'utf-8'
+        else:
+            # Python 2 str (already encoded)
+            encoded = content
+            try:
+                # Is the string encoded in ascii?
+                content.decode(charset)
+            except UnicodeError:
+                # If is not, assume utf-8
+                charset = 'utf-8'
 
         self.set_payload(encoded, charset=charset)
 
