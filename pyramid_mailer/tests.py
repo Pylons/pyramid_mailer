@@ -826,7 +826,8 @@ class TestMailResponse(unittest.TestCase):
             From='From', Subject='Subject',
             Body='Body', Html='Html')
         message = response.to_message()
-        self.assertEqual(message['To'], 'chrism@plope.com, billg@microsoft.com')
+        self.assertEqual(message[b'To'],
+                         b'chrism@plope.com, billg@microsoft.com')
 
     def test_to_message_multipart(self):
         from pyramid_mailer.response import MIMEPart
@@ -957,12 +958,12 @@ class Test_header_to_mime_encoding(unittest.TestCase):
     def test_list_value(self):
         L = ['chrism@plope.com', 'billg@microsoft.com']
         result = self._callFUT(L)
-        self.assertEqual(result, 'chrism@plope.com, billg@microsoft.com')
+        self.assertEqual(result, b'chrism@plope.com, billg@microsoft.com')
 
     def test_nonempty_nonlist_value(self):
         val = 'chrism@plope.com'
         result = self._callFUT(val)
-        self.assertEqual(result, 'chrism@plope.com')
+        self.assertEqual(result, b'chrism@plope.com')
 
 class Test_properly_encode_header(unittest.TestCase):
     def _callFUT(self, value, encoder, not_email):
@@ -971,13 +972,13 @@ class Test_properly_encode_header(unittest.TestCase):
 
     def test_ascii_encodable(self):
         result = self._callFUT('a', None, None)
-        self.assertEqual(result, 'a')
+        self.assertEqual(result, b'a')
 
     def test_not_ascii_encodable_email(self):
         la = b'LaPe\xc3\xb1a@plope.com'.decode('utf-8')
         class Encoder(object):
             def header_encode(self, val):
-                return 'encoded'
+                return b'encoded'
         encoder = Encoder()
         result = self._callFUT(la, encoder, False)
         self.assertEqual(result,  '"encoded" <LaPe\xf1a@plope.com>')
@@ -986,10 +987,10 @@ class Test_properly_encode_header(unittest.TestCase):
         la = b'LaPe\xc3\xb1a'.decode('utf-8')
         class Encoder(object):
             def header_encode(self, val):
-                return 'encoded'
+                return b'encoded'
         encoder = Encoder()
         result = self._callFUT(la, encoder, False)
-        self.assertEqual(result,  'encoded')
+        self.assertEqual(result,  b'encoded')
 
 class Dummy(object):
     pass

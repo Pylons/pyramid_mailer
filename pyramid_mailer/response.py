@@ -424,7 +424,7 @@ def header_to_mime_encoding(value, not_email=False):
 
     encoder = Charset(DEFAULT_ENCODING)
     if is_nonstr_iter(value): # not a string
-        return ", ".join(properly_encode_header(
+        return b", ".join(properly_encode_header(
             v, encoder, not_email) for v in value)
     else:
         return properly_encode_header(value, encoder, not_email)
@@ -448,7 +448,7 @@ def properly_encode_header(value, encoder, not_email):
         if not_email is False and VALUE_IS_EMAIL_ADDRESS(value):
             # this could have an email address, make sure we don't screw it up
             name, address = parseaddr(value)
-            return '"%s" <%s>' % (
+            return b'"%s" <%s>' % (
                 encoder.header_encode(name.encode("utf-8")), address)
 
         return encoder.header_encode(value.encode("utf-8"))
