@@ -33,6 +33,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# BBB Python 2 vs 3 compat
+from __future__ import unicode_literals
+
+import sys
 import os
 import mimetypes
 import string
@@ -85,6 +89,7 @@ class MailBase(object):
 
     def __nonzero__(self):
         return self.body != None or len(self.headers) > 0 or len(self.parts) > 0
+    __bool__ = __nonzero__
 
     def keys(self):
         """Returns the sorted keys."""
@@ -332,7 +337,7 @@ def to_message(mail):
 
     try:
         out = MIMEPart(ctype, **params)
-    except TypeError, exc: # pragma: no cover
+    except TypeError as exc: # pragma: no cover
         raise EncodingError("Content-Type malformed, not allowed: %r; "
                             "%r (Python ERROR: %s" %
                             (ctype, params, exc.message))
@@ -395,7 +400,7 @@ class MIMEPart(MIMEBase):
             encoders.encode_base64(self)
 
     def __repr__(self):
-        return "<MIMEPart '%s/%s': %r, %r, multipart=%r>" % (
+        return "<MIMEPart '%s/%s': '%s', %r, multipart=%r>" % (
             self.subtype,
             self.maintype,
             self['Content-Type'],
@@ -403,11 +408,22 @@ class MIMEPart(MIMEBase):
             self.is_multipart())
 
 
+def is_nonstr_iter(v):
+    if isinstance(v, str):
+        return False
+    return hasattr(v, '__iter__')
+
+# BBB Python 2 vs 3 compat
+if sys.version < '3':
+    def is_nonstr_iter(v):
+        return hasattr(v, '__iter__')
+
+        
 def header_to_mime_encoding(value, not_email=False):
     if not value: return ""
 
     encoder = Charset(DEFAULT_ENCODING)
-    if hasattr(value, '__iter__'): # not a string
+    if is_nonstr_iter(value): # not a string
         return ", ".join(properly_encode_header(
             v, encoder, not_email) for v in value)
     else:

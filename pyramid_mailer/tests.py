@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
+
+# BBB Python 2 vs 3 compat
+from __future__ import unicode_literals
+
 import unittest
 import os
+from io import StringIO
 
 from pyramid import testing
 
@@ -17,7 +22,6 @@ class TestAttachment(unittest.TestCase):
 
     def test_data_from_file_obj(self):
 
-        from StringIO import StringIO
         from pyramid_mailer.message import Attachment
 
         a = Attachment(data=StringIO("foo"))
@@ -436,7 +440,7 @@ class TestMailer(unittest.TestCase):
             import socket
             try:
                 self.assert_(mailer.direct_delivery.mailer.smtp_factory())
-            except socket.error, e:
+            except socket.error as e:
                 # smtp mailer might fail to resolve hostname
                 self.assert_(e.args[0] == 61)
 
@@ -919,11 +923,11 @@ class TestMIMEPart(unittest.TestCase):
     def test_add_text_string(self):
         part = self._makeOne('text/html')
         part.add_text('a')
-        self.assertEqual(part.get_payload(), 'a')
+        self.assertEqual(part.get_payload(), b'a')
 
     def test_add_text_unicode(self):
         part = self._makeOne('text/html')
-        la = unicode('LaPe\xc3\xb1a', 'utf-8')
+        la = b'LaPe\xc3\xb1a'.decode('utf-8')
         part.add_text(la)
         self.assertEqual(part.get_payload(), 'TGFQZcOxYQ==\n')
 
@@ -932,7 +936,7 @@ class TestMIMEPart(unittest.TestCase):
         mail.content_encoding['Content-Type'] = ('application/json', {})
         part = self._makeOne('application/json')
         part.extract_payload(mail)
-        self.assertEqual(part.get_payload(), 'Ym9keQ==')
+        self.assertEqual(part.get_payload(), b'Ym9keQ==')
 
     def test___repr__(self):
         part = self._makeOne('text/html')
@@ -970,16 +974,16 @@ class Test_properly_encode_header(unittest.TestCase):
         self.assertEqual(result, 'a')
 
     def test_not_ascii_encodable_email(self):
-        la = unicode('LaPe\xc3\xb1a@plope.com', 'utf-8')
+        la = b'LaPe\xc3\xb1a@plope.com'.decode('utf-8')
         class Encoder(object):
             def header_encode(self, val):
                 return 'encoded'
         encoder = Encoder()
         result = self._callFUT(la, encoder, False)
-        self.assertEqual(result,  u'"encoded" <LaPe\xf1a@plope.com>')
+        self.assertEqual(result,  '"encoded" <LaPe\xf1a@plope.com>')
 
     def test_not_ascii_encodable(self):
-        la = unicode('LaPe\xc3\xb1a', 'utf-8')
+        la = b'LaPe\xc3\xb1a'.decode('utf-8')
         class Encoder(object):
             def header_encode(self, val):
                 return 'encoded'
