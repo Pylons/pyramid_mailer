@@ -368,18 +368,6 @@ class MIMEPart(MIMEBase):
         self.maintype, self.subtype = type.split('/')
         MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
-    def add_text(self, content):
-        # this is text, so encode it in canonical form
-        try:
-            encoded = content.encode('ascii')
-            charset = 'ascii'
-        except UnicodeError:
-            encoded = content.encode('utf-8')
-            charset = 'utf-8'
-
-        self.set_payload(encoded, charset=charset)
-
-
     def extract_payload(self, mail):
         if mail.body == None: return  # only None, '' is still ok
 
@@ -390,13 +378,19 @@ class MIMEPart(MIMEBase):
                        "have a valid Content-Type.")
 
         if ctype.startswith("text/"):
-            self.add_text(mail.body)
+            self.set_payload(mail.body)
         else:
             if cdisp:
                 # replicate the content-disposition settings
                 self.add_header('Content-Disposition', cdisp, **cdisp_params)
 
-            self.set_payload(mail.body)
+            charset = None
+            body = mail.body
+            if hasattr(mail.body, 'encode'):
+                charset = best_charset(mail.body)
+                if charset:
+                    body = body.encode(charset)
+            self.set_payload(body, charset=charset)
             encoders.encode_base64(self)
 
     def __repr__(self):
@@ -406,6 +400,16 @@ class MIMEPart(MIMEBase):
             self['Content-Type'],
             self['Content-Disposition'],
             self.is_multipart())
+
+
+def best_charset(text):
+    for charset in 'ascii', 'latin_1', 'utf_8':
+        try:
+            text.encode(charset)
+        except UnicodeError:
+            pass
+        else:
+            return charset
 
 
 def is_nonstr_iter(v):
@@ -423,11 +427,5 @@ def header_to_mime_encoding(value, charset=DEFAULT_ENCODING):
     if is_nonstr_iter(value): # not a string
         value = ", ".join(value)
     if value:
-        for charset in 'ascii', 'latin_1', 'utf_8':
-            try:
-                value.encode(charset)
-            except UnicodeError:
-                pass
-            else:
-                break
+        charset = best_charset(value)
     return header.Header(value, charset=charset)

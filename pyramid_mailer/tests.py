@@ -921,17 +921,6 @@ class TestMIMEPart(unittest.TestCase):
         from pyramid_mailer.response import MIMEPart
         return MIMEPart(type, **params)
 
-    def test_add_text_string(self):
-        part = self._makeOne('text/html')
-        part.add_text('a')
-        self.assertEqual(part.get_payload(), b'a')
-
-    def test_add_text_unicode(self):
-        part = self._makeOne('text/html')
-        la = b'LaPe\xc3\xb1a'.decode('utf-8')
-        part.add_text(la)
-        self.assertEqual(part.get_payload(), 'TGFQZcOxYQ==\n')
-
     def test_extract_payload(self):
         mail = DummyPart()
         mail.content_encoding['Content-Type'] = ('application/json', {})
