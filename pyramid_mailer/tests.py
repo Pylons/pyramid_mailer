@@ -926,7 +926,7 @@ class TestMIMEPart(unittest.TestCase):
         mail.content_encoding['Content-Type'] = ('application/json', {})
         part = self._makeOne('application/json')
         part.extract_payload(mail)
-        self.assertEqual(part.get_payload(), b'Ym9keQ==')
+        self.assert_(part.get_payload().startswith('Ym9keQ=='))
 
     def test___repr__(self):
         part = self._makeOne('text/html')
