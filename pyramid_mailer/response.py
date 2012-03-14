@@ -42,6 +42,7 @@ import mimetypes
 import string
 from email import encoders
 from email.charset import Charset
+from email import header
 from email.utils import parseaddr
 from email.mime.base import MIMEBase
 
@@ -344,10 +345,9 @@ def to_message(mail):
 
     for k in mail.keys():
         if k in ADDRESS_HEADERS_WHITELIST:
-            out[k.encode('ascii')] = header_to_mime_encoding(mail[k])
+            out[k] = header_to_mime_encoding(mail[k])
         else:
-            out[k.encode('ascii')] = header_to_mime_encoding(mail[k],
-                                                             not_email=True)
+            out[k] = header_to_mime_encoding(mail[k])
 
     out.extract_payload(mail)
 
@@ -419,36 +419,15 @@ if sys.version < '3':
         return hasattr(v, '__iter__')
 
         
-def header_to_mime_encoding(value, not_email=False):
-    if not value: return ""
-
-    encoder = Charset(DEFAULT_ENCODING)
+def header_to_mime_encoding(value, charset=DEFAULT_ENCODING):
     if is_nonstr_iter(value): # not a string
-        return b", ".join(properly_encode_header(
-            v, encoder, not_email) for v in value)
-    else:
-        return properly_encode_header(value, encoder, not_email)
-
-def properly_encode_header(value, encoder, not_email):
-    """
-    The only thing special (weird) about this function is that it tries
-    to do a fast check to see if the header value has an email address in
-    it.  Since random headers could have an email address, and email addresses
-    have weird special formatting rules, we have to check for it.
-
-    Normally this works fine, but in Librelist, we need to "obfuscate" email
-    addresses by changing the '@' to '-AT-'.  This is where
-    VALUE_IS_EMAIL_ADDRESS exists.  It's a simple lambda returning True/False
-    to check if a header value has an email address.  If you need to make this
-    check different, then change this.
-    """
-    try:
-        return value.encode("ascii")
-    except UnicodeEncodeError:
-        if not_email is False and VALUE_IS_EMAIL_ADDRESS(value):
-            # this could have an email address, make sure we don't screw it up
-            name, address = parseaddr(value)
-            return b'"%s" <%s>' % (
-                encoder.header_encode(name.encode("utf-8")), address)
-
-        return encoder.header_encode(value.encode("utf-8"))
+        value = ", ".join(value)
+    if value:
+        for charset in 'ascii', 'latin_1', 'utf_8':
+            try:
+                value.encode(charset)
+            except UnicodeError:
+                pass
+            else:
+                break
+    return header.Header(value, charset=charset)
