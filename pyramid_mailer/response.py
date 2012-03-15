@@ -181,7 +181,7 @@ class MailResponse(object):
         self.multipart = True
 
         if filename and not content_type:
-            content_type, encoding = mimetypes.guess_type(filename)
+            content_type, enc = mimetypes.guess_type(filename)
 
         assert content_type, ("No content type given, and couldn't guess "
                               "from the filename: %r" % filename)
