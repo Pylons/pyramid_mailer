@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
+
+# BBB Python 2 vs 3 compat
+from __future__ import unicode_literals
+
 import unittest
 import os
+from io import StringIO
 
 from pyramid import testing
 
@@ -17,7 +22,6 @@ class TestAttachment(unittest.TestCase):
 
     def test_data_from_file_obj(self):
 
-        from StringIO import StringIO
         from pyramid_mailer.message import Attachment
 
         a = Attachment(data=StringIO("foo"))
@@ -436,7 +440,7 @@ class TestMailer(unittest.TestCase):
             import socket
             try:
                 self.assert_(mailer.direct_delivery.mailer.smtp_factory())
-            except socket.error, e:
+            except socket.error as e:
                 # smtp mailer might fail to resolve hostname
                 self.assert_(e.args[0] == 61)
 
@@ -822,7 +826,8 @@ class TestMailResponse(unittest.TestCase):
             From='From', Subject='Subject',
             Body='Body', Html='Html')
         message = response.to_message()
-        self.assertEqual(message['To'], 'chrism@plope.com, billg@microsoft.com')
+        self.assertEqual(str(message['To']),
+                         'chrism@plope.com, billg@microsoft.com')
 
     def test_to_message_multipart(self):
         from pyramid_mailer.response import MIMEPart
@@ -916,24 +921,6 @@ class TestMIMEPart(unittest.TestCase):
         from pyramid_mailer.response import MIMEPart
         return MIMEPart(type, **params)
 
-    def test_add_text_string(self):
-        part = self._makeOne('text/html')
-        part.add_text('a')
-        self.assertEqual(part.get_payload(), 'a')
-
-    def test_add_text_unicode(self):
-        part = self._makeOne('text/html')
-        la = unicode('LaPe\xc3\xb1a', 'utf-8')
-        part.add_text(la)
-        self.assertEqual(part.get_payload(), 'TGFQZcOxYQ==\n')
-
-    def test_extract_payload(self):
-        mail = DummyPart()
-        mail.content_encoding['Content-Type'] = ('application/json', {})
-        part = self._makeOne('application/json')
-        part.extract_payload(mail)
-        self.assertEqual(part.get_payload(), 'Ym9keQ==')
-
     def test___repr__(self):
         part = self._makeOne('text/html')
         result = repr(part)
@@ -941,51 +928,6 @@ class TestMIMEPart(unittest.TestCase):
             result,
             "<MIMEPart 'html/text': 'text/html', None, multipart=False>")
 
-class Test_header_to_mime_encoding(unittest.TestCase):
-    def _callFUT(self, value, not_email=False):
-        from pyramid_mailer.response import header_to_mime_encoding
-        return header_to_mime_encoding(value, not_email=not_email)
-
-    def test_empty_value(self):
-        result = self._callFUT('')
-        self.assertEqual(result, '')
-
-    def test_list_value(self):
-        L = ['chrism@plope.com', 'billg@microsoft.com']
-        result = self._callFUT(L)
-        self.assertEqual(result, 'chrism@plope.com, billg@microsoft.com')
-
-    def test_nonempty_nonlist_value(self):
-        val = 'chrism@plope.com'
-        result = self._callFUT(val)
-        self.assertEqual(result, 'chrism@plope.com')
-
-class Test_properly_encode_header(unittest.TestCase):
-    def _callFUT(self, value, encoder, not_email):
-        from pyramid_mailer.response import properly_encode_header
-        return properly_encode_header(value, encoder, not_email)
-
-    def test_ascii_encodable(self):
-        result = self._callFUT('a', None, None)
-        self.assertEqual(result, 'a')
-
-    def test_not_ascii_encodable_email(self):
-        la = unicode('LaPe\xc3\xb1a@plope.com', 'utf-8')
-        class Encoder(object):
-            def header_encode(self, val):
-                return 'encoded'
-        encoder = Encoder()
-        result = self._callFUT(la, encoder, False)
-        self.assertEqual(result,  u'"encoded" <LaPe\xf1a@plope.com>')
-
-    def test_not_ascii_encodable(self):
-        la = unicode('LaPe\xc3\xb1a', 'utf-8')
-        class Encoder(object):
-            def header_encode(self, val):
-                return 'encoded'
-        encoder = Encoder()
-        result = self._callFUT(la, encoder, False)
-        self.assertEqual(result,  'encoded')
 
 class Dummy(object):
     pass

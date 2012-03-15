@@ -209,7 +209,7 @@ class Mailer(object):
         """
 
         if not self.queue_delivery:
-            raise RuntimeError, "No queue_path provided"
+            raise RuntimeError("No queue_path provided")
     
         return self.queue_delivery.send(*self._message_args(message))
 

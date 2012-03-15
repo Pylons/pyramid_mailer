@@ -33,17 +33,17 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# BBB Python 2 vs 3 compat
+from __future__ import unicode_literals
+
 import os
+import sys
 import mimetypes
 import string
-from email import encoders
-from email.charset import Charset
-from email.utils import parseaddr
 from email.mime.base import MIMEBase
 
-ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc']
-DEFAULT_ENCODING = "utf-8"
-VALUE_IS_EMAIL_ADDRESS = lambda v: '@' in v
+from repoze.sendmail import encoding
+
 
 def normalize_header(header):
     return string.capwords(header.lower(), '-')
@@ -85,6 +85,7 @@ class MailBase(object):
 
     def __nonzero__(self):
         return self.body != None or len(self.headers) > 0 or len(self.parts) > 0
+    __bool__ = __nonzero__
 
     def keys(self):
         """Returns the sorted keys."""
@@ -332,17 +333,17 @@ def to_message(mail):
 
     try:
         out = MIMEPart(ctype, **params)
-    except TypeError, exc: # pragma: no cover
+    except TypeError as exc: # pragma: no cover
         raise EncodingError("Content-Type malformed, not allowed: %r; "
                             "%r (Python ERROR: %s" %
                             (ctype, params, exc.message))
 
     for k in mail.keys():
-        if k in ADDRESS_HEADERS_WHITELIST:
-            out[k.encode('ascii')] = header_to_mime_encoding(mail[k])
-        else:
-            out[k.encode('ascii')] = header_to_mime_encoding(mail[k],
-                                                             not_email=True)
+        value = mail[k]
+        if k.lower() in encoding.ADDR_HEADERS:
+            if is_nonstr_iter(value): # not a string
+                value = ", ".join(value)
+        out[k] = value
 
     out.extract_payload(mail)
 
@@ -363,18 +364,6 @@ class MIMEPart(MIMEBase):
         self.maintype, self.subtype = type.split('/')
         MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
-    def add_text(self, content):
-        # this is text, so encode it in canonical form
-        try:
-            encoded = content.encode('ascii')
-            charset = 'ascii'
-        except UnicodeError:
-            encoded = content.encode('utf-8')
-            charset = 'utf-8'
-
-        self.set_payload(encoded, charset=charset)
-
-
     def extract_payload(self, mail):
         if mail.body == None: return  # only None, '' is still ok
 
@@ -385,17 +374,16 @@ class MIMEPart(MIMEBase):
                        "have a valid Content-Type.")
 
         if ctype.startswith("text/"):
-            self.add_text(mail.body)
+            self.set_payload(mail.body)
         else:
             if cdisp:
                 # replicate the content-disposition settings
                 self.add_header('Content-Disposition', cdisp, **cdisp_params)
 
             self.set_payload(mail.body)
-            encoders.encode_base64(self)
 
     def __repr__(self):
-        return "<MIMEPart '%s/%s': %r, %r, multipart=%r>" % (
+        return "<MIMEPart '%s/%s': '%s', %r, multipart=%r>" % (
             self.subtype,
             self.maintype,
             self['Content-Type'],
@@ -403,36 +391,12 @@ class MIMEPart(MIMEBase):
             self.is_multipart())
 
 
-def header_to_mime_encoding(value, not_email=False):
-    if not value: return ""
+def is_nonstr_iter(v):
+    if isinstance(v, str):
+        return False
+    return hasattr(v, '__iter__')
 
-    encoder = Charset(DEFAULT_ENCODING)
-    if hasattr(value, '__iter__'): # not a string
-        return ", ".join(properly_encode_header(
-            v, encoder, not_email) for v in value)
-    else:
-        return properly_encode_header(value, encoder, not_email)
-
-def properly_encode_header(value, encoder, not_email):
-    """
-    The only thing special (weird) about this function is that it tries
-    to do a fast check to see if the header value has an email address in
-    it.  Since random headers could have an email address, and email addresses
-    have weird special formatting rules, we have to check for it.
-
-    Normally this works fine, but in Librelist, we need to "obfuscate" email
-    addresses by changing the '@' to '-AT-'.  This is where
-    VALUE_IS_EMAIL_ADDRESS exists.  It's a simple lambda returning True/False
-    to check if a header value has an email address.  If you need to make this
-    check different, then change this.
-    """
-    try:
-        return value.encode("ascii")
-    except UnicodeEncodeError:
-        if not_email is False and VALUE_IS_EMAIL_ADDRESS(value):
-            # this could have an email address, make sure we don't screw it up
-            name, address = parseaddr(value)
-            return '"%s" <%s>' % (
-                encoder.header_encode(name.encode("utf-8")), address)
-
-        return encoder.header_encode(value.encode("utf-8"))
+# BBB Python 2 vs 3 compat
+if sys.version < '3':
+    def is_nonstr_iter(v):
+        return hasattr(v, '__iter__')

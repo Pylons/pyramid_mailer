@@ -1,3 +1,11 @@
+# BBB Python 2 vs 3 compat
+try:
+    unicode
+except NameError:
+    basestring = (bytes, str)
+else:
+    basestring = (str, unicode)
+
 from pyramid_mailer.response import MailResponse
 
 from pyramid_mailer.exceptions import BadHeaders
@@ -129,13 +137,13 @@ class Message(object):
         """
 
         if not self.recipients:
-            raise InvalidMessage, "No recipients have been added"
+            raise InvalidMessage("No recipients have been added")
 
         if not self.body and not self.html:
-            raise InvalidMessage, "No body has been set"
+            raise InvalidMessage("No body has been set")
 
         if not self.sender:
-            raise InvalidMessage, "No sender address has been set"
+            raise InvalidMessage("No sender address has been set")
 
         if self.is_bad_headers():
             raise BadHeaders
