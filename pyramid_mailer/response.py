@@ -33,9 +33,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# BBB Python 2 vs 3 compat
-from __future__ import unicode_literals
-
 import os
 import sys
 import mimetypes
@@ -333,7 +330,8 @@ def to_message(mail):
 
     try:
         out = MIMEPart(ctype, **params)
-    except TypeError as exc: # pragma: no cover
+    except TypeError: # pragma: no cover
+        exc = sys.exc_info()[1]
         raise EncodingError("Content-Type malformed, not allowed: %r; "
                             "%r (Python ERROR: %s" %
                             (ctype, params, exc.message))

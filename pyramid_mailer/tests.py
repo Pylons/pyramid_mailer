@@ -1,11 +1,22 @@
 # -*- coding: utf-8 -*-
 
-# BBB Python 2 vs 3 compat
-from __future__ import unicode_literals
-
+import sys
 import unittest
 import os
-from io import StringIO
+import errno
+
+# BBB Python 2.5 & 3 compat
+try:
+    str = unicode
+except NameError:
+    pass
+
+try:
+    from io import StringIO
+except ImportError:
+    # BBB Python 2.5 compat
+    from StringIO import StringIO
+    
 
 from pyramid import testing
 
@@ -24,7 +35,7 @@ class TestAttachment(unittest.TestCase):
 
         from pyramid_mailer.message import Attachment
 
-        a = Attachment(data=StringIO("foo"))
+        a = Attachment(data=StringIO(str("foo")))
         self.assert_(a.data == "foo")
 
 
@@ -146,6 +157,38 @@ class TestMessage(unittest.TestCase):
 
         response = msg.get_response()
         self.assert_("Cc: tosomeoneelse@example.com" in str(response))
+
+    def test_cc_without_recipients(self):
+
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.mailer import Mailer
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      body="testing",
+                      cc=["tosomeoneelse@example.com"])
+        mailer = Mailer()
+        msgid = mailer.send(msg)
+        response = msg.get_response()
+
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue(msgid)
+
+    def test_bcc_without_recipients(self):
+
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.mailer import Mailer
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      body="testing",
+                      bcc=["tosomeoneelse@example.com"])
+        mailer = Mailer()
+        msgid = mailer.send(msg)
+        response = msg.get_response()
+
+        self.assertFalse("Bcc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue(msgid)
 
     def test_attach(self):
 
@@ -440,9 +483,14 @@ class TestMailer(unittest.TestCase):
             import socket
             try:
                 self.assert_(mailer.direct_delivery.mailer.smtp_factory())
-            except socket.error as e:
+            except socket.error:
+                e = sys.exc_info()[1]
+                error_number = e.args[0]
                 # smtp mailer might fail to resolve hostname
-                self.assert_(e.args[0] == 61)
+                self.assert_(error_number in
+                             (errno.ENODATA,
+                              errno.ECONNREFUSED  # BBB Python 2.5 compat
+                              ))
 
                           
     def test_from_settings_factory(self):
