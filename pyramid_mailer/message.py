@@ -136,7 +136,7 @@ class Message(object):
         Checks if message is valid and raises appropriate exception.
         """
 
-        if not self.recipients:
+        if not (self.recipients or self.cc or self.bcc):
             raise InvalidMessage("No recipients have been added")
 
         if not self.body and not self.html:

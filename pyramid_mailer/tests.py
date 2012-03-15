@@ -158,6 +158,38 @@ class TestMessage(unittest.TestCase):
         response = msg.get_response()
         self.assert_("Cc: tosomeoneelse@example.com" in str(response))
 
+    def test_cc_without_recipients(self):
+
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.mailer import Mailer
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      body="testing",
+                      cc=["tosomeoneelse@example.com"])
+        mailer = Mailer()
+        msgid = mailer.send(msg)
+        response = msg.get_response()
+
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue(msgid)
+
+    def test_bcc_without_recipients(self):
+
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.mailer import Mailer
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      body="testing",
+                      bcc=["tosomeoneelse@example.com"])
+        mailer = Mailer()
+        msgid = mailer.send(msg)
+        response = msg.get_response()
+
+        self.assertFalse("Bcc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue(msgid)
+
     def test_attach(self):
 
         from pyramid_mailer.message import Message
