@@ -36,19 +36,14 @@
 # BBB Python 2 vs 3 compat
 from __future__ import unicode_literals
 
-import sys
 import os
+import sys
 import mimetypes
 import string
-from email import encoders
-from email.charset import Charset
-from email import header
-from email.utils import parseaddr
 from email.mime.base import MIMEBase
 
-ADDRESS_HEADERS_WHITELIST = ['From', 'To', 'Delivered-To', 'Cc']
-DEFAULT_ENCODING = "utf-8"
-VALUE_IS_EMAIL_ADDRESS = lambda v: '@' in v
+from repoze.sendmail import encoding
+
 
 def normalize_header(header):
     return string.capwords(header.lower(), '-')
@@ -344,10 +339,11 @@ def to_message(mail):
                             (ctype, params, exc.message))
 
     for k in mail.keys():
-        if k in ADDRESS_HEADERS_WHITELIST:
-            out[k] = header_to_mime_encoding(mail[k])
-        else:
-            out[k] = header_to_mime_encoding(mail[k])
+        value = mail[k]
+        if k.lower() in encoding.ADDR_HEADERS:
+            if is_nonstr_iter(value): # not a string
+                value = ", ".join(value)
+        out[k] = value
 
     out.extract_payload(mail)
 
@@ -384,14 +380,7 @@ class MIMEPart(MIMEBase):
                 # replicate the content-disposition settings
                 self.add_header('Content-Disposition', cdisp, **cdisp_params)
 
-            charset = None
-            body = mail.body
-            if hasattr(mail.body, 'encode'):
-                charset = best_charset(mail.body)
-                if charset:
-                    body = body.encode(charset)
-            self.set_payload(body, charset=charset)
-            encoders.encode_base64(self)
+            self.set_payload(mail.body)
 
     def __repr__(self):
         return "<MIMEPart '%s/%s': '%s', %r, multipart=%r>" % (
@@ -400,16 +389,6 @@ class MIMEPart(MIMEBase):
             self['Content-Type'],
             self['Content-Disposition'],
             self.is_multipart())
-
-
-def best_charset(text):
-    for charset in 'ascii', 'latin_1', 'utf_8':
-        try:
-            text.encode(charset)
-        except UnicodeError:
-            pass
-        else:
-            return charset
 
 
 def is_nonstr_iter(v):
@@ -421,11 +400,3 @@ def is_nonstr_iter(v):
 if sys.version < '3':
     def is_nonstr_iter(v):
         return hasattr(v, '__iter__')
-
-        
-def header_to_mime_encoding(value, charset=DEFAULT_ENCODING):
-    if is_nonstr_iter(value): # not a string
-        value = ", ".join(value)
-    if value:
-        charset = best_charset(value)
-    return header.Header(value, charset=charset)

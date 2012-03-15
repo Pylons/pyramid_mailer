@@ -921,38 +921,12 @@ class TestMIMEPart(unittest.TestCase):
         from pyramid_mailer.response import MIMEPart
         return MIMEPart(type, **params)
 
-    def test_extract_payload(self):
-        mail = DummyPart()
-        mail.content_encoding['Content-Type'] = ('application/json', {})
-        part = self._makeOne('application/json')
-        part.extract_payload(mail)
-        self.assert_(part.get_payload().startswith('Ym9keQ=='))
-
     def test___repr__(self):
         part = self._makeOne('text/html')
         result = repr(part)
         self.assertEqual(
             result,
             "<MIMEPart 'html/text': 'text/html', None, multipart=False>")
-
-class Test_header_to_mime_encoding(unittest.TestCase):
-    def _callFUT(self, value, not_email=False):
-        from pyramid_mailer.response import header_to_mime_encoding
-        return header_to_mime_encoding(value)
-
-    def test_empty_value(self):
-        result = self._callFUT('')
-        self.assertEqual(result, '')
-
-    def test_list_value(self):
-        L = ['chrism@plope.com', 'billg@microsoft.com']
-        result = self._callFUT(L)
-        self.assertEqual(str(result), 'chrism@plope.com, billg@microsoft.com')
-
-    def test_nonempty_nonlist_value(self):
-        val = 'chrism@plope.com'
-        result = self._callFUT(val)
-        self.assertEqual(str(result), 'chrism@plope.com')
 
 
 class Dummy(object):
