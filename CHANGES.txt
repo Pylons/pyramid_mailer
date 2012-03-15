@@ -1,7 +1,12 @@
-0.7 (Unreleased)
-----------------
+Next release
+------------
 
-- No changes.
+- Python 3.2 compatibility.
+
+- No longer compatible with Python 2.5 (and therefore no longer compatible
+  with the current version of Jython).
+
+- Requires repoze.sendmail 3.0+.
 
 0.6 (2012-01-22)
 ----------------
