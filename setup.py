@@ -1,6 +1,6 @@
 """
-pyramid_mailer is a package for taking the pain out of sending emails
-in your Pyramid project.
+pyramid_mailer is a package for taking the pain out of sending emails in your
+Pyramid project.  It is compatible with Python 2.5, 2.6, 2.7, and 3.2.
 
 This includes:
 
@@ -33,7 +33,7 @@ from setuptools import setup
 
 setup(
     name='pyramid_mailer',
-    version='0.7dev',
+    version='0.7',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
