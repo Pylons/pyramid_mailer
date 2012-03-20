@@ -168,8 +168,22 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       cc=["tosomeoneelse@example.com"])
         mailer = Mailer()
-        from pyramid_mailer.exceptions import InvalidMessage
-        self.assertRaises(InvalidMessage, mailer.send, msg)
+        msgid = mailer.send(msg)
+        response = msg.get_response()
+
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue(msgid)
+
+    def test_cc_without_recipients_2(self):
+
+        from pyramid_mailer.message import Message
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      body="testing",
+                      cc=["tosomeoneelse@example.com"])
+        response = msg.get_response()
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
 
     def test_bcc_without_recipients(self):
 
@@ -181,8 +195,11 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       bcc=["tosomeoneelse@example.com"])
         mailer = Mailer()
-        from pyramid_mailer.exceptions import InvalidMessage
-        self.assertRaises(InvalidMessage, mailer.send, msg)
+        msgid = mailer.send(msg)
+        response = msg.get_response()
+
+        self.assertFalse("Bcc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue(msgid)
 
     def test_attach(self):
 

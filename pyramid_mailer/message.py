@@ -139,10 +139,6 @@ class Message(object):
         if not (self.recipients or self.cc or self.bcc):
             raise InvalidMessage("No recipients have been added")
 
-        if (self.cc or self.bcc) and not self.recipients:
-            raise InvalidMessage("Must have at least one direct recipient "
-                                 "even if cc or bcc set")
-
         if not self.body and not self.html:
             raise InvalidMessage("No body has been set")
 
