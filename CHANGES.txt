@@ -1,3 +1,9 @@
+0.7 (Unreleased)
+----------------
+
+- Workaround a Python 3.2.0 bug in handling emails with empty
+  headers.
+
 0.6 (2012-03-20)
 ----------------
 
