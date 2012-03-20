@@ -1,9 +1,15 @@
 Next release
 ------------
 
-- Python 2.5, 2.6, 2.7, 3.2, jython and pypy compatibility.
+- Python 2.5, 2.6, 2.7, 3.2, and pypy compatibility.
+
+- Remove explicit Jython support.  It may work, but we no longer test it
+  using automated testing.
 
 - Requires repoze.sendmail 3.0+.
+
+- More descriptive exception raised when attempting to send cc-only or
+  bcc-only messages.  See https://github.com/Pylons/pyramid_mailer/issues/14
 
 0.6 (2012-01-22)
 ----------------
