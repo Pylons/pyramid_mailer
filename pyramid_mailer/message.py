@@ -1,7 +1,7 @@
 # BBB Python 2 vs 3 compat
 try:
     unicode
-except NameError:
+except NameError: # pragma: no cover
     basestring = (bytes, str)
 else:
     basestring = (str, unicode)

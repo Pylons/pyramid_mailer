@@ -391,8 +391,8 @@ class MIMEPart(MIMEBase):
             self.is_multipart())
 
 
-def is_nonstr_iter(v):
-    if isinstance(v, str):
+def is_nonstr_iter(v): # pragma: no cover
+    if isinstance(v, str): 
         return False
     return hasattr(v, '__iter__')
 

@@ -8,12 +8,12 @@ import errno
 # BBB Python 2.5 & 3 compat
 try:
     str = unicode
-except NameError:
+except NameError: # pragma: no cover
     pass
 
 try:
     from io import StringIO
-except ImportError:
+except ImportError: # pragma: no cover
     # BBB Python 2.5 compat
     from StringIO import StringIO
     
