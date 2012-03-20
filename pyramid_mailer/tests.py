@@ -971,6 +971,42 @@ class TestMIMEPart(unittest.TestCase):
             result,
             "<MIMEPart 'html/text': 'text/html', None, multipart=False>")
 
+    def test_extract_payload_text_type(self):
+        part = self._makeOne('text/html')
+        L = []
+        part.set_payload = lambda body: L.append(body)
+        mail = DummyMail('body')
+        part.extract_payload(mail)
+        self.assertEqual(L, ['body'])
+
+    def test_extract_payload_non_text_type_no_cdisp(self):
+        part = self._makeOne('text/html')
+        L = []
+        part.set_payload = lambda body: L.append(body)
+        mail = DummyMail('body', 'application/octet-stream')
+        part.extract_payload(mail)
+        self.assertEqual(L, ['body'])
+
+    def test_extract_payload_non_text_type_with_cdisp(self):
+        part = self._makeOne('text/html')
+        L = []
+        part.set_payload = lambda body: L.append(body)
+        part.add_header = lambda h, d, **x: L.append((h, d, x))
+        mail = DummyMail('body', 'application/octet-stream', 'foo')
+        part.extract_payload(mail)
+        self.assertEqual(L, [('Content-Disposition', 'foo', {}), 'body'])
+        
+class DummyMail(object):
+    def __init__(self, body, content_type='text/plain', 
+                 content_disposition=None):
+        self.body = body
+        self.content_type = content_type
+        self.content_disposition = content_disposition
+
+    @property
+    def content_encoding(self):
+        return {'Content-Type':(self.content_type, {}),
+                'Content-Disposition':(self.content_disposition, {})}
 
 class Dummy(object):
     pass
