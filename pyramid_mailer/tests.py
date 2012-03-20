@@ -976,6 +976,12 @@ class Test_to_message(unittest.TestCase):
         result = self._callFUT(mail)
         self.assertEqual(result.__class__, MIMEPart)
 
+    def test_empty_header(self):
+        mail = self._makeBase()
+        mail['To'] = ''
+        result = self._callFUT(mail)
+        self.assertFalse('To' in result)
+
 class TestMIMEPart(unittest.TestCase):
     def _makeOne(self, type, **params):
         from pyramid_mailer.response import MIMEPart

@@ -343,6 +343,8 @@ def to_message(mail):
         if k.lower() in encoding.ADDR_HEADERS:
             if is_nonstr_iter(value): # not a string
                 value = ", ".join(value)
+        if value == '':
+            continue
         out[k] = value
 
     out.extract_payload(mail)
