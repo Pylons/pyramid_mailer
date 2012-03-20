@@ -29,14 +29,14 @@ class TestAttachment(unittest.TestCase):
         from pyramid_mailer.message import Attachment
 
         a = Attachment(data="foo")
-        self.assert_(a.data == "foo")
+        self.assertEqual(a.data, "foo")
 
     def test_data_from_file_obj(self):
 
         from pyramid_mailer.message import Attachment
 
         a = Attachment(data=StringIO(str("foo")))
-        self.assert_(a.data == "foo")
+        self.assertEqual(a.data, "foo")
 
 
 class TestMessage(unittest.TestCase):
@@ -50,9 +50,9 @@ class TestMessage(unittest.TestCase):
                       recipients=["to@example.com"])
 
 
-        self.assert_(msg.subject == "subject")
-        self.assert_(msg.sender == "support@mysite.com")
-        self.assert_(msg.recipients == ["to@example.com"])
+        self.assertEqual(msg.subject, "subject")
+        self.assertEqual(msg.sender, "support@mysite.com")
+        self.assertEqual(msg.recipients, ["to@example.com"])
 
     def test_recipients_properly_initialized(self):
 
@@ -60,17 +60,17 @@ class TestMessage(unittest.TestCase):
 
         msg = Message(subject="subject")
 
-        self.assert_(msg.recipients == [])
+        self.assertEqual(msg.recipients, [])
 
         msg2 = Message(subject="subject")
         msg2.add_recipient("somebody@here.com")
 
-        self.assert_(len(msg.recipients) == 0)
+        self.assertEqual(len(msg.recipients), 0)
 
         msg3 = Message(subject="subject")
         msg3.add_recipient("somebody@here.com")
 
-        self.assert_(len(msg.recipients) == 0)
+        self.assertEqual(len(msg.recipients), 0)
 
     def test_add_recipient(self):
 
@@ -79,7 +79,7 @@ class TestMessage(unittest.TestCase):
         msg = Message("testing")
         msg.add_recipient("to@example.com")
 
-        self.assert_(msg.recipients == ["to@example.com"])
+        self.assertEqual(msg.recipients, ["to@example.com"])
 
     def test_add_cc(self):
 
@@ -88,7 +88,7 @@ class TestMessage(unittest.TestCase):
         msg = Message("testing")
         msg.add_cc("to@example.com")
 
-        self.assert_(msg.cc == ["to@example.com"])
+        self.assertEqual(msg.cc, ["to@example.com"])
 
     def test_add_bcc(self):
 
@@ -97,7 +97,7 @@ class TestMessage(unittest.TestCase):
         msg = Message("testing")
         msg.add_bcc("to@example.com")
 
-        self.assert_(msg.bcc == ["to@example.com"])
+        self.assertEqual(msg.bcc, ["to@example.com"])
     
     def test_send_without_sender(self):
 
@@ -156,7 +156,7 @@ class TestMessage(unittest.TestCase):
                       cc=["tosomeoneelse@example.com"])
 
         response = msg.get_response()
-        self.assert_("Cc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
 
     def test_cc_without_recipients(self):
 
@@ -168,11 +168,8 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       cc=["tosomeoneelse@example.com"])
         mailer = Mailer()
-        msgid = mailer.send(msg)
-        response = msg.get_response()
-
-        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
-        self.assertTrue(msgid)
+        from pyramid_mailer.exceptions import InvalidMessage
+        self.assertRaises(InvalidMessage, mailer.send, msg)
 
     def test_bcc_without_recipients(self):
 
@@ -184,11 +181,8 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       bcc=["tosomeoneelse@example.com"])
         mailer = Mailer()
-        msgid = mailer.send(msg)
-        response = msg.get_response()
-
-        self.assertFalse("Bcc: tosomeoneelse@example.com" in str(response))
-        self.assertTrue(msgid)
+        from pyramid_mailer.exceptions import InvalidMessage
+        self.assertRaises(InvalidMessage, mailer.send, msg)
 
     def test_attach(self):
 
@@ -205,14 +199,14 @@ class TestMessage(unittest.TestCase):
 
         a = msg.attachments[0]
         
-        self.assert_(a.filename is None)
-        self.assert_(a.disposition == 'attachment')
-        self.assert_(a.content_type == "text/plain")
-        self.assert_(a.data == "this is a test")
+        self.assertTrue(a.filename is None)
+        self.assertEqual(a.disposition, 'attachment')
+        self.assertEqual(a.content_type, "text/plain")
+        self.assertEqual(a.data, "this is a test")
  
         response = msg.get_response()
         
-        self.assert_(len(response.attachments) == 1)
+        self.assertEqual(len(response.attachments), 1)
 
     def test_bad_header_subject(self):
 
@@ -278,9 +272,10 @@ class TestMessage(unittest.TestCase):
                       body="testing")
 
 
-        self.assert_(msg.send_to == set(["to@example.com",
-                                        "somebodyelse@example.com",
-                                        "anotherperson@example.com"]))
+        self.assertEqual(msg.send_to,
+                         set(["to@example.com",
+                              "somebodyelse@example.com",
+                              "anotherperson@example.com"]))
 
     def test_is_bad_headers_if_no_bad_headers(self):
         from pyramid_mailer.message import Message
@@ -289,7 +284,7 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       recipients=["to@example.com"])
 
-        self.assert_(not(msg.is_bad_headers()))
+        self.assertFalse(msg.is_bad_headers())
 
     def test_is_bad_headers_if_subject_empty(self):
         from pyramid_mailer.message import Message
@@ -297,7 +292,7 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       recipients=["to@example.com"])
 
-        self.assert_(not(msg.is_bad_headers()))
+        self.assertFalse((msg.is_bad_headers()))
 
     def test_is_bad_headers_if_bad_headers(self):
 
@@ -307,7 +302,7 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       recipients=["to@example.com"])
 
-        self.assert_(msg.is_bad_headers())
+        self.assertTrue(msg.is_bad_headers())
 
 class TestMailer(unittest.TestCase):
 
@@ -325,7 +320,7 @@ class TestMailer(unittest.TestCase):
 
         mailer.send_immediately(msg)
 
-        self.assert_(len(mailer.outbox)) == 1
+        self.assertEqual(len(mailer.outbox), 1)
  
 
     def test_dummy_send_immediately_and_fail_silently(self):
@@ -342,7 +337,7 @@ class TestMailer(unittest.TestCase):
 
         mailer.send_immediately(msg, True)
 
-        self.assert_(len(mailer.outbox)) == 1
+        self.assertEqual(len(mailer.outbox), 1)
  
     def test_dummy_send(self):
 
@@ -358,7 +353,7 @@ class TestMailer(unittest.TestCase):
 
         mailer.send(msg)
 
-        self.assert_(len(mailer.outbox)) == 1
+        self.assertEqual(len(mailer.outbox), 1)
 
     def test_dummy_send_to_queue(self):
 
@@ -374,7 +369,7 @@ class TestMailer(unittest.TestCase):
 
         mailer.send_to_queue(msg)
 
-        self.assert_(len(mailer.queue)) == 1
+        self.assertEqual(len(mailer.queue), 1)
 
     def test_send_immediately(self):
 
@@ -471,26 +466,26 @@ class TestMailer(unittest.TestCase):
 
         mailer = Mailer(ssl=True)
         if ssl_enabled:
-            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+            self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
             from ssl import SSLError
             try:
-                self.assert_(mailer.direct_delivery.mailer.smtp_factory())
+                self.assertTrue(mailer.direct_delivery.mailer.smtp_factory())
             except (IOError, SSLError):
                 pass
 
         else: # pragma: no cover
-            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
+            self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
             import socket
             try:
-                self.assert_(mailer.direct_delivery.mailer.smtp_factory())
+                self.assertTrue(mailer.direct_delivery.mailer.smtp_factory())
             except socket.error:
                 e = sys.exc_info()[1]
                 error_number = e.args[0]
                 # smtp mailer might fail to resolve hostname
-                self.assert_(error_number in
-                             (errno.ENODATA,
-                              errno.ECONNREFUSED  # BBB Python 2.5 compat
-                              ))
+                self.assertTrue(error_number in
+                                (errno.ENODATA,
+                                 errno.ECONNREFUSED  # BBB Python 2.5 compat
+                                 ))
 
                           
     def test_from_settings_factory(self):
@@ -516,20 +511,20 @@ class TestMailer(unittest.TestCase):
 
         mailer = mailer_factory_from_settings(settings, prefix='mymail.')
 
-        self.assert_(mailer.direct_delivery.mailer.hostname=='my.server.com')
-        self.assert_(mailer.direct_delivery.mailer.port==123)
-        self.assert_(mailer.direct_delivery.mailer.username=='tester')
-        self.assert_(mailer.direct_delivery.mailer.password=='test')
-        self.assert_(mailer.direct_delivery.mailer.force_tls==True)
+        self.assertEqual(mailer.direct_delivery.mailer.hostname,'my.server.com')
+        self.assertEqual(mailer.direct_delivery.mailer.port, 123)
+        self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
+        self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
+        self.assertEqual(mailer.direct_delivery.mailer.force_tls, True)
         if ssl_enabled:
-            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+            self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
         else: # pragma: no cover
-            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
+            self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
 
-        self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
-        self.assert_(mailer.direct_delivery.mailer.certfile == 'ssl.crt')
-        self.assert_(mailer.queue_delivery.queuePath == '/tmp')
-        self.assert_(mailer.direct_delivery.mailer.debug_smtp == 1)
+        self.assertEqual(mailer.direct_delivery.mailer.keyfile, 'ssl.key')
+        self.assertEqual(mailer.direct_delivery.mailer.certfile, 'ssl.crt')
+        self.assertEqual(mailer.queue_delivery.queuePath, '/tmp')
+        self.assertEqual(mailer.direct_delivery.mailer.debug_smtp, 1)
 
 
     def test_from_settings(self):
@@ -555,20 +550,20 @@ class TestMailer(unittest.TestCase):
 
         mailer = Mailer.from_settings(settings, prefix='mymail.')
 
-        self.assert_(mailer.direct_delivery.mailer.hostname=='my.server.com')
-        self.assert_(mailer.direct_delivery.mailer.port==123)
-        self.assert_(mailer.direct_delivery.mailer.username=='tester')
-        self.assert_(mailer.direct_delivery.mailer.password=='test')
-        self.assert_(mailer.direct_delivery.mailer.force_tls==True)
+        self.assertEqual(mailer.direct_delivery.mailer.hostname,'my.server.com')
+        self.assertEqual(mailer.direct_delivery.mailer.port, 123)
+        self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
+        self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
+        self.assertEqual(mailer.direct_delivery.mailer.force_tls, True)
         if ssl_enabled:
-            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP_SSL)
+            self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
         else: # pragma: no cover
-            self.assert_(mailer.direct_delivery.mailer.smtp == SMTP)
+            self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
 
-        self.assert_(mailer.direct_delivery.mailer.keyfile == 'ssl.key')
-        self.assert_(mailer.direct_delivery.mailer.certfile == 'ssl.crt')
-        self.assert_(mailer.queue_delivery.queuePath == '/tmp')
-        self.assert_(mailer.direct_delivery.mailer.debug_smtp == 1)
+        self.assertEqual(mailer.direct_delivery.mailer.keyfile, 'ssl.key')
+        self.assertEqual(mailer.direct_delivery.mailer.certfile, 'ssl.crt')
+        self.assertEqual(mailer.queue_delivery.queuePath, '/tmp')
+        self.assertEqual(mailer.direct_delivery.mailer.debug_smtp, 1)
 
 
 class TestGetMailer(unittest.TestCase):
