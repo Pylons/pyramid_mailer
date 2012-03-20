@@ -51,12 +51,10 @@ setup(
     ],
     test_suite='pyramid_mailer',
     classifiers=[
-        'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Software Development :: Libraries :: Python Modules'
+        "Topic :: Communications :: Email",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.5",
         "Programming Language :: Python :: 2.6",
