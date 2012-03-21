@@ -1,8 +1,10 @@
 0.7 (Unreleased)
 ----------------
 
-- Workaround a Python 3.2.0 bug in handling emails with empty
-  headers.
+- Work around a Python 3.2.0 bug in handling emails with empty headers.  This
+  allows cc-only and bcc-only emails to be handled properly on all platforms
+  (no recipient= required anymore).  See
+  https://github.com/Pylons/pyramid_mailer/issues/14.
 
 0.6 (2012-03-20)
 ----------------
