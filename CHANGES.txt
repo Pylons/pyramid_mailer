@@ -1,3 +1,11 @@
+0.9 (2012-05-03)
+----------------
+
+- Add a test for uncode encoding in multipart messages.
+
+- Depend on ``repoze.sendmail`` >= 3.2 (fixes unicode multipart message
+  encoding).
+
 0.8 (2012-03-26)
 ----------------
 

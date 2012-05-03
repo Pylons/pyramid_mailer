@@ -33,7 +33,7 @@ from setuptools import setup
 
 setup(
     name='pyramid_mailer',
-    version='0.8',
+    version='0.9',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
@@ -47,7 +47,7 @@ setup(
     platforms='any',
     install_requires=[
         'pyramid',
-        'repoze.sendmail>=3.0dev',
+        'repoze.sendmail>=3.2dev',
     ],
     test_suite='pyramid_mailer',
     classifiers=[

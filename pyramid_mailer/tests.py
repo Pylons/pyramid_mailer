@@ -7,9 +7,11 @@ import errno
 
 # BBB Python 2.5 & 3 compat
 try:
+    b = str
     str = unicode
 except NameError: # pragma: no cover
-    pass
+    def b(x):
+        return x.encode('utf-8')
 
 try:
     from io import StringIO
@@ -17,7 +19,6 @@ except ImportError: # pragma: no cover
     # BBB Python 2.5 compat
     from StringIO import StringIO
     
-
 from pyramid import testing
 
 here = os.path.dirname(os.path.abspath(__file__))
@@ -421,8 +422,6 @@ class TestMailer(unittest.TestCase):
         mailer.send_immediately(msg, True)
 
     def test_send_immediately_multipart(self):
-
-        from repoze.sendmail._compat import b
 
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
