@@ -419,6 +419,29 @@ class TestMailer(unittest.TestCase):
                       body="test")
 
         mailer.send_immediately(msg, True)
+
+    def test_send_immediately_multipart(self):
+
+        from repoze.sendmail._compat import b
+
+        from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.message import Message
+
+        mailer = Mailer()
+
+        utf_8_encoded = b('mo \xe2\x82\xac')
+        utf_8 = utf_8_encoded.decode('utf_8')
+
+        text_string = utf_8
+        html_string = '<p>'+utf_8+'</p>'
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body=text_string,
+                      html=html_string)
+
+        mailer.send_immediately(msg, True)
  
     def test_send(self):
 
