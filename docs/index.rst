@@ -283,11 +283,11 @@ The ``DummyMailer`` instance keeps track of emails "sent" in two properties:
 sent via :meth:`pyramid_mailer.mailer.Mailer.send`. Each stores the
 individual ``Message`` instances::
 
-    self.assertTrue(len(mailer.outbox) == 1)
-    self.assertTrue(mailer.outbox[0].subject == "hello world")
+    self.assertEqual(len(mailer.outbox), 1)
+    self.assertEqual(mailer.outbox[0].subject, "hello world")
 
-    self.assertTrue(len(mailer.queue) == 1)
-    self.assertTrue(mailer.queue[0].subject == "hello world")
+    self.assertEqual(len(mailer.queue), 1)
+    self.assertEqual(mailer.queue[0].subject, "hello world")
 
 Queue
 -----
