@@ -33,7 +33,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import base64
 import os
+import quopri
 import sys
 import mimetypes
 import string
@@ -60,7 +62,7 @@ class MailBase(object):
         self.body = None
         self.content_encoding = {'Content-Type': (None, {}), 
                                  'Content-Disposition': (None, {}),
-                                 'Content-Transfer-Encoding': (None, {})}
+                                 'Content-Transfer-Encoding': None}
 
     def __getitem__(self, key):
         return self.headers.get(normalize_header(key), None)
@@ -88,7 +90,8 @@ class MailBase(object):
         """Returns the sorted keys."""
         return sorted(self.headers.keys())
 
-    def attach_file(self, filename, data, ctype, disposition):
+    def attach_file(self, filename, data, ctype, disposition,
+                    transfer_encoding=None):
         """
         A file attachment is a raw attachment with a disposition that
         indicates the file name.
@@ -101,6 +104,7 @@ class MailBase(object):
         part.content_encoding['Content-Type'] = (ctype, {'name': filename})
         part.content_encoding['Content-Disposition'] = (disposition,
                                                         {'filename': filename})
+        part.content_encoding['Content-Transfer-Encoding'] = transfer_encoding
         self.parts.append(part)
 
 
@@ -159,12 +163,13 @@ class MailResponse(object):
         del self.base[name]
 
     def attach(self, filename=None, content_type=None, data=None,
-               disposition=None):
+               disposition=None, transfer_encoding=None):
         """
 
         Simplifies attaching files from disk or data as files.  To attach
         simple text simple give data and a content_type.  To attach a file,
-        give the data/content_type/filename/disposition combination.
+        give the data/content_type/filename/disposition/transfer-encoding
+        combination.
 
         For convenience, if you don't give data and only a filename, then it
         will read that file's contents when you call to_message() later.  If
@@ -189,7 +194,9 @@ class MailResponse(object):
         self.attachments.append({'filename': filename,
                                  'content_type': content_type,
                                  'data': data,
-                                 'disposition': disposition,})
+                                 'disposition': disposition,
+                                 'transfer_encoding': transfer_encoding,})
+
     def attach_part(self, part):
         """
         Attaches a raw MailBase part from a MailRequest (or anywhere)
@@ -201,6 +208,7 @@ class MailResponse(object):
                                  'content_type': None,
                                  'data': None,
                                  'disposition': None,
+                                 'transfer_encoding': None,
                                  'part': part,
                                  })
 
@@ -239,7 +247,8 @@ class MailResponse(object):
         return self.to_message().as_string()
 
     def _encode_attachment(self, filename=None, content_type=None, data=None,
-                           disposition=None, part=None):
+                           disposition=None, transfer_encoding=None,
+                           part=None):
         """
         Used internally to take the attachments mentioned in self.attachments
         and do the actual encoding in a lazy way when you call to_message.
@@ -248,12 +257,14 @@ class MailResponse(object):
             self.base.parts.append(part)
         elif filename:
             if not data:
-                f = open(filename)
+                # should be opened with binary mode to encode the data later
+                f = open(filename, mode='rb')
                 data = f.read()
                 f.close()
 
             self.base.attach_file(filename, data, content_type,
-                                  disposition or 'attachment')
+                                  disposition or 'attachment',
+                                  transfer_encoding or 'base64')
         else:
             self.base.attach_text(data, content_type)
 
@@ -371,18 +382,20 @@ class MIMEPart(MIMEBase):
 
         ctype, ctype_params = mail.content_encoding['Content-Type']
         cdisp, cdisp_params = mail.content_encoding['Content-Disposition']
+        ctenc = mail.content_encoding.get('Content-Transfer-Encoding')
 
         assert ctype, ("Extract payload requires that mail.content_encoding "
                        "have a valid Content-Type.")
 
-        if ctype.startswith("text/"):
-            self.set_payload(mail.body)
-        else:
-            if cdisp:
-                # replicate the content-disposition settings
-                self.add_header('Content-Disposition', cdisp, **cdisp_params)
+        if cdisp:
+            # replicate the content-disposition settings
+            self.add_header('Content-Disposition', cdisp, **cdisp_params)
+        if ctenc:
+            # need to encode because repoze.sendmail don't handle attachments
+            mail.body = encode_string(ctenc, mail.body)
+            self.add_header('Content-Transfer-Encoding', ctenc)
 
-            self.set_payload(mail.body)
+        self.set_payload(mail.body)
 
     def __repr__(self):
         return "<MIMEPart '%s/%s': '%s', %r, multipart=%r>" % (
@@ -397,6 +410,14 @@ def is_nonstr_iter(v): # pragma: no cover
     if isinstance(v, str): 
         return False
     return hasattr(v, '__iter__')
+
+def encode_string(encoding, data):
+    encoded = data
+    if encoding == 'base64':
+        encoded = base64.encodestring(data)
+    elif encoding == 'quoted-printable':
+        encoded = quopri.encodestring(data)
+    return encoded
 
 # BBB Python 2 vs 3 compat
 if sys.version < '3':
