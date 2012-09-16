@@ -30,6 +30,18 @@ Links
 
 from setuptools import setup
 
+docs_extras = [
+    'Sphinx',
+    'docutils',
+    'repoze.sphinx.autointerface',
+    ]
+
+tests_require = []
+
+testing_extras = tests_require + [
+    'nose',
+    'coverage',
+    ]
 
 setup(
     name='pyramid_mailer',
@@ -49,6 +61,11 @@ setup(
         'pyramid',
         'repoze.sendmail>=3.2dev',
     ],
+    tests_require = tests_require,
+    extras_require = {
+        'testing':testing_extras,
+        'docs':docs_extras,
+        },
     test_suite='pyramid_mailer',
     classifiers=[
         'Intended Audience :: Developers',

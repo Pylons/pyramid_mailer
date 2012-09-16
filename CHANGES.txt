@@ -1,3 +1,10 @@
+Next release
+------------
+
+- Support ``setup.py dev`` (installs testing dependencies).
+
+- Use ``setup.py dev`` in tox.ini.
+
 0.9 (2012-05-03)
 ----------------
 

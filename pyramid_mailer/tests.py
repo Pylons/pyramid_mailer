@@ -412,14 +412,15 @@ class TestMailer(unittest.TestCase):
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
-        mailer = Mailer()
+        mailer = Mailer(host='localhost', port='28322')
 
         msg = Message(subject="testing",
                       sender="sender@example.com",
                       recipients=["tester@example.com"],
                       body="test")
 
-        mailer.send_immediately(msg, True)
+        result = mailer.send_immediately(msg, True)
+        self.assertEqual(result, None)
 
     def test_send_immediately_multipart(self):
 
