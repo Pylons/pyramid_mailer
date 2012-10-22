@@ -19,17 +19,20 @@ class Attachment(object):
     :param content_type: file mimetype
     :param data: the raw file data, either as string or file obj
     :param disposition: content-disposition (if any)
+    :param transfer_encoding: content-transfer-encoding (if any)
     """
 
     def __init__(self, 
                  filename=None, 
                  content_type=None, 
                  data=None,
-                 disposition=None): 
+                 disposition=None,
+                 transfer_encoding=None):
 
         self.filename = filename
         self.content_type = content_type
         self.disposition = disposition or 'attachment'
+        self.transfer_encoding = transfer_encoding or 'base64'
         self._data = data
 
     @property
@@ -110,7 +113,8 @@ class Message(object):
             response.attach(attachment.filename, 
                             attachment.content_type, 
                             attachment.data, 
-                            attachment.disposition)
+                            attachment.disposition,
+                            attachment.transfer_encoding)
 
         response.update(self.extra_headers)
 
