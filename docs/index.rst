@@ -295,8 +295,9 @@ Queue
 -----
 
 When you send mail to a queue via
-:meth:`pyramid_mailer.Mailer.send_to_queue`, the mail will be placed into a
-``maildir`` directory specified by the ``queue_path`` parameter or setting to
+:meth:`pyramid_mailer.mailer.Mailer.send_to_queue`, the mail will be placed
+into a ``maildir`` directory specified by the ``queue_path`` parameter or
+setting to
 :class:`pyramid_mailer.mailer.Mailer`.  A separate process will need to be
 launched to monitor this maildir and take actions based on its state.  Such a
 program comes as part of `repoze_sendmail`_ (a dependency of the
