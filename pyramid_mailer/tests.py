@@ -581,7 +581,7 @@ class TestMailer(unittest.TestCase):
                     'mymail.port' : 123,
                     'mymail.username' : 'tester',
                     'mymail.password' : 'test',
-                    'mymail.tls' : True,
+                    'mymail.tls' : 'false',
                     'mymail.ssl' : True,
                     'mymail.keyfile' : 'ssl.key',
                     'mymail.certfile' : 'ssl.crt',
@@ -594,7 +594,7 @@ class TestMailer(unittest.TestCase):
         self.assertEqual(mailer.direct_delivery.mailer.port, 123)
         self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
         self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
-        self.assertEqual(mailer.direct_delivery.mailer.force_tls, True)
+        self.assertEqual(mailer.direct_delivery.mailer.force_tls, False)
         if ssl_enabled:
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
         else: # pragma: no cover
