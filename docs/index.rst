@@ -46,7 +46,7 @@ In your application's configuration stanza use the
 
    config.include('pyramid_mailer')
 
-Thereafter in view code, use the :func:`~pyramid_mailer.get_mailer`` API to
+Thereafter in view code, use the :func:`~pyramid_mailer.get_mailer` API to
 obtain the configured mailer::
 
    from pyramid_mailer import get_mailer
