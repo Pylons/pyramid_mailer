@@ -165,6 +165,10 @@ class Mailer(object):
         kwargs = dict(((k[size:], settings[k]) for k in settings.keys() if
                         k in kwarg_names))
 
+        for key in ('tls', 'ssl'):
+            if key in kwargs and str(kwargs[key]).strip().lower() in (0, 'false'):
+                kwargs[key] = False
+
         return cls(**kwargs)
 
     def send(self, message):
