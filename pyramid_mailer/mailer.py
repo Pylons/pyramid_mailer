@@ -167,7 +167,7 @@ class Mailer(object):
         kwargs = dict(((k[size:], settings[k]) for k in settings.keys() if
                         k in kwarg_names))
 
-        for key in ('debug', 'tls', 'ssl'):
+        for key in ('tls', 'ssl'):
             val = kwargs.get(key)
             if val:
                 kwargs[key] = asbool(val)

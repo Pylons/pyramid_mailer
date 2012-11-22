@@ -5,7 +5,8 @@ Next release
   an optional ``transfer_encoding`` argument for attachments. This currently
   supports ``base64`` or ``quoted-printable``.
 
-- Properly handle ``Mailer.from_settings`` boolean options.
+- Properly handle ``Mailer.from_settings`` boolean options including ``tls``
+  and ``ssl``.
 
 - Support ``setup.py dev`` (installs testing dependencies).
 
