@@ -1,5 +1,5 @@
-Next release
-------------
+0.10 (2012-11-22)
+-----------------
 
 - Set default transfer encoding for attachments to ``base64`` and allow
   an optional ``transfer_encoding`` argument for attachments. This currently
