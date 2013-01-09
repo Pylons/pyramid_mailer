@@ -412,14 +412,22 @@ def is_nonstr_iter(v): # pragma: no cover
     return hasattr(v, '__iter__')
 
 def encode_string(encoding, data):
+    """ return the string decoded with ascii
+    In Python3, the encodestring method returns 'bytes' string and
+    the email module expects 'str' string. Passing the unicode string
+    to the email module is also OK even if in Python 2.x.
+    """
     encoded = data
     if encoding == 'base64':
-        encoded = base64.encodestring(data)
+        encoded = b64encodestring(data).decode('ascii')
     elif encoding == 'quoted-printable':
-        encoded = quopri.encodestring(data)
+        encoded = quopri.encodestring(data).decode('ascii')
     return encoded
 
 # BBB Python 2 vs 3 compat
 if sys.version < '3':
     def is_nonstr_iter(v):
         return hasattr(v, '__iter__')
+    b64encodestring = base64.encodestring
+else:
+    b64encodestring = base64.encodebytes
