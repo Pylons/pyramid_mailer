@@ -306,7 +306,7 @@ installed into your Python (or virtualenv) ``bin`` or ``Scripts`` directory
 when you install ``repoze_sendmail``.
 
 ``qp`` is a script that is meant to be run as a cron job because what it does 
-it that it looks at maildir and sends messages. You'll need to arrange 
+is that it looks at maildir and sends messages. You'll need to arrange 
 for ``qp`` to be a long-running process that monitors the maildir state.::
 
   $ bin/qp /path/to/mail/queue
