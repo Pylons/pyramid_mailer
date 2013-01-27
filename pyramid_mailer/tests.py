@@ -446,6 +446,7 @@ class TestMailer(unittest.TestCase):
     def test_send(self):
 
         from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.message import Attachment
         from pyramid_mailer.message import Message
 
         mailer = Mailer()
@@ -454,6 +455,9 @@ class TestMailer(unittest.TestCase):
                       sender="sender@example.com",
                       recipients=["tester@example.com"],
                       body="test")
+        msg.attach(Attachment('test.txt',
+                              data=b"this is a test", 
+                              content_type="text/plain"))
 
         mailer.send(msg)
 
@@ -953,7 +957,7 @@ class TestMailResponse(unittest.TestCase):
         self.assertEqual(message.__class__, MIMEPart)
         payload = message.get_payload()[0]
         self.assertEqual(payload.get('Content-Transfer-Encoding'), 'base64')
-        self.assertEqual(payload.get_payload(), base64.encodestring(data))
+        self.assertEqual(payload.get_payload(), base64.encodestring(data).decode('ascii'))
 
     def test_to_message_multipart_with_qpencoding(self):
         from pyramid_mailer.response import MIMEPart
@@ -972,7 +976,7 @@ class TestMailResponse(unittest.TestCase):
         payload = message.get_payload()[0]
         self.assertEqual(payload.get('Content-Transfer-Encoding'),
                          'quoted-printable')
-        self.assertEqual(payload.get_payload(), quopri.encodestring(data))
+        self.assertEqual(payload.get_payload(), quopri.encodestring(data).decode('ascii'))
 
     def test_to_message_with_parts(self):
         from pyramid_mailer.response import MIMEPart
