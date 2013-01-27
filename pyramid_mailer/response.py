@@ -417,7 +417,7 @@ def encode_string(encoding, data):
         encoded = base64.encodestring(data)
     elif encoding == 'quoted-printable':
         encoded = quopri.encodestring(data)
-    return encoded
+    return encoded.decode('ascii')
 
 # BBB Python 2 vs 3 compat
 if sys.version < '3':
