@@ -41,19 +41,19 @@ queries there.
 Getting Started (The Easier Way)
 --------------------------------
 
-In your application's configuration stanza (where you create a Pyramid
-"Configurator"), use the ``config.include`` method::
+In your application's configuration stanza use the
+:meth:`pyramid.config.Configurator.include` method::
 
    config.include('pyramid_mailer')
 
-Thereafter in view code, use the ``pyramid_mailer.get_mailer`` API to obtain
-the configured mailer::
+Thereafter in view code, use the :func:`~pyramid_mailer.get_mailer` API to
+obtain the configured mailer::
 
    from pyramid_mailer import get_mailer
    mailer = get_mailer(request)
 
 To send a message, you must first create a
-:class:`pyramid_mailer.message.Message` instance::
+:class:`~pyramid_mailer.message.Message` instance::
 
     from pyramid_mailer.message import Message
 
@@ -79,11 +79,11 @@ otherwise provided.
 
 
 If you don't want to use transactions, you can side-step them by using
-**send_immediately**::
+:meth:`~pyramid_mailer.mailer.Mailer.send_immediately`::
 
     mailer.send_immediately(message, fail_silently=False)
 
-This will send the email immediately, outwith the transaction, so if it fails
+This will send the email immediately, without the transaction, so if it fails
 you have to deal with it manually. The ``fail_silently`` flag will swallow
 any connection errors silently - if it's not important whether the email gets
 sent.
@@ -98,7 +98,7 @@ instance of :class:`pyramid_mailer.mailer.Mailer`::
 
     mailer = Mailer()
 
-The ``Mailer`` class can take a number of optional settings, detailed in
+The mailer can take a number of optional settings, detailed in
 :ref:`configuration`. It's a good idea to create a single ``Mailer`` instance
 for your application, and add it to your registry in your configuration
 setup::
@@ -124,8 +124,8 @@ construct and set your own mailer in this way.
 Configuration
 -------------
 
-If you configure a ``Mailer`` using
-:meth:`pyramid_mailer.mailer.Mailer.from_settings` or
+If you configure a :class:`~pyramid_mailer.mailer.Mailer` using
+:meth:`~pyramid_mailer.mailer.Mailer.from_settings` or via
 ``config.include('pyramid_mailer')``, you can pass the settings from your
 Paste ``.ini`` file.  For example::
 
@@ -133,7 +133,7 @@ Paste ``.ini`` file.  For example::
   mail.host = localhost
   mail.port = 25
 
-By default, the prefix for is assumed to be `mail.`.  If you use the
+By default, the prefix is assumed to be `mail.`.  If you use the
 ``config.include`` mechanism, to set another prefix, use the
 ``pyramid_mailer.prefix`` key in the config file.  For example::
 
@@ -142,7 +142,7 @@ By default, the prefix for is assumed to be `mail.`.  If you use the
   foo.port = 25
   pyramid_mailer.prefix = foo.
 
-If you use the :meth:`pyramid_mailer.Mailer.Mailer.from_settings` or
+If you use the :meth:`pyramid_mailer.mailer.Mailer.from_settings` or
 :func:`pyramid_mailer.mailer_factory_from_settings` API, these accept a
 prefix directly; for example::
 
@@ -244,7 +244,9 @@ could be rewritten::
 
     message.attach(attachment)
 
-
+A transfer encoding can be specified via the ``transfer_encoding`` option.
+Supported options are currently ``base64`` (the default) and
+``quoted-printable``.
 
 Unit tests
 ----------
@@ -283,18 +285,19 @@ The ``DummyMailer`` instance keeps track of emails "sent" in two properties:
 sent via :meth:`pyramid_mailer.mailer.Mailer.send`. Each stores the
 individual ``Message`` instances::
 
-    self.assertTrue(len(mailer.outbox) == 1)
-    self.assertTrue(mailer.outbox[0].subject == "hello world")
+    self.assertEqual(len(mailer.outbox), 1)
+    self.assertEqual(mailer.outbox[0].subject, "hello world")
 
-    self.assertTrue(len(mailer.queue) == 1)
-    self.assertTrue(mailer.queue[0].subject == "hello world")
+    self.assertEqual(len(mailer.queue), 1)
+    self.assertEqual(mailer.queue[0].subject, "hello world")
 
 Queue
 -----
 
 When you send mail to a queue via
-:meth:`pyramid_mailer.Mailer.send_to_queue`, the mail will be placed into a
-``maildir`` directory specified by the ``queue_path`` parameter or setting to
+:meth:`pyramid_mailer.mailer.Mailer.send_to_queue`, the mail will be placed
+into a ``maildir`` directory specified by the ``queue_path`` parameter or
+setting to
 :class:`pyramid_mailer.mailer.Mailer`.  A separate process will need to be
 launched to monitor this maildir and take actions based on its state.  Such a
 program comes as part of `repoze_sendmail`_ (a dependency of the
@@ -312,6 +315,22 @@ the queue over time.  ``qp`` has other options that allow you to choose
 different settings.  Use it's ``--help`` parameter to see more::
 
   $ bin/qp --help
+
+.. note::
+
+   Sending messages via the queue requires the use of a transaction manager.
+   If no manager is enabled, it must be emulated by issuing a manual commit
+   via ``transaction.commit()``.
+
+   .. code-block:: python
+
+      import transaction
+      tx = transaction.begin()
+      mailer.send_to_queue(msg)
+      try:
+          tx.commit()
+      except Exception:
+          # handle a failed delivery
         
 API
 ---

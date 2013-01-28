@@ -30,10 +30,22 @@ Links
 
 from setuptools import setup
 
+docs_extras = [
+    'Sphinx',
+    'docutils',
+    'repoze.sphinx.autointerface',
+    ]
+
+tests_require = []
+
+testing_extras = tests_require + [
+    'nose',
+    'coverage',
+    ]
 
 setup(
     name='pyramid_mailer',
-    version='0.9',
+    version='0.10',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
@@ -49,6 +61,11 @@ setup(
         'pyramid',
         'repoze.sendmail>=3.2dev',
     ],
+    tests_require = tests_require,
+    extras_require = {
+        'testing':testing_extras,
+        'docs':docs_extras,
+        },
     test_suite='pyramid_mailer',
     classifiers=[
         'Intended Audience :: Developers',
@@ -60,6 +77,7 @@ setup(
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Framework :: Pyramid",

@@ -4,6 +4,8 @@ from repoze.sendmail.mailer import SMTPMailer
 from repoze.sendmail.delivery import DirectMailDelivery
 from repoze.sendmail.delivery import QueuedMailDelivery
 
+from pyramid.settings import asbool
+
 
 class DummyMailer(object):
     """
@@ -164,6 +166,11 @@ class Mailer(object):
 
         kwargs = dict(((k[size:], settings[k]) for k in settings.keys() if
                         k in kwarg_names))
+
+        for key in ('tls', 'ssl'):
+            val = kwargs.get(key)
+            if val:
+                kwargs[key] = asbool(val)
 
         return cls(**kwargs)
 

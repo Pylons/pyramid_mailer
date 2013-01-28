@@ -1,8 +1,21 @@
-After 0.9 (unreleased)
-----------------------
+After 0.10 (unreleased)
+-----------------------
 
 - Dropped support for Python 2.5.
 
+0.10 (2012-11-22)
+-----------------
+
+- Set default transfer encoding for attachments to ``base64`` and allow
+  an optional ``transfer_encoding`` argument for attachments. This currently
+  supports ``base64`` or ``quoted-printable``.
+
+- Properly handle ``Mailer.from_settings`` boolean options including ``tls``
+  and ``ssl``.
+
+- Support ``setup.py dev`` (installs testing dependencies).
+
+- Use ``setup.py dev`` in tox.ini.
 
 0.9 (2012-05-03)
 ----------------

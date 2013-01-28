@@ -4,7 +4,7 @@ from pyramid_mailer.interfaces import IMailer
 def mailer_factory_from_settings(settings, prefix='mail.'):
     """
     Factory function to create a Mailer instance from settings.
-    Equivalent to **Mailer.from_settings**
+    Equivalent to :meth:`pyramid_mailer.mailer.Mailer.from_settings`.
 
     :versionadded: 0.2.2
     """

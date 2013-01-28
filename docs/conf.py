@@ -57,7 +57,17 @@ for item in os.listdir(parent):
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
+]
+
+intersphinx_mapping = {
+    'pyramid': (
+        'http://docs.pylonsproject.org/projects/pyramid/en/latest/',
+        None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 #templates_path = ['_templates']
@@ -76,7 +86,7 @@ copyright = '%s, Dan Jacob' % datetime.datetime.now().year
 # other places throughout the built documents.
 #
 # The short X.Y version.
-version = '0.9'
+version = '0.10'
 # The full version, including alpha/beta/rc tags.
 release = version
 

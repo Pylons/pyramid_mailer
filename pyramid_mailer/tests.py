@@ -412,14 +412,15 @@ class TestMailer(unittest.TestCase):
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
-        mailer = Mailer()
+        mailer = Mailer(host='localhost', port='28322')
 
         msg = Message(subject="testing",
                       sender="sender@example.com",
                       recipients=["tester@example.com"],
                       body="test")
 
-        mailer.send_immediately(msg, True)
+        result = mailer.send_immediately(msg, True)
+        self.assertEqual(result, None)
 
     def test_send_immediately_multipart(self):
 
@@ -580,7 +581,7 @@ class TestMailer(unittest.TestCase):
                     'mymail.port' : 123,
                     'mymail.username' : 'tester',
                     'mymail.password' : 'test',
-                    'mymail.tls' : True,
+                    'mymail.tls' : 'false',
                     'mymail.ssl' : True,
                     'mymail.keyfile' : 'ssl.key',
                     'mymail.certfile' : 'ssl.crt',
@@ -593,7 +594,7 @@ class TestMailer(unittest.TestCase):
         self.assertEqual(mailer.direct_delivery.mailer.port, 123)
         self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
         self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
-        self.assertEqual(mailer.direct_delivery.mailer.force_tls, True)
+        self.assertEqual(mailer.direct_delivery.mailer.force_tls, False)
         if ssl_enabled:
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
         else: # pragma: no cover
@@ -771,13 +772,15 @@ class TestMailBase(unittest.TestCase):
 
     def test_attach_file(self):
         base = self._makeOne()
-        base.attach_file('filename', 'data', 'ctype', 'inline')
+        base.attach_file('filename', 'data', 'ctype', 'inline', 'base64')
         self.assertEqual(len(base.parts), 1)
         part = base.parts[0]
         self.assertEqual(part.content_encoding['Content-Type'],
                          ('ctype', {'name':'filename'}))
         self.assertEqual(part.content_encoding['Content-Disposition'],
                          ('inline', {'filename':'filename'}))
+        self.assertEqual(part.content_encoding['Content-Transfer-Encoding'],
+                         'base64')
         self.assertEqual(part.body, 'data')
 
     def test_attach_text(self):
@@ -800,6 +803,14 @@ class TestMailResponse(unittest.TestCase):
     def _makeOne(self, **kw):
         from pyramid_mailer.response import MailResponse
         return MailResponse(**kw)
+
+    def _read_filedata(self, filename, mode='r'):
+        f = open(filename, mode)
+        try:
+            data = f.read()
+        finally:
+            f.close()
+        return data
 
     def test_ctor(self):
         response = self._makeOne(To='To', From='From', Subject='Subject',
@@ -835,13 +846,15 @@ class TestMailResponse(unittest.TestCase):
         this = os.path.abspath(__file__)
         response = self._makeOne()
         response.attach(filename=this, content_type='content_type',
-                        data='data', disposition='disposition')
+                        data='data', disposition='disposition',
+                        transfer_encoding='base64')
         self.assertEqual(len(response.attachments), 1)
         attachment = response.attachments[0]
         self.assertEqual(attachment['filename'], this)
         self.assertEqual(attachment['content_type'], 'content_type')
         self.assertEqual(attachment['data'], 'data')
         self.assertEqual(attachment['disposition'], 'disposition') 
+        self.assertEqual(attachment['transfer_encoding'], 'base64')
 
     def test_attach_no_content_type(self):
         import os
@@ -854,6 +867,7 @@ class TestMailResponse(unittest.TestCase):
         self.assertTrue('python' in attachment['content_type'])
         self.assertEqual(attachment['data'], 'data')
         self.assertEqual(attachment['disposition'], 'disposition') 
+        self.assertEqual(attachment['transfer_encoding'], None)
 
     def test_attach_part(self):
         response = self._makeOne()
@@ -864,6 +878,7 @@ class TestMailResponse(unittest.TestCase):
         self.assertEqual(attachment['content_type'], None)
         self.assertEqual(attachment['data'], None)
         self.assertEqual(attachment['disposition'], None)
+        self.assertEqual(attachment['transfer_encoding'], None)
         self.assertEqual(attachment['part'], 'part')
 
     def test_attach_all_parts(self):
@@ -919,9 +934,45 @@ class TestMailResponse(unittest.TestCase):
         this = os.path.abspath(__file__)
         response = self._makeOne()
         response.attach(filename=this, content_type='text/html',
-                        data='data', disposition='disposition')
+                        data='data'.encode('ascii'), disposition='disposition')
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
+
+    def test_to_message_multipart_with_b64encoding(self):
+        from pyramid_mailer.response import MIMEPart
+        response = self._makeOne(To='To', From='From', Subject='Subject',
+                                 Body='Body', Html='Html')
+        import base64
+        import os
+        this = os.path.abspath(__file__)
+        data = self._read_filedata(this, mode='rb')
+        response = self._makeOne()
+        response.attach(filename=this, content_type='text/plain',
+                        disposition='disposition', transfer_encoding='base64')
+        message = response.to_message()
+        self.assertEqual(message.__class__, MIMEPart)
+        payload = message.get_payload()[0]
+        self.assertEqual(payload.get('Content-Transfer-Encoding'), 'base64')
+        self.assertEqual(payload.get_payload(), base64.encodestring(data))
+
+    def test_to_message_multipart_with_qpencoding(self):
+        from pyramid_mailer.response import MIMEPart
+        response = self._makeOne(To='To', From='From', Subject='Subject',
+                                 Body='Body', Html='Html')
+        import os
+        import quopri
+        this = os.path.abspath(__file__)
+        data = self._read_filedata(this, mode='rb')
+        response = self._makeOne()
+        response.attach(filename=this, content_type='text/plain',
+                        disposition='disposition',
+                        transfer_encoding='quoted-printable')
+        message = response.to_message()
+        self.assertEqual(message.__class__, MIMEPart)
+        payload = message.get_payload()[0]
+        self.assertEqual(payload.get('Content-Transfer-Encoding'),
+                         'quoted-printable')
+        self.assertEqual(payload.get_payload(), quopri.encodestring(data))
 
     def test_to_message_with_parts(self):
         from pyramid_mailer.response import MIMEPart
