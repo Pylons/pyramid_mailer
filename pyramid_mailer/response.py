@@ -414,9 +414,9 @@ def is_nonstr_iter(v): # pragma: no cover
 def encode_string(encoding, data):
     encoded = data
     if encoding == 'base64':
-        encoded = base64.encodestring(data)
+        encoded = base64.encodestring(data).decode('ascii')
     elif encoding == 'quoted-printable':
-        encoded = quopri.encodestring(data)
+        encoded = quopri.encodestring(data).decode('ascii')
     return encoded
 
 # BBB Python 2 vs 3 compat
