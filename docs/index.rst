@@ -170,7 +170,7 @@ Setting                    Default            Description
 **mail.certfile**          **None**           SSL certificate file     
 **mail.queue_path**        **None**           Location of maildir      
 **mail.default_sender**    **None**           Default from address     
-**mail.debug**             **False**          SMTP debug level         
+**mail.debug**             **0**              SMTP debug level
 =========================  ===============    =====================
 
 **Note:** SSL will only work with **pyramid_mailer** if you are using Python
@@ -178,6 +178,13 @@ Setting                    Default            Description
   package. While it may be possible to work around this if you have to use
   Python 2.5 or lower, **pyramid_mailer** does not support this out of the
   box.
+
+**Note:** the ``mail.debug`` option will be passed to the underlying
+``smtplib`` connection. Any values for this option that Python would consider
+``> 0`` will result in debug messages for all messages sent and received from
+the server. Thus, specifying ``mail.debug`` with any value will result in debug
+messages as ``pyramid_mailer`` will not attempt to coerce this value from its
+original string. 
 
 Transactions
 ------------
