@@ -9,19 +9,21 @@ import errno
 try:
     b = str
     str = unicode
-except NameError: # pragma: no cover
+except NameError:  # pragma: no cover
     def b(x):
         return x.encode('utf-8')
 
 try:
     from io import StringIO
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
+    StringIO  # pyflakes
     # BBB Python 2.5 compat
     from StringIO import StringIO
-    
+
 from pyramid import testing
 
 here = os.path.dirname(os.path.abspath(__file__))
+
 
 class TestAttachment(unittest.TestCase):
 
@@ -49,7 +51,6 @@ class TestMessage(unittest.TestCase):
         msg = Message(subject="subject",
                       sender="support@mysite.com",
                       recipients=["to@example.com"])
-
 
         self.assertEqual(msg.subject, "subject")
         self.assertEqual(msg.sender, "support@mysite.com")
@@ -99,7 +100,7 @@ class TestMessage(unittest.TestCase):
         msg.add_bcc("to@example.com")
 
         self.assertEqual(msg.bcc, ["to@example.com"])
-    
+
     def test_send_without_sender(self):
 
         from pyramid_mailer.message import Message
@@ -210,20 +211,19 @@ class TestMessage(unittest.TestCase):
         msg = Message(subject="testing",
                       recipients=["to@example.com"],
                       body="testing")
-        
-        msg.attach(Attachment(data="this is a test", 
+
+        msg.attach(Attachment(data="this is a test",
                               content_type="text/plain"))
-        
 
         a = msg.attachments[0]
-        
+
         self.assertTrue(a.filename is None)
         self.assertEqual(a.disposition, 'attachment')
         self.assertEqual(a.content_type, "text/plain")
         self.assertEqual(a.data, "this is a test")
- 
+
         response = msg.get_response()
-        
+
         self.assertEqual(len(response.attachments), 1)
 
     def test_bad_header_subject(self):
@@ -284,11 +284,10 @@ class TestMessage(unittest.TestCase):
                       sender="from@example.com",
                       recipients=[
                           "to@example.com"],
-                      cc=['somebodyelse@example.com', 
+                      cc=['somebodyelse@example.com',
                           'to@example.com'],
                       bcc=['anotherperson@example.com'],
                       body="testing")
-
 
         self.assertEqual(msg.send_to,
                          set(["to@example.com",
@@ -322,6 +321,7 @@ class TestMessage(unittest.TestCase):
 
         self.assertTrue(msg.is_bad_headers())
 
+
 class TestMailer(unittest.TestCase):
 
     def test_dummy_send_immediately(self):
@@ -339,7 +339,6 @@ class TestMailer(unittest.TestCase):
         mailer.send_immediately(msg)
 
         self.assertEqual(len(mailer.outbox), 1)
- 
 
     def test_dummy_send_immediately_and_fail_silently(self):
 
@@ -356,7 +355,7 @@ class TestMailer(unittest.TestCase):
         mailer.send_immediately(msg, True)
 
         self.assertEqual(len(mailer.outbox), 1)
- 
+
     def test_dummy_send(self):
 
         from pyramid_mailer.mailer import DummyMailer
@@ -403,10 +402,10 @@ class TestMailer(unittest.TestCase):
                       recipients=["tester@example.com"],
                       body="test")
 
-        self.assertRaises(socket.error, 
+        self.assertRaises(socket.error,
                           mailer.send_immediately,
                           msg)
-            
+
     def test_send_immediately_and_fail_silently(self):
 
         from pyramid_mailer.mailer import Mailer
@@ -433,7 +432,7 @@ class TestMailer(unittest.TestCase):
         utf_8 = utf_8_encoded.decode('utf_8')
 
         text_string = utf_8
-        html_string = '<p>'+utf_8+'</p>'
+        html_string = '<p>' + utf_8 + '</p>'
 
         msg = Message(subject="testing",
                       sender="sender@example.com",
@@ -442,7 +441,7 @@ class TestMailer(unittest.TestCase):
                       html=html_string)
 
         mailer.send_immediately(msg, True)
- 
+
     def test_send(self):
 
         from pyramid_mailer.mailer import Mailer
@@ -461,7 +460,7 @@ class TestMailer(unittest.TestCase):
 
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
-        
+
         msg = Message(subject="testing",
                       sender="sender@example.com",
                       recipients=["tester@example.com"],
@@ -484,7 +483,7 @@ class TestMailer(unittest.TestCase):
                 os.makedirs(os.path.join(test_queue, dir))
             except OSError:
                 pass
-        
+
         mailer = Mailer(queue_path=test_queue)
 
         msg = Message(subject="testing",
@@ -499,7 +498,7 @@ class TestMailer(unittest.TestCase):
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
-        except ImportError: # pragma: no cover
+        except ImportError:  # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer.mailer import Mailer
@@ -513,7 +512,7 @@ class TestMailer(unittest.TestCase):
             except (IOError, SSLError):
                 pass
 
-        else: # pragma: no cover
+        else:  # pragma: no cover
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
             import socket
             try:
@@ -527,38 +526,38 @@ class TestMailer(unittest.TestCase):
                                  errno.ECONNREFUSED  # BBB Python 2.5 compat
                                  ))
 
-                          
     def test_from_settings_factory(self):
 
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
-        except ImportError: # pragma: no cover
+        except ImportError:  # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer import mailer_factory_from_settings
 
-        settings = {'mymail.host' : 'my.server.com',
-                    'mymail.port' : 123,
-                    'mymail.username' : 'tester',
-                    'mymail.password' : 'test',
-                    'mymail.tls' : True,
-                    'mymail.ssl' : True,
-                    'mymail.keyfile' : 'ssl.key',
-                    'mymail.certfile' : 'ssl.crt',
-                    'mymail.queue_path' : '/tmp',
-                    'mymail.debug' : 1}
+        settings = {'mymail.host': 'my.server.com',
+                    'mymail.port': 123,
+                    'mymail.username': 'tester',
+                    'mymail.password': 'test',
+                    'mymail.tls': True,
+                    'mymail.ssl': True,
+                    'mymail.keyfile': 'ssl.key',
+                    'mymail.certfile': 'ssl.crt',
+                    'mymail.queue_path': '/tmp',
+                    'mymail.debug': 1}
 
         mailer = mailer_factory_from_settings(settings, prefix='mymail.')
 
-        self.assertEqual(mailer.direct_delivery.mailer.hostname,'my.server.com')
+        self.assertEqual(mailer.direct_delivery.mailer.hostname,
+                         'my.server.com')
         self.assertEqual(mailer.direct_delivery.mailer.port, 123)
         self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
         self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
         self.assertEqual(mailer.direct_delivery.mailer.force_tls, True)
         if ssl_enabled:
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
-        else: # pragma: no cover
+        else:  # pragma: no cover
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
 
         self.assertEqual(mailer.direct_delivery.mailer.keyfile, 'ssl.key')
@@ -566,38 +565,38 @@ class TestMailer(unittest.TestCase):
         self.assertEqual(mailer.queue_delivery.queuePath, '/tmp')
         self.assertEqual(mailer.direct_delivery.mailer.debug_smtp, 1)
 
-
     def test_from_settings(self):
-        
+
         try:
             from smtplib import SMTP_SSL
             ssl_enabled = True
-        except ImportError: # pragma: no cover
+        except ImportError:  # pragma: no cover
             from smtplib import SMTP
             ssl_enabled = False
         from pyramid_mailer.mailer import Mailer
 
-        settings = {'mymail.host' : 'my.server.com',
-                    'mymail.port' : 123,
-                    'mymail.username' : 'tester',
-                    'mymail.password' : 'test',
-                    'mymail.tls' : 'false',
-                    'mymail.ssl' : True,
-                    'mymail.keyfile' : 'ssl.key',
-                    'mymail.certfile' : 'ssl.crt',
-                    'mymail.queue_path' : '/tmp',
-                    'mymail.debug' : 1}
+        settings = {'mymail.host': 'my.server.com',
+                    'mymail.port': 123,
+                    'mymail.username': 'tester',
+                    'mymail.password': 'test',
+                    'mymail.tls': 'false',
+                    'mymail.ssl': True,
+                    'mymail.keyfile': 'ssl.key',
+                    'mymail.certfile': 'ssl.crt',
+                    'mymail.queue_path': '/tmp',
+                    'mymail.debug': 1}
 
         mailer = Mailer.from_settings(settings, prefix='mymail.')
 
-        self.assertEqual(mailer.direct_delivery.mailer.hostname,'my.server.com')
+        self.assertEqual(mailer.direct_delivery.mailer.hostname,
+                         'my.server.com')
         self.assertEqual(mailer.direct_delivery.mailer.port, 123)
         self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
         self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
         self.assertEqual(mailer.direct_delivery.mailer.force_tls, False)
         if ssl_enabled:
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
-        else: # pragma: no cover
+        else:  # pragma: no cover
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
 
         self.assertEqual(mailer.direct_delivery.mailer.keyfile, 'ssl.key')
@@ -637,7 +636,7 @@ class Test_includeme(unittest.TestCase):
     def test_with_default_prefix(self):
         from pyramid_mailer.interfaces import IMailer
         registry = DummyRegistry()
-        settings = {'mail.default_sender':'sender'}
+        settings = {'mail.default_sender': 'sender'}
         config = DummyConfig(registry, settings)
         self._do_includeme(config)
         self.assertEqual(registry.registered[IMailer].default_sender, 'sender')
@@ -645,8 +644,8 @@ class Test_includeme(unittest.TestCase):
     def test_with_specified_prefix(self):
         from pyramid_mailer.interfaces import IMailer
         registry = DummyRegistry()
-        settings = {'pyramid_mailer.prefix':'foo.',
-                    'foo.default_sender':'sender'}
+        settings = {'pyramid_mailer.prefix': 'foo.',
+                    'foo.default_sender': 'sender'}
         config = DummyConfig(registry, settings)
         self._do_includeme(config)
         self.assertEqual(registry.registered[IMailer].default_sender, 'sender')
@@ -662,6 +661,7 @@ class TestIncludemeTesting(unittest.TestCase):
         config = DummyConfig(registry, {})
         includeme(config)
         self.assertEqual(registry.registered[IMailer].__class__, DummyMailer)
+
 
 class TestFunctional(unittest.TestCase):
     def setUp(self):
@@ -686,6 +686,7 @@ class TestFunctional(unittest.TestCase):
         mailer = get_mailer(request)
         self.assertEqual(mailer.__class__, DummyMailer)
 
+
 class DummyConfig(object):
     def __init__(self, registry, settings):
         self.registry = registry
@@ -703,6 +704,7 @@ class DummyRegistry(object):
     def registerUtility(self, impl, iface):
         self.registered[iface] = impl
 
+
 class TestEncodingError(unittest.TestCase):
     def _makeOne(self):
         from pyramid_mailer.response import EncodingError
@@ -711,6 +713,7 @@ class TestEncodingError(unittest.TestCase):
     def test_it(self):
         inst = self._makeOne()
         self.assertTrue(isinstance(inst, Exception))
+
 
 class Test_normalize_header(unittest.TestCase):
     def _callFUT(self, header):
@@ -721,6 +724,7 @@ class Test_normalize_header(unittest.TestCase):
         result = self._callFUT('content-type')
         self.assertEqual(result, 'Content-Type')
 
+
 class TestMailBase(unittest.TestCase):
     def _makeOne(self, items=()):
         from pyramid_mailer.response import MailBase
@@ -729,7 +733,7 @@ class TestMailBase(unittest.TestCase):
     def test___getitem__hit(self):
         base = self._makeOne([('Content-Type', 'text/html')])
         self.assertEqual(base['content-type'], 'text/html')
-        
+
     def test___getitem__miss(self):
         base = self._makeOne([('Content-Type', 'text/html')])
         self.assertEqual(base['Wrong'], None)
@@ -755,11 +759,11 @@ class TestMailBase(unittest.TestCase):
         base = self._makeOne()
         base.body = 'body'
         self.assertTrue(base)
-        
+
     def test___nonzero__true_headers(self):
         base = self._makeOne([('Content-Type', 'text/html')])
         self.assertTrue(base)
-        
+
     def test___nonzero__true_parts(self):
         base = self._makeOne()
         base.parts = [True]
@@ -776,9 +780,9 @@ class TestMailBase(unittest.TestCase):
         self.assertEqual(len(base.parts), 1)
         part = base.parts[0]
         self.assertEqual(part.content_encoding['Content-Type'],
-                         ('ctype', {'name':'filename'}))
+                         ('ctype', {'name': 'filename'}))
         self.assertEqual(part.content_encoding['Content-Disposition'],
-                         ('inline', {'filename':'filename'}))
+                         ('inline', {'filename': 'filename'}))
         self.assertEqual(part.content_encoding['Content-Transfer-Encoding'],
                          'base64')
         self.assertEqual(part.body, 'data')
@@ -798,6 +802,7 @@ class TestMailBase(unittest.TestCase):
         base1.parts = [base2]
         base2.parts = [base3]
         self.assertEqual(list(base1.walk()), [base2, base3])
+
 
 class TestMailResponse(unittest.TestCase):
     def _makeOne(self, **kw):
@@ -826,11 +831,11 @@ class TestMailResponse(unittest.TestCase):
     def test___contains__(self):
         response = self._makeOne(To='To')
         self.assertTrue('To' in response)
-        
+
     def test___getitem__(self):
         response = self._makeOne(To='To')
         self.assertEqual(response['To'], 'To')
-        
+
     def test___setitem__(self):
         response = self._makeOne(To='To')
         response['To'] = 'To2'
@@ -853,7 +858,7 @@ class TestMailResponse(unittest.TestCase):
         self.assertEqual(attachment['filename'], this)
         self.assertEqual(attachment['content_type'], 'content_type')
         self.assertEqual(attachment['data'], 'data')
-        self.assertEqual(attachment['disposition'], 'disposition') 
+        self.assertEqual(attachment['disposition'], 'disposition')
         self.assertEqual(attachment['transfer_encoding'], 'base64')
 
     def test_attach_no_content_type(self):
@@ -866,7 +871,7 @@ class TestMailResponse(unittest.TestCase):
         self.assertEqual(attachment['filename'], this)
         self.assertTrue('python' in attachment['content_type'])
         self.assertEqual(attachment['data'], 'data')
-        self.assertEqual(attachment['disposition'], 'disposition') 
+        self.assertEqual(attachment['disposition'], 'disposition')
         self.assertEqual(attachment['transfer_encoding'], None)
 
     def test_attach_part(self):
@@ -901,7 +906,7 @@ class TestMailResponse(unittest.TestCase):
 
     def test_update(self):
         response = self._makeOne()
-        response.update({'a':'1'})
+        response.update({'a': '1'})
         self.assertEqual(response.base['a'], '1')
 
     def test___str__(self):
@@ -990,7 +995,8 @@ class TestMailResponse(unittest.TestCase):
         from pyramid_mailer.response import MIMEPart
         response = self._makeOne(To='To', From='From', Subject='Subject')
         response.multipart = True
-        response.attachments = [{'filename':this, 'content_type':'text/python'}]
+        response.attachments = [{'filename': this,
+                                 'content_type': 'text/python'}]
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 
@@ -998,7 +1004,7 @@ class TestMailResponse(unittest.TestCase):
         from pyramid_mailer.response import MIMEPart
         response = self._makeOne(To='To', From='From', Subject='Subject')
         response.multipart = True
-        response.attachments = [{'data':'data', 'content_type':'text/html'}]
+        response.attachments = [{'data': 'data', 'content_type': 'text/html'}]
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 
@@ -1007,7 +1013,7 @@ class TestMailResponse(unittest.TestCase):
         response = self._makeOne(To='To', From='From', Subject='Subject')
         response.multipart = True
         response.base.content_encoding['Content-Type'] = ('text/html', None)
-        response.attachments = [{'data':'data', 'content_type':'text/html'}]
+        response.attachments = [{'data': 'data', 'content_type': 'text/html'}]
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 
@@ -1017,17 +1023,18 @@ class TestMailResponse(unittest.TestCase):
         response.multipart = True
         data = os.urandom(100)
         response.attachments = [{'data': data,
-                                 'content_type':'application/octet-stream'}]
+                                 'content_type': 'application/octet-stream'}]
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 
     def test_all_parts(self):
         response = self._makeOne()
         self.assertEqual(response.all_parts(), [])
-        
+
     def test_keys(self):
         response = self._makeOne()
         self.assertEqual(response.keys(), ['From', 'Subject', 'To'])
+
 
 class Test_to_message(unittest.TestCase):
     def _callFUT(self, mail):
@@ -1056,6 +1063,7 @@ class Test_to_message(unittest.TestCase):
         mail['To'] = ''
         result = self._callFUT(mail)
         self.assertFalse('To' in result)
+
 
 class TestMIMEPart(unittest.TestCase):
     def _makeOne(self, type, **params):
@@ -1093,9 +1101,10 @@ class TestMIMEPart(unittest.TestCase):
         mail = DummyMail('body', 'application/octet-stream', 'foo')
         part.extract_payload(mail)
         self.assertEqual(L, [('Content-Disposition', 'foo', {}), 'body'])
-        
+
+
 class DummyMail(object):
-    def __init__(self, body, content_type='text/plain', 
+    def __init__(self, body, content_type='text/plain',
                  content_disposition=None):
         self.body = body
         self.content_type = content_type
@@ -1103,11 +1112,13 @@ class DummyMail(object):
 
     @property
     def content_encoding(self):
-        return {'Content-Type':(self.content_type, {}),
-                'Content-Disposition':(self.content_disposition, {})}
+        return {'Content-Type': (self.content_type, {}),
+                'Content-Disposition': (self.content_disposition, {})}
+
 
 class Dummy(object):
     pass
+
 
 class DummyMailRequest(object):
     def __init__(self):
@@ -1117,13 +1128,13 @@ class DummyMailRequest(object):
     def all_parts(self):
         return [self]
 
+
 class DummyPart(object):
     def __init__(self):
-        self.content_encoding = {'Content-Type':('text/html', {}),
-                                 'Content-Disposition':('inline', {})}
+        self.content_encoding = {'Content-Type': ('text/html', {}),
+                                 'Content-Disposition': ('inline', {})}
         self.parts = []
         self.body = 'body'
 
     def keys(self):
         return []
-        
