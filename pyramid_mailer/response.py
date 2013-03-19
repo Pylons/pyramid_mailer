@@ -47,9 +47,11 @@ from repoze.sendmail import encoding
 def normalize_header(header):
     return string.capwords(header.lower(), '-')
 
-class EncodingError(Exception): 
+
+class EncodingError(Exception):
     """Thrown when there is an encoding error."""
     pass
+
 
 class MailBase(object):
     """MailBase is used as the basis of lamson.mail and contains the basics of
@@ -60,7 +62,7 @@ class MailBase(object):
         self.headers = dict(items)
         self.parts = []
         self.body = None
-        self.content_encoding = {'Content-Type': (None, {}), 
+        self.content_encoding = {'Content-Type': (None, {}),
                                  'Content-Disposition': (None, {}),
                                  'Content-Transfer-Encoding': None}
 
@@ -83,7 +85,8 @@ class MailBase(object):
         del self.headers[normalize_header(key)]
 
     def __nonzero__(self):
-        return self.body != None or len(self.headers) > 0 or len(self.parts) > 0
+        return self.body != None or len(
+            self.headers) > 0 or len(self.parts) > 0
     __bool__ = __nonzero__
 
     def keys(self):
@@ -107,7 +110,6 @@ class MailBase(object):
         part.content_encoding['Content-Transfer-Encoding'] = transfer_encoding
         self.parts.append(part)
 
-
     def attach_text(self, data, ctype):
         """
         This attaches a simpler text encoded part, which doesn't have a
@@ -125,6 +127,7 @@ class MailBase(object):
             yield p
             for x in p.walk():
                 yield x
+
 
 class MailResponse(object):
     """
@@ -146,7 +149,8 @@ class MailResponse(object):
     def __init__(self, To=None, From=None, Subject=None, Body=None, Html=None):
         self.Body = Body
         self.Html = Html
-        self.base = MailBase([('To', To), ('From', From), ('Subject', Subject)])
+        self.base = MailBase(
+            [('To', To), ('From', From), ('Subject', Subject)])
         self.multipart = self.Body and self.Html
         self.attachments = []
 
@@ -195,7 +199,7 @@ class MailResponse(object):
                                  'content_type': content_type,
                                  'data': data,
                                  'disposition': disposition,
-                                 'transfer_encoding': transfer_encoding,})
+                                 'transfer_encoding': transfer_encoding})
 
     def attach_part(self, part):
         """
@@ -230,7 +234,6 @@ class MailResponse(object):
         del self.attachments[:]
         del self.base.parts[:]
         self.multipart = False
-
 
     def update(self, message):
         """
@@ -271,7 +274,8 @@ class MailResponse(object):
         ctype = self.base.content_encoding['Content-Type'][0]
 
         if ctype and not ctype.startswith('multipart'):
-            self.base.content_encoding['Content-Type'] = ('multipart/mixed', {})
+            self.base.content_encoding[
+                'Content-Type'] = ('multipart/mixed', {})
 
     def to_message(self):
         """
@@ -321,9 +325,10 @@ class MailResponse(object):
     def keys(self):
         return self.base.keys()
 
+
 def to_message(mail):
     """
-    Given a MailBase message, this will construct a MIMEPart 
+    Given a MailBase message, this will construct a MIMEPart
     that is canonicalized for use with the Python email API.
     """
     ctype, params = mail.content_encoding['Content-Type']
@@ -335,15 +340,15 @@ def to_message(mail):
             ctype = 'text/plain'
     else:
         if mail.parts:
-            assert ctype.startswith(("multipart", "message")), \
-                   "Content type should be multipart or message, not %r" % ctype
+            assert ctype.startswith(("multipart", "message")), (
+                "Content type should be multipart or message, not %r" % ctype)
 
     # adjust the content type according to what it should be now
     mail.content_encoding['Content-Type'] = (ctype, params)
 
     try:
         out = MIMEPart(ctype, **params)
-    except TypeError: # pragma: no cover
+    except TypeError:  # pragma: no cover
         exc = sys.exc_info()[1]
         raise EncodingError("Content-Type malformed, not allowed: %r; "
                             "%r (Python ERROR: %s" %
@@ -352,7 +357,7 @@ def to_message(mail):
     for k in mail.keys():
         value = mail[k]
         if k.lower() in encoding.ADDR_HEADERS:
-            if is_nonstr_iter(value): # not a string
+            if is_nonstr_iter(value):  # not a string
                 value = ", ".join(value)
         if value == '':
             continue
@@ -366,6 +371,7 @@ def to_message(mail):
 
     return out
 
+
 class MIMEPart(MIMEBase):
     """
     A reimplementation of nearly everything in email.mime to be more useful
@@ -378,7 +384,8 @@ class MIMEPart(MIMEBase):
         MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
     def extract_payload(self, mail):
-        if mail.body == None: return  # only None, '' is still ok
+        if mail.body == None:
+            return  # only None, '' is still ok
 
         ctype, ctype_params = mail.content_encoding['Content-Type']
         cdisp, cdisp_params = mail.content_encoding['Content-Disposition']
@@ -406,10 +413,11 @@ class MIMEPart(MIMEBase):
             self.is_multipart())
 
 
-def is_nonstr_iter(v): # pragma: no cover
-    if isinstance(v, str): 
+def is_nonstr_iter(v):  # pragma: no cover
+    if isinstance(v, str):
         return False
     return hasattr(v, '__iter__')
+
 
 def encode_string(encoding, data):
     encoded = data
