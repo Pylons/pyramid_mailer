@@ -289,18 +289,23 @@ class MailResponse(object):
         """
         del self.base.parts[:]
 
+        part = self.base
         if self.Body and self.Html:
             self.multipart = True
-            self.base.content_encoding['Content-Type'] = (
+            if self.attachments:
+                part = MailBase()
+                self.base.parts.append(part)
+            part.content_encoding['Content-Type'] = (
                 'multipart/alternative', {})
 
         if self.multipart:
             self.base.body = None
             if self.Body:
-                self.base.attach_text(self.Body, 'text/plain')
+                part.attach_text(self.Body, 'text/plain')
 
             if self.Html:
-                self.base.attach_text(self.Html, 'text/html')
+                # Per RFC2046, HTML part is last in multipart/alternative
+                part.attach_text(self.Html, 'text/html')
 
             for args in self.attachments:
                 self._encode_attachment(**args)

@@ -1,6 +1,9 @@
 After 0.10 (unreleased)
 -----------------------
 
+- Issue #32: Fix handling of messages with both HTML and plain text
+  bodies that also have attachments.
+
 - Issue #24:  ensure that ``pyramid_mailer.response.to_message`` returns
   text under Python 3.x.
 

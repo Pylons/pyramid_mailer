@@ -921,6 +921,7 @@ class TestMailResponse(unittest.TestCase):
                                  Body='Body', Html='Html')
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
+        self.assertEqual(message['Content-Type'], 'multipart/alternative')
 
     def test_to_message_multiple_to_recipients(self):
         response = self._makeOne(
@@ -937,11 +938,25 @@ class TestMailResponse(unittest.TestCase):
                                  Body='Body', Html='Html')
         import os
         this = os.path.abspath(__file__)
-        response = self._makeOne()
-        response.attach(filename=this, content_type='text/html',
+        attachment_type = 'text/html'
+        response.attach(filename=this, content_type=attachment_type,
                         data='data'.encode('ascii'), disposition='disposition')
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
+        self.assertEqual(message['Content-Type'], 'multipart/mixed')
+
+        payload = message.get_payload()
+        self.assertEqual(len(payload), 2)
+        self.assertTrue(
+            payload[0]['Content-Type'].startswith('multipart/alternative'))
+        self.assertTrue(
+            payload[1]['Content-Type'].startswith(attachment_type))
+
+        alt_payload = payload[0].get_payload()
+        self.assertTrue(
+            alt_payload[0]['Content-Type'].startswith('text/plain'))
+        self.assertTrue(
+            alt_payload[1]['Content-Type'].startswith('text/html'))
 
     def test_to_message_multipart_with_b64encoding(self):
         from pyramid_mailer.response import MIMEPart
