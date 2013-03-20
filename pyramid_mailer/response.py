@@ -297,6 +297,13 @@ class MailResponse(object):
         """
         del self.base.parts[:]
 
+        if isinstance(self.Body, MailBase):
+            self.Body.body = encoding.best_charset(self.Body.body)[1]
+            self.Body.content_encoding['Content-Type'] = ('text/plain', {})
+        if isinstance(self.Html, MailBase):
+            self.Html.body = encoding.best_charset(self.Html.body)[1]
+            self.Html.content_encoding['Content-Type'] = ('text/html', {})
+
         part = self.base
         if self.Body and self.Html:
             self.multipart = True
@@ -308,22 +315,34 @@ class MailResponse(object):
 
         if self.multipart:
             self.base.body = None
-            if self.Body:
+            if isinstance(self.Body, MailBase):
+                part.parts.append(self.Body)
+            elif self.Body:
                 part.attach_text(self.Body, 'text/plain')
 
-            if self.Html:
-                # Per RFC2046, HTML part is last in multipart/alternative
+            # Per RFC2046, HTML part is last in multipart/alternative
+            if isinstance(self.Html, MailBase):
+                part.parts.append(self.Html)
+            elif self.Html:
                 part.attach_text(self.Html, 'text/html')
 
             for args in self.attachments:
                 self._encode_attachment(**args)
 
         elif self.Body:
-            self.base.body = self.Body
+            if isinstance(self.Body, MailBase):
+                self.base.body = self.Body.body
+                self.base.content_encoding.update(**self.Body.content_encoding)
+            else:
+                self.base.body = self.Body
             self.base.content_encoding['Content-Type'] = ('text/plain', {})
 
         elif self.Html:
-            self.base.body = self.Html
+            if isinstance(self.Html, MailBase):
+                self.base.body = self.Html.body
+                self.base.content_encoding.update(**self.Html.content_encoding)
+            else:
+                self.base.body = self.Html
             self.base.content_encoding['Content-Type'] = ('text/html', {})
 
         return to_message(self.base)

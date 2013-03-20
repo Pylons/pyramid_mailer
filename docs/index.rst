@@ -255,6 +255,20 @@ A transfer encoding can be specified via the ``transfer_encoding`` option.
 Supported options are currently ``base64`` (the default) and
 ``quoted-printable``.
 
+You can also pass an attachment as the ``body`` and/or ``html``
+arguments to specify ``Content-Transfer-Encoding`` or other
+``Attachment`` attributes::
+
+    from pyramid_mailer.message import Attachment
+    from pyramid_mailer.message import Message
+
+    body = Attachment(data="hello, arthur",
+                      transfer_encoding="quoted-printable")
+    html = Attachment(data="<p>hello, arthur</p>",
+                      transfer_encoding="quoted-printable")
+    message = Message(body=body, html=html)
+
+
 Unit tests
 ----------
 

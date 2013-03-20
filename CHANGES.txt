@@ -1,6 +1,9 @@
 After 0.10 (unreleased)
 -----------------------
 
+- Issue #29: Allow setting Content-Transfer-Encoding for body and html
+  via Attachments.
+
 - Issue #32: Fix handling of messages with both HTML and plain text
   bodies that also have attachments.
 
