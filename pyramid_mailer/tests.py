@@ -962,7 +962,13 @@ class TestMailResponse(unittest.TestCase):
         from pyramid_mailer.response import MIMEPart
         response = self._makeOne(To='To', From='From', Subject='Subject',
                                  Body='Body', Html='Html')
-        import base64
+        try:
+            from base64 import encodebytes as base64_encodebytes
+            # pyflakes
+            base64_encodebytes  # pragma: no cover
+        except ImportError:  # pragma: no cover
+            # BBB Python 2 compat
+            from base64 import encodestring as base64_encodebytes
         import os
         this = os.path.abspath(__file__)
         data = self._read_filedata(this, mode='rb')
@@ -974,7 +980,7 @@ class TestMailResponse(unittest.TestCase):
         payload = message.get_payload()[0]
         self.assertEqual(payload.get('Content-Transfer-Encoding'), 'base64')
         self.assertEqual(payload.get_payload(),
-                         base64.encodestring(data).decode('ascii'))
+                         base64_encodebytes(data).decode('ascii'))
 
     def test_to_message_multipart_with_qpencoding(self):
         from pyramid_mailer.response import MIMEPart

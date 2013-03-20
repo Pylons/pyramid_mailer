@@ -33,13 +33,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import base64
 import os
 import quopri
 import sys
 import mimetypes
 import string
 from email.mime.base import MIMEBase
+
+try:
+    from base64 import encodebytes as base64_encodebytes
+    # pyflakes
+    base64_encodebytes  # pragma: no cover
+except ImportError:
+    # BBB Python 2 compat
+    from base64 import encodestring as base64_encodebytes
+
 
 from repoze.sendmail import encoding
 
@@ -427,7 +435,7 @@ def is_nonstr_iter(v):  # pragma: no cover
 def encode_string(encoding, data):
     encoded = data
     if encoding == 'base64':
-        encoded = base64.encodestring(data).decode('ascii')
+        encoded = base64_encodebytes(data).decode('ascii')
     elif encoding == 'quoted-printable':
         encoded = quopri.encodestring(data).decode('ascii')
     return encoded
