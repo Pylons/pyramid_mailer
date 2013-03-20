@@ -1,7 +1,7 @@
 # BBB Python 2 vs 3 compat
 try:
     unicode
-except NameError: # pragma: no cover
+except NameError:  # pragma: no cover
     basestring = (bytes, str)
 else:
     basestring = (str, unicode)
@@ -10,6 +10,7 @@ from pyramid_mailer.response import MailResponse
 
 from pyramid_mailer.exceptions import BadHeaders
 from pyramid_mailer.exceptions import InvalidMessage
+
 
 class Attachment(object):
     """
@@ -22,9 +23,9 @@ class Attachment(object):
     :param transfer_encoding: content-transfer-encoding (if any)
     """
 
-    def __init__(self, 
-                 filename=None, 
-                 content_type=None, 
+    def __init__(self,
+                 filename=None,
+                 content_type=None,
                  data=None,
                  disposition=None,
                  transfer_encoding=None):
@@ -58,17 +59,16 @@ class Message(object):
     :param attachments: list of Attachment instances
     """
 
-    def __init__(self, 
-                 subject=None, 
-                 recipients=None, 
-                 body=None, 
-                 html=None, 
+    def __init__(self,
+                 subject=None,
+                 recipients=None,
+                 body=None,
+                 html=None,
                  sender=None,
                  cc=None,
                  bcc=None,
                  extra_headers=None,
                  attachments=None):
-
 
         self.subject = subject or ''
         self.sender = sender
@@ -89,7 +89,7 @@ class Message(object):
         """
         Returns raw email.Message instance.Validates message first.
         """
-        
+
         self.validate()
 
         return self.get_response().to_message()
@@ -119,12 +119,12 @@ class Message(object):
         response.update(self.extra_headers)
 
         return response
-    
+
     def is_bad_headers(self):
         """
         Checks for bad headers i.e. newlines in subject, sender or recipients.
         """
-       
+
         headers = [self.subject, self.sender]
         headers += list(self.send_to)
         headers += self.extra_headers.values()
@@ -134,7 +134,7 @@ class Message(object):
                 if c in val:
                     return True
         return False
-        
+
     def validate(self):
         """
         Checks if message is valid and raises appropriate exception.
@@ -155,15 +155,15 @@ class Message(object):
     def add_recipient(self, recipient):
         """
         Adds another recipient to the message.
-        
+
         :param recipient: email address of recipient.
         """
-        
+
         self.recipients.append(recipient)
 
     def add_cc(self, recipient):
         """
-        Adds an email address to the CC list. 
+        Adds an email address to the CC list.
 
         :param recipient: email address of recipient.
         """
@@ -172,7 +172,7 @@ class Message(object):
 
     def add_bcc(self, recipient):
         """
-        Adds an email address to the BCC list. 
+        Adds an email address to the BCC list.
 
         :param recipient: email address of recipient.
         """
@@ -187,5 +187,3 @@ class Message(object):
         """
 
         self.attachments.append(attachment)
-
-
