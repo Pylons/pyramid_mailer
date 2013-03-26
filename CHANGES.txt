@@ -12,6 +12,8 @@ After 0.10 (unreleased)
 
 - Dropped support for Python 2.5.
 
+- [jvanasco] added support for sendmail binary via repoze.sendmail 4.0-dev
+
 0.10 (2012-11-22)
 -----------------
 

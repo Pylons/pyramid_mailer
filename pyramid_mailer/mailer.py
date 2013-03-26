@@ -1,6 +1,7 @@
 import smtplib
 
 from repoze.sendmail.mailer import SMTPMailer
+from repoze.sendmail.mailer import SendmailMailer
 from repoze.sendmail.delivery import DirectMailDelivery
 from repoze.sendmail.delivery import QueuedMailDelivery
 
@@ -49,6 +50,25 @@ class DummyMailer(object):
         """
         self.queue.append(message)
 
+    def send_sendmail(self, message ):
+        """
+        Mocks sending a transactional message. The message is added to the 
+        **outbox** list.
+
+        :param message: a **Message** instance.
+        """
+        self.outbox.append(message)
+
+    def send_immediately_sendmail(self, message, fail_silently=False):
+        """
+        Mocks sending an immediate (non-transactional) message. The message
+        is added to the **outbox** list.
+
+        :param message: a **Message** instance.
+        :param fail_silently: swallow connection errors (ignored here)
+        """
+        self.outbox.append(message)
+
 
 class SMTP_SSLMailer(SMTPMailer):
     """
@@ -96,6 +116,10 @@ class Mailer(object):
     :param certfile: SSL certificate file
     :param queue_path: path to maildir for queued messages
     :param default_sender: default "from" address
+    :param sendmail_app: path to "sendmail" binary.
+           repoze defaults to "/usr/sbin/sendmail"
+    :param sendmail_template: custom commandline template passed to sendmail binary
+           repoze defaults to'["{sendmail_app}", "-t", "-i", "-f", "{sender}"]'
     :param debug: SMTP debug level
     """
 
@@ -110,6 +134,8 @@ class Mailer(object):
                  certfile=None,
                  queue_path=None,
                  default_sender=None,
+                 sendmail_app=None,
+                 sendmail_template=None,
                  debug=0):
 
 
@@ -143,6 +169,9 @@ class Mailer(object):
             self.queue_delivery = QueuedMailDelivery(queue_path)
         else:
             self.queue_delivery = None
+            
+        self.sendmail_mailer = SendmailMailer( sendmail_app , sendmail_template )
+        self.sendmail_delivery = DirectMailDelivery(self.sendmail_mailer)        
 
         self.default_sender = default_sender
 
@@ -228,3 +257,33 @@ class Mailer(object):
                 message.send_to,
                 message.to_message())
 
+    def send_sendmail(self, message ):
+        """
+        Sends a message within the transaction manager.
+
+        Uses the local sendmail option
+
+        :param message: a **Message** instance.
+        """
+        return self.sendmail_delivery.send(*self._message_args(message))
+
+    def send_immediately_sendmail(self, message, fail_silently=False):
+        """
+        Sends a message immediately, outside the transaction manager.
+
+        Uses the local sendmail option
+
+        If there is a connection error to the mail server this will have to
+        be handled manually. However if you pass ``fail_silently`` the error
+        will be swallowed.
+
+        :param message: a **Message** instance.
+
+        :param fail_silently: silently handle connection errors.
+        """
+
+        try:
+            return self.sendmail_mailer.send(*self._message_args(message))
+        except :
+            if not fail_silently:
+                raise
