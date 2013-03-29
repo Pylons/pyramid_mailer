@@ -112,3 +112,5 @@ Contributors
 - Ross Patterson, 2012/03/13
 
 - Michael Merickel, 2011/11/13
+
+- Marcin Kuzminski, 2012/01/22
