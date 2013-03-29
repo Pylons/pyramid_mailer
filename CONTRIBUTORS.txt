@@ -88,13 +88,13 @@ Committed Code.
 Licensing Exceptions
 ====================
 
-None.
+BSD licenses used: see LICENSE.txt.
 
 List of Contributors
 ====================
 
 The below-signed are contributors to a code repository that is part of the
-project named "repoze.sendmail".
+project named "pyramid_mailer".
 
 Each below-signed contributor has read, understand and agrees to the terms
 above in the section within this document entitled "Repoze Project Contributor
