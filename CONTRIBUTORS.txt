@@ -116,3 +116,5 @@ Contributors
 - Michael Merickel, 2011/11/13
 
 - Marcin Kuzminski, 2012/01/22
+
+- Christophe Combelles, 2012/05/26
