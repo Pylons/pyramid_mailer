@@ -109,6 +109,8 @@ Contributors
 
 - Tres Seaver, 2013/01/28
 
+- Tetsuya Morimoto, 2012/07/17
+
 - Ross Patterson, 2012/03/13
 
 - Michael Merickel, 2011/11/13
