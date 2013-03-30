@@ -107,14 +107,16 @@ Contributors
 
 - Dan Connolly, 2011/11/01
 
-- Tres Seaver, 2013/01/28
-
-- Tetsuya Morimoto, 2012/07/17
-
-- Ross Patterson, 2012/03/13
+- Blaise Laflamme, 2011/11/07
 
 - Michael Merickel, 2011/11/13
 
 - Marcin Kuzminski, 2012/01/22
 
+- Ross Patterson, 2012/03/13
+
 - Christophe Combelles, 2012/05/26
+
+- Tetsuya Morimoto, 2012/07/17
+
+- Tres Seaver, 2013/01/28
