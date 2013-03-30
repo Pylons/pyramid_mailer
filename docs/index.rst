@@ -41,7 +41,15 @@ queries there.
 Getting Started (The Easier Way)
 --------------------------------
 
-In your application's configuration stanza use the
+Or, in your application's configuration development.ini add::
+
+   pyramid.includes =
+      pyramid_mailer
+      ...
+      pyramid_debugtoolbar
+      pyramid_tm
+
+Or, in your application's configuration stanza use the
 :meth:`pyramid.config.Configurator.include` method::
 
    config.include('pyramid_mailer')
@@ -158,18 +166,18 @@ If you don't use Paste, just pass the settings directly into your Pyramid
 The available settings are listed below.
 
 =========================  ===============    =====================
-Setting                    Default            Description              
+Setting                    Default            Description
 =========================  ===============    =====================
-**mail.host**              ``localhost``      SMTP host                
-**mail.port**              ``25``             SMTP port                
-**mail.username**          **None**           SMTP username            
-**mail.password**          **None**           SMTP password           
-**mail.tls**               **False**          Use TLS                  
-**mail.ssl**               **False**          Use SSL                  
-**mail.keyfile**           **None**           SSL key file             
-**mail.certfile**          **None**           SSL certificate file     
-**mail.queue_path**        **None**           Location of maildir      
-**mail.default_sender**    **None**           Default from address     
+**mail.host**              ``localhost``      SMTP host
+**mail.port**              ``25``             SMTP port
+**mail.username**          **None**           SMTP username
+**mail.password**          **None**           SMTP password
+**mail.tls**               **False**          Use TLS
+**mail.ssl**               **False**          Use SSL
+**mail.keyfile**           **None**           SSL key file
+**mail.certfile**          **None**           SSL certificate file
+**mail.queue_path**        **None**           Location of maildir
+**mail.default_sender**    **None**           Default from address
 **mail.debug**             **0**              SMTP debug level
 =========================  ===============    =====================
 
@@ -184,7 +192,7 @@ Setting                    Default            Description
 ``> 0`` will result in debug messages for all messages sent and received from
 the server. Thus, specifying ``mail.debug`` with any value will result in debug
 messages as ``pyramid_mailer`` will not attempt to coerce this value from its
-original string. 
+original string.
 
 Transactions
 ------------
@@ -211,7 +219,7 @@ For example::
     transaction.commit()
 
 
-The email is not actually sent until the transaction is committed. 
+The email is not actually sent until the transaction is committed.
 
 When the `repoze.tm2 <http://pypi.python.org/pypi/repoze.tm2>`_ ``tm``
 middleware is in your Pyramid WSGI pipeline or if you've included the
@@ -246,7 +254,7 @@ could be rewritten::
 
     message = Message()
 
-    attachment = Attachment("photo.jpg", "image/jpg", 
+    attachment = Attachment("photo.jpg", "image/jpg",
                             open("photo.jpg", "rb"))
 
     message.attach(attachment)
@@ -326,8 +334,8 @@ program comes as part of `repoze_sendmail`_ (a dependency of the
 installed into your Python (or virtualenv) ``bin`` or ``Scripts`` directory
 when you install ``repoze_sendmail``.
 
-``qp`` is a script that is meant to be run as a cron job because what it does 
-is that it looks at maildir and sends messages. You'll need to arrange 
+``qp`` is a script that is meant to be run as a cron job because what it does
+is that it looks at maildir and sends messages. You'll need to arrange
 for ``qp`` to be a long-running process that monitors the maildir state.::
 
   $ bin/qp /path/to/mail/queue
@@ -353,12 +361,12 @@ different settings.  Use it's ``--help`` parameter to see more::
           tx.commit()
       except Exception:
           # handle a failed delivery
-        
+
 API
 ---
 
 .. module:: pyramid_mailer
-    
+
 .. autofunction:: mailer_factory_from_settings
 
 .. autofunction:: get_mailer
@@ -370,7 +378,7 @@ API
 
 .. autoclass:: DummyMailer
    :members:
-    
+
 .. module:: pyramid_mailer.message
 
 .. autoclass:: Message
