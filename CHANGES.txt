@@ -1,7 +1,10 @@
 Next release
 ------------
 
-- ...
+Next release
+------------
+
+- Pull #35:  aadded support for sendmail binary via repoze.sendmail >= 4.0b2.
 
 0.11 (2013-03-28)
 -----------------
@@ -16,8 +19,6 @@ Next release
   text under Python 3.x.
 
 - Dropped support for Python 2.5.
-
-- [jvanasco] added support for sendmail binary via repoze.sendmail 4.0-dev
 
 0.10 (2012-11-22)
 -----------------
