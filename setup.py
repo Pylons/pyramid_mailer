@@ -59,7 +59,7 @@ setup(
     platforms='any',
     install_requires=[
         'pyramid',
-        'repoze.sendmail>=3.2dev',
+        'repoze.sendmail>=4.0b2',
     ],
     tests_require = tests_require,
     extras_require = {
