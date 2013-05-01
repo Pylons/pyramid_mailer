@@ -38,6 +38,7 @@ import quopri
 import sys
 import mimetypes
 import string
+import types
 from email.mime.base import MIMEBase
 
 try:
@@ -118,7 +119,7 @@ class MailBase(object):
         part.content_encoding['Content-Transfer-Encoding'] = transfer_encoding
         self.parts.append(part)
 
-    def attach_text(self, data, ctype):
+    def attach_text(self, data, ctype, transfer_encoding=None , charset=None):
         """
         This attaches a simpler text encoded part, which doesn't have a
         filename.
@@ -127,7 +128,12 @@ class MailBase(object):
 
         part = MailBase()
         part.body = data
-        part.content_encoding['Content-Type'] = (ctype, {})
+        ctype_params = {}
+        if charset is not None:
+            ctype_params['charset'] = charset
+        part.content_encoding['Content-Type'] = (ctype, ctype_params)
+        if transfer_encoding is not None :
+            part.content_encoding['Content-Transfer-Encoding'] = transfer_encoding
         self.parts.append(part)
 
     def walk(self):
@@ -296,13 +302,27 @@ class MailResponse(object):
         lamson.encoding.MailBase.
         """
         del self.base.parts[:]
+        
+        # ensure ASCII compliance of self.Body
+        if self.Body :
+            if isinstance( self.Body , types.StringTypes ):
+                try:
+                    tried = self.Body.encode('ascii')
+                except UnicodeEncodeError:
+                    raise EncodingError("Non-ASCII text must be in `html` part")
+            elif isinstance(self.Body, MailBase):
+                try:
+                    tried = self.Body.body.encode('ascii')
+                except UnicodeEncodeError:
+                    raise EncodingError("Non-ASCII text must be in `html` part")
+                (p_charset,p_encoded) = encoding.best_charset(self.Body.body)
+                self.Body.body = p_encoded
+                self.Body.content_encoding['Content-Type'] = ('text/plain', {'charset':p_charset})
 
-        if isinstance(self.Body, MailBase):
-            self.Body.body = encoding.best_charset(self.Body.body)[1]
-            self.Body.content_encoding['Content-Type'] = ('text/plain', {})
         if isinstance(self.Html, MailBase):
-            self.Html.body = encoding.best_charset(self.Html.body)[1]
-            self.Html.content_encoding['Content-Type'] = ('text/html', {})
+            (p_charset,p_encoded) = encoding.best_charset(self.Html.body)
+            self.Html.body = p_encoded
+            self.Html.content_encoding['Content-Type'] = ('text/html', {'charset':p_charset})
 
         part = self.base
         if self.Body and self.Html:
@@ -324,7 +344,13 @@ class MailResponse(object):
             if isinstance(self.Html, MailBase):
                 part.parts.append(self.Html)
             elif self.Html:
-                part.attach_text(self.Html, 'text/html')
+                charset = None
+                try :
+                    encoded = self.Html.encode('ascii')
+                except UnicodeEncodeError:
+                    (charset,charset_encoded) = encoding.best_charset(self.Html)
+                    self.Html = charset_encoded
+                part.attach_text(self.Html, 'text/html' , charset=charset)
 
             for args in self.attachments:
                 self._encode_attachment(**args)
@@ -425,6 +451,29 @@ class MIMEPart(MIMEBase):
 
         assert ctype, ("Extract payload requires that mail.content_encoding "
                        "have a valid Content-Type.")
+
+        # this should catch non `body` items that are text/plain
+        ctype = ctype.lower()
+        if ctype == 'text/plain':
+            try:
+                tried = mail.body.encode('ascii')
+            except UnicodeDecodeError:
+                raise EncodingError("Content-Type is text/plain but not ASCII text")
+
+        # let's try and encode this
+        if ctenc is None:
+            try:
+                tried = mail.body.encode('ascii')
+            except UnicodeDecodeError:
+                try :
+                    ctenc = 'quoted-printable'
+                    tried = encode_string(ctenc, mail.body).encode('ascii')
+                except UnicodeDecodeError:
+                    try :
+                        ctenc = 'base64'
+                        tried = encode_string(ctenc, mail.body).encode('ascii')
+                    except UnicodeDecodeError:
+                        raise EncodingError("I can't encode this")
 
         if cdisp:
             # replicate the content-disposition settings

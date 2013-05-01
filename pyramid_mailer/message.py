@@ -159,7 +159,7 @@ class Message(object):
 
         if not self.body and not self.html:
             raise InvalidMessage("No body has been set")
-
+            
         if not self.sender:
             raise InvalidMessage("No sender address has been set")
 
