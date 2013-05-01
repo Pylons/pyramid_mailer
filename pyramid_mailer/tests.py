@@ -227,6 +227,7 @@ class TestMessage(unittest.TestCase):
         self.assertEqual(len(response.attachments), 1)
 
     def test_attach_as_body_and_html(self):
+        
         import codecs
         from pyramid_mailer.message import Message
         from pyramid_mailer.message import Attachment
@@ -243,18 +244,18 @@ class TestMessage(unittest.TestCase):
         msg = Message(subject="testing",
                       sender="from@example.com",
                       recipients=["to@example.com"],
-                      body=body, html=html)
+                      body=body, html=text_html)
         message = msg.to_message()
         body_part, html_part = message.get_payload()
         self.assertEqual(
-            body_part['Content-Type'], 'text/plain')
+            body_part['Content-Type'][:10], 'text/plain')
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
         self.assertEqual(body_part.get_payload(),
                          codecs.getencoder('quopri_codec')(
                              text.encode(charset))[0].decode('ascii'))
         self.assertEqual(
-            html_part['Content-Type'], 'text/html')
+            html_part['Content-Type'][:9], 'text/html')
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
         self.assertEqual(html_part.get_payload(),
@@ -406,6 +407,65 @@ class TestMessage(unittest.TestCase):
                       recipients=["to@example.com"])
 
         self.assertTrue(msg.is_bad_headers())
+
+
+    def test_fails_unicode_in_body(self):
+
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.response import EncodingError
+
+        utf_8_encoded = b('mo \xe2\x82\xac')
+        utf_8 = utf_8_encoded.decode('utf_8')
+        text_string = utf_8
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body=text_string,
+                      html=None)
+
+        self.assertRaises(EncodingError, msg.to_message)
+
+
+    def test_accepts_ascii_in_body(self):
+
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.response import EncodingError
+
+        text_string = 'ascii'
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body=text_string,
+                      html=None)
+
+        self.assertTrue(msg.to_message())
+
+
+
+    def test_accepts_unicode_in_html(self):
+
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.response import EncodingError
+
+        text_string = 'ascii'
+        utf_8_encoded = b('mo \xe2\x82\xac')
+        utf_8 = utf_8_encoded.decode('utf_8')
+        html_string = utf_8
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body=text_string,
+                      html=html_string)
+
+        self.assertTrue(msg.to_message())
+
+
+
+
+
 
 
 class TestMailerSendmail(unittest.TestCase):
@@ -601,16 +661,14 @@ class TestMailer(unittest.TestCase):
         self.assertEqual(result, None)
 
     def test_send_immediately_multipart(self):
-
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
         mailer = Mailer()
 
+        text_string = 'ascii'
         utf_8_encoded = b('mo \xe2\x82\xac')
         utf_8 = utf_8_encoded.decode('utf_8')
-
-        text_string = utf_8
         html_string = '<p>' + utf_8 + '</p>'
 
         msg = Message(subject="testing",

@@ -311,10 +311,6 @@ class MailResponse(object):
                 except UnicodeEncodeError:
                     raise EncodingError("Non-ASCII text must be in `html` part")
             elif isinstance(self.Body, MailBase):
-                try:
-                    tried = self.Body.body.encode('ascii')
-                except UnicodeEncodeError:
-                    raise EncodingError("Non-ASCII text must be in `html` part")
                 (p_charset,p_encoded) = encoding.best_charset(self.Body.body)
                 self.Body.body = p_encoded
                 self.Body.content_encoding['Content-Type'] = ('text/plain', {'charset':p_charset})
@@ -452,14 +448,6 @@ class MIMEPart(MIMEBase):
         assert ctype, ("Extract payload requires that mail.content_encoding "
                        "have a valid Content-Type.")
 
-        # this should catch non `body` items that are text/plain
-        ctype = ctype.lower()
-        if ctype == 'text/plain':
-            try:
-                tried = mail.body.encode('ascii')
-            except UnicodeDecodeError:
-                raise EncodingError("Content-Type is text/plain but not ASCII text")
-
         # let's try and encode this
         if ctenc is None:
             try:
@@ -482,6 +470,15 @@ class MIMEPart(MIMEBase):
             # need to encode because repoze.sendmail don't handle attachments
             mail.body = encode_string(ctenc, mail.body)
             self.add_header('Content-Transfer-Encoding', ctenc)
+
+        # this should catch non `body` items that are text/plain
+        # this must happen down here, because the content might be encoded above
+        ctype = ctype.lower()
+        if ctype == 'text/plain':
+            try:
+                tried = mail.body.encode('ascii')
+            except UnicodeDecodeError:
+                raise EncodingError("Content-Type is text/plain but not ASCII text")
 
         self.set_payload(mail.body)
 
