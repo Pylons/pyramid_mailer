@@ -158,7 +158,8 @@ class Message(object):
             raise InvalidMessage("No recipients have been added")
 
         if not self.body and not self.html:
-            raise InvalidMessage("No body has been set")
+            raise InvalidMessage("No body or html has been set;"
+                " at least one is required")
             
         if not self.sender:
             raise InvalidMessage("No sender address has been set")
