@@ -226,12 +226,12 @@ class TestMessage(unittest.TestCase):
 
         self.assertEqual(len(response.attachments), 1)
 
-    def test_attach_as_body_and_html(self):
+    def test_attach_as_body_and_html_latin1(self):
         import codecs
         from pyramid_mailer.message import Message
         from pyramid_mailer.message import Attachment
 
-        charset = 'latin-1'
+        charset = 'iso-8859-1'
         text_encoded = b('LaPe\xf1a')
         text = text_encoded.decode(charset)
         text_html = '<p>' + text + '</p>'
@@ -247,26 +247,70 @@ class TestMessage(unittest.TestCase):
         message = msg.to_message()
         body_part, html_part = message.get_payload()
         self.assertEqual(
-            body_part['Content-Type'], 'text/plain')
+            body_part['Content-Type'], 'text/plain; charset="%s"' % charset)
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
-        self.assertEqual(body_part.get_payload(),
-                         codecs.getencoder('quopri_codec')(
-                             text.encode(charset))[0].decode('ascii'))
+        encoder = codecs.getencoder('quopri_codec')
+        payload = body_part.get_payload()
+        encoded_text = text.encode(charset)
+        expected = encoder(encoded_text)[0].decode('ascii')
+        self.assertEqual(payload, expected)
+
         self.assertEqual(
-            html_part['Content-Type'], 'text/html')
+            html_part['Content-Type'], 'text/html; charset="%s"' % charset)
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
-        self.assertEqual(html_part.get_payload(),
-                         codecs.getencoder('quopri_codec')(
-                             text_html.encode(charset))[0].decode('ascii'))
+        payload = html_part.get_payload()
+        encoded_html = text_html.encode(charset)
+        expected = encoder(encoded_html)[0].decode('ascii')
+        self.assertEqual(payload, expected)
+
+    def test_attach_as_body_and_html_utf8(self):
+        import codecs
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.message import Attachment
+
+        charset = 'utf-8'
+        # greek small letter iota with dialtyika and tonos
+        text_encoded = b('\xce\x90')
+        text = text_encoded.decode(charset)
+        text_html = '<p>' + text + '</p>'
+        transfer_encoding = 'quoted-printable'
+        body = Attachment(data=text,
+                          transfer_encoding=transfer_encoding)
+        html = Attachment(data=text_html,
+                          transfer_encoding=transfer_encoding)
+        msg = Message(subject="testing",
+                      sender="from@example.com",
+                      recipients=["to@example.com"],
+                      body=body, html=html)
+        message = msg.to_message()
+        body_part, html_part = message.get_payload()
+        self.assertEqual(
+            body_part['Content-Type'], 'text/plain; charset="%s"' % charset)
+        self.assertEqual(
+            body_part['Content-Transfer-Encoding'], transfer_encoding)
+        encoder = codecs.getencoder('quopri_codec')
+        payload = body_part.get_payload()
+        encoded_text = text.encode(charset)
+        expected = encoder(encoded_text)[0].decode('ascii')
+        self.assertEqual(payload, expected)
+
+        self.assertEqual(
+            html_part['Content-Type'], 'text/html; charset="%s"' % charset)
+        self.assertEqual(
+            html_part['Content-Transfer-Encoding'], transfer_encoding)
+        payload = html_part.get_payload()
+        encoded_html = text_html.encode(charset)
+        expected = encoder(encoded_html)[0].decode('ascii')
+        self.assertEqual(payload, expected)
 
     def test_attach_as_body(self):
         import codecs
         from pyramid_mailer.message import Message
         from pyramid_mailer.message import Attachment
 
-        charset = 'latin-1'
+        charset = 'iso-8859-1'
         text_encoded = b('LaPe\xf1a')
         text = text_encoded.decode(charset)
         transfer_encoding = 'quoted-printable'
@@ -279,7 +323,7 @@ class TestMessage(unittest.TestCase):
         body_part = msg.to_message()
 
         self.assertEqual(
-            body_part['Content-Type'], 'text/plain')
+            body_part['Content-Type'], 'text/plain; charset="%s"' % charset)
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
         self.assertEqual(body_part.get_payload(),
@@ -291,7 +335,7 @@ class TestMessage(unittest.TestCase):
         from pyramid_mailer.message import Message
         from pyramid_mailer.message import Attachment
 
-        charset = 'latin-1'
+        charset = 'iso-8859-1'
         text_encoded = b('LaPe\xf1a')
         text = text_encoded.decode(charset)
         text_html = '<p>' + text + '</p>'
@@ -305,7 +349,7 @@ class TestMessage(unittest.TestCase):
         html_part = msg.to_message()
 
         self.assertEqual(
-            html_part['Content-Type'], 'text/html')
+            html_part['Content-Type'], 'text/html; charset="%s"' % charset)
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
         self.assertEqual(html_part.get_payload(),

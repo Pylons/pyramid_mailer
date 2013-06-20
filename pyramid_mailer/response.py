@@ -298,11 +298,19 @@ class MailResponse(object):
         del self.base.parts[:]
 
         if isinstance(self.Body, MailBase):
-            self.Body.body = encoding.best_charset(self.Body.body)[1]
-            self.Body.content_encoding['Content-Type'] = ('text/plain', {})
+            charset, self.Body.body = encoding.best_charset(self.Body.body)
+            if charset == 'ascii':
+                params = {}
+            else:
+                params = {'charset':charset}
+            self.Body.content_encoding['Content-Type'] = ('text/plain', params)
         if isinstance(self.Html, MailBase):
-            self.Html.body = encoding.best_charset(self.Html.body)[1]
-            self.Html.content_encoding['Content-Type'] = ('text/html', {})
+            charset, self.Html.body = encoding.best_charset(self.Html.body)
+            if charset == 'ascii':
+                params = {}
+            else:
+                params = {'charset':charset}
+            self.Html.content_encoding['Content-Type'] = ('text/html', params)
 
         part = self.base
         if self.Body and self.Html:
@@ -335,7 +343,7 @@ class MailResponse(object):
                 self.base.content_encoding.update(**self.Body.content_encoding)
             else:
                 self.base.body = self.Body
-            self.base.content_encoding['Content-Type'] = ('text/plain', {})
+                self.base.content_encoding['Content-Type'] = ('text/plain', {})
 
         elif self.Html:
             if isinstance(self.Html, MailBase):
@@ -343,7 +351,7 @@ class MailResponse(object):
                 self.base.content_encoding.update(**self.Html.content_encoding)
             else:
                 self.base.body = self.Html
-            self.base.content_encoding['Content-Type'] = ('text/html', {})
+                self.base.content_encoding['Content-Type'] = ('text/html', {})
 
         return to_message(self.base)
 
