@@ -271,7 +271,8 @@ class TestMessage(unittest.TestCase):
         from pyramid_mailer.message import Attachment
 
         charset = 'utf-8'
-        # greek small letter iota with dialtyika and tonos
+        # greek small letter iota with dialtyika and tonos; this character
+        # cannot be encoded to either ascii or latin-1, so utf-8 is chosen
         text_encoded = b('\xce\x90')
         text = text_encoded.decode(charset)
         text_html = '<p>' + text + '</p>'
