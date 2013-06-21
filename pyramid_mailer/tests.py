@@ -7,11 +7,9 @@ import errno
 
 # BBB Python 2.5 & 3 compat
 try:
-    b = str
-    str = unicode
+    text = unicode
 except NameError:  # pragma: no cover
-    def b(x):
-        return x.encode('utf-8')
+    text = str
 
 try:
     from io import StringIO
@@ -38,7 +36,7 @@ class TestAttachment(unittest.TestCase):
 
         from pyramid_mailer.message import Attachment
 
-        a = Attachment(data=StringIO(str("foo")))
+        a = Attachment(data=StringIO(text("foo")))
         self.assertEqual(a.data, "foo")
 
 
@@ -158,7 +156,7 @@ class TestMessage(unittest.TestCase):
                       cc=["tosomeoneelse@example.com"])
 
         response = msg.get_response()
-        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in text(response))
 
     def test_cc_without_recipients(self):
 
@@ -173,7 +171,7 @@ class TestMessage(unittest.TestCase):
         msgid = mailer.send(msg)
         response = msg.get_response()
 
-        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in text(response))
         self.assertTrue(msgid)
 
     def test_cc_without_recipients_2(self):
@@ -185,7 +183,7 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       cc=["tosomeoneelse@example.com"])
         response = msg.get_response()
-        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in text(response))
 
     def test_bcc_without_recipients(self):
 
@@ -200,7 +198,7 @@ class TestMessage(unittest.TestCase):
         msgid = mailer.send(msg)
         response = msg.get_response()
 
-        self.assertFalse("Bcc: tosomeoneelse@example.com" in str(response))
+        self.assertFalse("Bcc: tosomeoneelse@example.com" in text(response))
         self.assertTrue(msgid)
 
     def test_attach(self):
@@ -232,7 +230,7 @@ class TestMessage(unittest.TestCase):
         from pyramid_mailer.message import Attachment
 
         charset = 'iso-8859-1'
-        text_encoded = b('LaPe\xf1a')
+        text_encoded = b'LaPe\xf1a'
         text = text_encoded.decode(charset)
         text_html = '<p>' + text + '</p>'
         transfer_encoding = 'quoted-printable'
@@ -246,8 +244,14 @@ class TestMessage(unittest.TestCase):
                       body=body, html=html)
         message = msg.to_message()
         body_part, html_part = message.get_payload()
-        self.assertEqual(
-            body_part['Content-Type'], 'text/plain; charset="%s"' % charset)
+
+        # different repoze.sendmail versions use a different string to
+        # represent the charset, so we permit either.
+        self.assertTrue(
+            body_part['Content-Type'] in 
+                ('text/plain; charset="iso-8859-1"',
+                 'text/plain; charset="latin_1"'),
+                )
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
         encoder = codecs.getencoder('quopri_codec')
@@ -256,8 +260,13 @@ class TestMessage(unittest.TestCase):
         expected = encoder(encoded_text)[0].decode('ascii')
         self.assertEqual(payload, expected)
 
-        self.assertEqual(
-            html_part['Content-Type'], 'text/html; charset="%s"' % charset)
+        # different repoze.sendmail versions use a different string to
+        # represent the charset, so we permit either.
+        self.assertTrue(
+            html_part['Content-Type'] in 
+                ('text/html; charset="iso-8859-1"',
+                 'text/html; charset="latin_1"'),
+                )
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
         payload = html_part.get_payload()
@@ -273,7 +282,7 @@ class TestMessage(unittest.TestCase):
         charset = 'utf-8'
         # greek small letter iota with dialtyika and tonos; this character
         # cannot be encoded to either ascii or latin-1, so utf-8 is chosen
-        text_encoded = b('\xce\x90')
+        text_encoded = b'\xce\x90'
         text = text_encoded.decode(charset)
         text_html = '<p>' + text + '</p>'
         transfer_encoding = 'quoted-printable'
@@ -287,8 +296,14 @@ class TestMessage(unittest.TestCase):
                       body=body, html=html)
         message = msg.to_message()
         body_part, html_part = message.get_payload()
-        self.assertEqual(
-            body_part['Content-Type'], 'text/plain; charset="%s"' % charset)
+
+        # different repoze.sendmail versions use a different string to
+        # represent the charset, so we permit either.
+        self.assertTrue(
+            body_part['Content-Type'] in 
+                ('text/plain; charset="utf-8"',
+                 'text/plain; charset="utf_8"'),
+                )
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
         encoder = codecs.getencoder('quopri_codec')
@@ -297,8 +312,13 @@ class TestMessage(unittest.TestCase):
         expected = encoder(encoded_text)[0].decode('ascii')
         self.assertEqual(payload, expected)
 
-        self.assertEqual(
-            html_part['Content-Type'], 'text/html; charset="%s"' % charset)
+        # different repoze.sendmail versions use a different string to
+        # represent the charset, so we permit either.
+        self.assertTrue(
+            html_part['Content-Type'] in 
+                ('text/html; charset="utf-8"',
+                 'text/html; charset="utf_8"'),
+                )
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
         payload = html_part.get_payload()
@@ -312,7 +332,7 @@ class TestMessage(unittest.TestCase):
         from pyramid_mailer.message import Attachment
 
         charset = 'iso-8859-1'
-        text_encoded = b('LaPe\xf1a')
+        text_encoded = b'LaPe\xf1a'
         text = text_encoded.decode(charset)
         transfer_encoding = 'quoted-printable'
         body = Attachment(data=text,
@@ -323,8 +343,13 @@ class TestMessage(unittest.TestCase):
                       body=body)
         body_part = msg.to_message()
 
-        self.assertEqual(
-            body_part['Content-Type'], 'text/plain; charset="%s"' % charset)
+        # different repoze.sendmail versions use a different string to
+        # represent the charset, so we permit either.
+        self.assertTrue(
+            body_part['Content-Type'] in 
+                ('text/plain; charset="iso-8859-1"',
+                 'text/plain; charset="latin_1"'),
+                )
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
         self.assertEqual(body_part.get_payload(),
@@ -337,7 +362,7 @@ class TestMessage(unittest.TestCase):
         from pyramid_mailer.message import Attachment
 
         charset = 'iso-8859-1'
-        text_encoded = b('LaPe\xf1a')
+        text_encoded = b'LaPe\xf1a'
         text = text_encoded.decode(charset)
         text_html = '<p>' + text + '</p>'
         transfer_encoding = 'quoted-printable'
@@ -349,8 +374,13 @@ class TestMessage(unittest.TestCase):
                       html=html)
         html_part = msg.to_message()
 
-        self.assertEqual(
-            html_part['Content-Type'], 'text/html; charset="%s"' % charset)
+        # different repoze.sendmail versions use a different string to
+        # represent the charset, so we permit either.
+        self.assertTrue(
+            html_part['Content-Type'] in 
+                ('text/html; charset="iso-8859-1"',
+                 'text/html; charset="latin_1"'),
+                )
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
         self.assertEqual(html_part.get_payload(),
@@ -652,7 +682,7 @@ class TestMailer(unittest.TestCase):
 
         mailer = Mailer()
 
-        utf_8_encoded = b('mo \xe2\x82\xac')
+        utf_8_encoded = b'mo \xe2\x82\xac'
         utf_8 = utf_8_encoded.decode('utf_8')
 
         text_string = utf_8
@@ -1136,7 +1166,7 @@ class TestMailResponse(unittest.TestCase):
     def test___str__(self):
         response = self._makeOne(To='To', From='From', Subject='Subject',
                                  Body='Body', Html='Html')
-        s = str(response)
+        s = text(response)
         self.assertTrue('Content-Type' in s)
 
     def test_to_message(self):
@@ -1153,7 +1183,7 @@ class TestMailResponse(unittest.TestCase):
             From='From', Subject='Subject',
             Body='Body', Html='Html')
         message = response.to_message()
-        self.assertEqual(str(message['To']),
+        self.assertEqual(text(message['To']),
                          'chrism@plope.com, billg@microsoft.com')
 
     def test_to_message_multipart(self):
