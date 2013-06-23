@@ -1459,12 +1459,13 @@ class TestMIMEPart(unittest.TestCase):
             )
 
     def test_extract_payload_with_charset(self):
-        part = self._makeOne('text/html', charset='utf-8')
+        part = self._makeOne('text/html')
         L = []
         part.set_payload = lambda body, charset=None: L.append((body, charset))
         mail = DummyMail('body')
+        mail.content_type_params = {'charset':'utf-8'}
         part.extract_payload(mail)
-        self.assertEqual(L, [('body', None)])
+        self.assertEqual(L, [('body', 'utf-8')])
         
 class DummyMail(object):
     def __init__(self, body, content_type='text/plain',
@@ -1472,10 +1473,11 @@ class DummyMail(object):
         self.body = body
         self.content_type = content_type
         self.content_disposition = content_disposition
+        self.content_type_params = {}
 
     @property
     def content_encoding(self):
-        return {'Content-Type': (self.content_type, {}),
+        return {'Content-Type': (self.content_type, self.content_type_params),
                 'Content-Disposition': (self.content_disposition, {})}
 
 
