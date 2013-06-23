@@ -387,6 +387,84 @@ class TestMessage(unittest.TestCase):
                          codecs.getencoder('quopri_codec')(
                              text_html.encode(charset))[0].decode('ascii'))
 
+    def test_attach_as_body_with_generate_and_reread(self):
+        # functest that emulates the interaction between pyramid_mailer and
+        # repoze.maildir.add and queuedelivery.send.
+        
+        import codecs
+        import tempfile
+        from email.generator import Generator
+        from email.parser import Parser
+        from pyramid_mailer.message import Message
+        from pyramid_mailer.message import Attachment
+        from repoze.sendmail.encoding import cleanup_message
+        from repoze.sendmail.delivery import copy_message
+
+        def checkit(msg):
+            self.assertTrue(
+                msg['Content-Type'] in 
+                    ('text/plain; charset="iso-8859-1"',
+                     'text/plain; charset="latin_1"'),
+                    )
+            self.assertEqual(
+                msg['Content-Transfer-Encoding'], transfer_encoding)
+
+            payload = msg.get_payload()
+
+            self.assertEqual(payload,
+                             codecs.getencoder('quopri_codec')(
+                                 text.encode(charset))[0].decode('ascii'))
+
+        charset = 'iso-8859-1'
+        text_encoded = b'LaPe\xf1a'
+        text = text_encoded.decode(charset)
+        transfer_encoding = 'quoted-printable'
+        body = Attachment(data=text,
+                          transfer_encoding=transfer_encoding)
+        msg = Message(subject="testing",
+                      sender="from@example.com",
+                      recipients=["to@example.com"],
+                      body=body)
+
+        # done in pyramid_mailer via mailer/send_to_queue
+        msg = msg.to_message()
+
+        checkit(msg)
+
+        # done in repoze.sendmail via delivery/AbstractMailDelivery/send
+        cleanup_message(msg)
+
+        checkit(msg)
+
+        # done in repoze.sendmail via
+        # delivery/AbstractMailDelivery/createDataManager
+        msg_copy = copy_message(msg)
+
+        checkit(msg_copy)
+
+        try:
+            # emulate what repoze.sendmail maildir.py/add does
+            fn = tempfile.mktemp()
+            fd = os.open(fn,
+                         os.O_CREAT|os.O_EXCL|os.O_WRONLY,
+                         0o600
+                         )
+            with os.fdopen(fd, 'w') as f:
+                writer = Generator(f)
+                writer.flatten(msg_copy)
+
+            # emulate what repoze.sendmail.queue _parseMessage does
+            with open(fn) as foo:
+                parser = Parser()
+                reconstituted = parser.parse(foo)
+                checkit(reconstituted)
+                
+        finally:
+            try:
+                os.remove(fn)
+            except:
+                pass
+
     def test_bad_header_subject(self):
 
         from pyramid_mailer.message import Message
@@ -1355,29 +1433,39 @@ class TestMIMEPart(unittest.TestCase):
     def test_extract_payload_text_type(self):
         part = self._makeOne('text/html')
         L = []
-        part.set_payload = lambda body: L.append(body)
+        part.set_payload = lambda body, charset=None: L.append((body, charset))
         mail = DummyMail('body')
         part.extract_payload(mail)
-        self.assertEqual(L, ['body'])
+        self.assertEqual(L, [('body', None)])
 
     def test_extract_payload_non_text_type_no_cdisp(self):
         part = self._makeOne('text/html')
         L = []
-        part.set_payload = lambda body: L.append(body)
+        part.set_payload = lambda body, charset=None: L.append((body, charset))
         mail = DummyMail('body', 'application/octet-stream')
         part.extract_payload(mail)
-        self.assertEqual(L, ['body'])
+        self.assertEqual(L, [('body', None)])
 
     def test_extract_payload_non_text_type_with_cdisp(self):
         part = self._makeOne('text/html')
         L = []
-        part.set_payload = lambda body: L.append(body)
+        part.set_payload = lambda body, charset=None: L.append((body, charset))
         part.add_header = lambda h, d, **x: L.append((h, d, x))
         mail = DummyMail('body', 'application/octet-stream', 'foo')
         part.extract_payload(mail)
-        self.assertEqual(L, [('Content-Disposition', 'foo', {}), 'body'])
+        self.assertEqual(
+            L,
+            [('Content-Disposition', 'foo', {}), ('body', None)]
+            )
 
-
+    def test_extract_payload_with_charset(self):
+        part = self._makeOne('text/html', charset='utf-8')
+        L = []
+        part.set_payload = lambda body, charset=None: L.append((body, charset))
+        mail = DummyMail('body')
+        part.extract_payload(mail)
+        self.assertEqual(L, [('body', None)])
+        
 class DummyMail(object):
     def __init__(self, body, content_type='text/plain',
                  content_disposition=None):

@@ -442,7 +442,9 @@ class MIMEPart(MIMEBase):
             mail.body = encode_string(ctenc, mail.body)
             self.add_header('Content-Transfer-Encoding', ctenc)
 
-        self.set_payload(mail.body)
+        charset = ctype_params.get('charset')
+
+        self.set_payload(mail.body, charset=charset)
 
     def __repr__(self):
         return "<MIMEPart '%s/%s': '%s', %r, multipart=%r>" % (
