@@ -585,8 +585,10 @@ def transfer_encode_string(encoding, data, charset):
         data = data.encode(charset)
     if encoding == 'base64':
         encoded = base64_encodestring(data).decode('ascii')
-    elif encoding == 'quoted-printable':
+    elif encoding in ('quoted-printable', 'quoted/printable', 'quopri'):
         encoded = quopri.encodestring(data).decode('ascii')
+    elif encoding:
+        raise RuntimeError('Unknown transfer encoding %s' % encoding)
     return encoded
 
 # BBB Python 2 vs 3 compat
