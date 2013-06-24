@@ -49,7 +49,7 @@ from ._compat import (
     text_type
     )
 
-from .exceptions import InvalidMessage
+from .exceptions import EncodingError
 
 def normalize_header(header):
     return string.capwords(header.lower(), '-')
@@ -59,11 +59,6 @@ def parse_header(header):
         return cgi.parse_header(header)
     else:
         return header, {}
-
-
-class EncodingError(Exception):
-    """Thrown when there is an encoding error."""
-    pass
 
 
 class MailBase(object):
@@ -115,7 +110,7 @@ class MailBase(object):
         assert filename, "You can't attach a file without a filename."
 
         if not isinstance(data, bytes):
-            raise InvalidMessage(
+            raise EncodingError(
                 'Attachment data must be bytes if it is not read from '
                 'filename: got %r' % data
                 )
@@ -134,7 +129,7 @@ class MailBase(object):
         This attaches a simple binary part.
         """
         if not isinstance(data, bytes):
-            raise InvalidMessage(
+            raise EncodingError(
                 'Attachment data must be bytes; got %r' % data
                 )
             
@@ -317,7 +312,7 @@ class MailResponse(object):
 
         else:
             if not isinstance(data, bytes):
-                raise InvalidMessage(
+                raise EncodingError(
                     'Attachment data must be bytes if it is not a file: '
                     'got %s' % data)
             self.base.attach_binary(data, content_type)
@@ -529,7 +524,7 @@ if sys.version < '3':
                 try:
                     data.decode('ascii')
                 except UnicodeError:
-                    raise InvalidMessage(
+                    raise EncodingError(
                         'Body is bytes, but no charset supplied and '
                         'cannot decode body from ascii'
                         )
@@ -560,7 +555,7 @@ else:
                 try:
                     return None, data.decode('ascii')
                 except UnicodeError:
-                    raise InvalidMessage(
+                    raise EncodingError(
                         'Body is bytes, but no charset supplied and '
                         'cannot decode body from ascii'
                         )
