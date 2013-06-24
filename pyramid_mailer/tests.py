@@ -1037,7 +1037,7 @@ class DummyRegistry(object):
 
 class TestEncodingError(unittest.TestCase):
     def _makeOne(self):
-        from pyramid_mailer.response import EncodingError
+        from pyramid_mailer.exceptions import EncodingError
         return EncodingError()
 
     def test_it(self):
