@@ -501,7 +501,12 @@ class MIMEPart(MIMEBase):
             self.add_header('Content-Disposition', cdisp, **cdisp_params)
         if ctenc:
             # need to encode because repoze.sendmail don't handle attachments
-            body = transfer_encode_string(ctenc, body, charset)
+            if isinstance(body, text_type):
+                # probably only true on py3
+                if charset is None:
+                    charset = 'ascii'
+                body = body.encode(charset)
+            body = transfer_encode_string(ctenc, body)
             self.add_header('Content-Transfer-Encoding', ctenc)
 
         self.set_payload(body, charset=charset)
@@ -577,19 +582,12 @@ else:
                     best_charset = None
                 return best_charset, data
                     
-def transfer_encode_string(encoding, data, charset):
-    encoded = data
-    if isinstance(data, text_type):
-        if charset is None:
-            charset = 'ascii'
-        data = data.encode(charset)
+def transfer_encode_string(encoding, data):
     if encoding == 'base64':
-        encoded = base64_encodestring(data).decode('ascii')
+        return base64_encodestring(data).decode('ascii')
     elif encoding == 'quoted-printable':
-        encoded = quopri.encodestring(data).decode('ascii')
-    elif encoding:
-        raise RuntimeError('Unknown transfer encoding %s' % encoding)
-    return encoded
+        return quopri.encodestring(data).decode('ascii')
+    raise RuntimeError('Unknown transfer encoding %s' % encoding)
 
 # BBB Python 2 vs 3 compat
 if sys.version < '3':
