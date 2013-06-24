@@ -8,10 +8,10 @@ else:
 
 from pyramid_mailer.response import MailResponse
 from pyramid_mailer.response import MailBase
+from pyramid_mailer.response import parse_header
 
 from pyramid_mailer.exceptions import BadHeaders
 from pyramid_mailer.exceptions import InvalidMessage
-
 
 class Attachment(object):
     """
@@ -100,35 +100,42 @@ class Message(object):
         Creates a Lamson MailResponse instance
         """
         bodies = [self.body, self.html]
+
         for idx, part in enumerate(bodies):
             if not isinstance(part, Attachment):
                 continue
 
             base = MailBase()
             base.body = part.data
-            base.content_encoding['Content-Type'] = (part.content_type, {})
-            base.content_encoding[
-                'Content-Disposition'] = (part.disposition, {})
+            # base.body here will be *either* text or bytes
+            content_type, ct_params = parse_header(part.content_type)
+            base.content_encoding['Content-Type'] = (content_type, ct_params)
+            disp, disp_params = parse_header(part.disposition)
+            base.content_encoding['Content-Disposition'] = (disp, disp_params)
             base.content_encoding[
                 'Content-Transfer-Encoding'] = part.transfer_encoding
             bodies[idx] = base
 
-        response = MailResponse(Subject=self.subject,
-                                To=self.recipients,
-                                From=self.sender,
-                                Body=bodies[0],
-                                Html=bodies[1])
+        response = MailResponse(
+            Subject=self.subject,
+            To=self.recipients,
+            From=self.sender,
+            Body=bodies[0],
+            Html=bodies[1]
+            )
 
         if self.cc:
             response.base['Cc'] = self.cc
 
         for attachment in self.attachments:
 
-            response.attach(attachment.filename,
-                            attachment.content_type,
-                            attachment.data,
-                            attachment.disposition,
-                            attachment.transfer_encoding)
+            response.attach(
+                attachment.filename,
+                attachment.content_type,
+                attachment.data,
+                attachment.disposition,
+                attachment.transfer_encoding
+                )
 
         response.update(self.extra_headers)
 

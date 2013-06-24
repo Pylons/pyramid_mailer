@@ -5,6 +5,8 @@ import unittest
 import os
 import errno
 
+PY2 = sys.version < '3'
+
 # BBB Python 2.5 & 3 compat
 try:
     text = unicode
@@ -21,7 +23,6 @@ except ImportError:  # pragma: no cover
 from pyramid import testing
 
 here = os.path.dirname(os.path.abspath(__file__))
-
 
 class TestAttachment(unittest.TestCase):
 
@@ -387,7 +388,7 @@ class TestMessage(unittest.TestCase):
                          codecs.getencoder('quopri_codec')(
                              text_html.encode(charset))[0].decode('ascii'))
 
-    def test_attach_as_body_with_generate_and_reread(self):
+    def test_repoze_sendmail_send_to_queue_functional(self):
         # functest that emulates the interaction between pyramid_mailer and
         # repoze.maildir.add and queuedelivery.send.
         
@@ -419,12 +420,16 @@ class TestMessage(unittest.TestCase):
         text_encoded = b'LaPe\xf1a'
         text = text_encoded.decode(charset)
         transfer_encoding = 'quoted-printable'
-        body = Attachment(data=text,
-                          transfer_encoding=transfer_encoding)
-        msg = Message(subject="testing",
-                      sender="from@example.com",
-                      recipients=["to@example.com"],
-                      body=body)
+        body = Attachment(
+            data=text,
+            transfer_encoding=transfer_encoding
+            )
+        msg = Message(
+            subject="testing",
+            sender="from@example.com",
+            recipients=["to@example.com"],
+            body=body
+            )
 
         # done in pyramid_mailer via mailer/send_to_queue
         msg = msg.to_message()
@@ -1108,7 +1113,7 @@ class TestMailBase(unittest.TestCase):
 
     def test_attach_file(self):
         base = self._makeOne()
-        base.attach_file('filename', 'data', 'ctype', 'inline', 'base64')
+        base.attach_file('filename', b'data', 'ctype', 'inline', 'base64')
         self.assertEqual(len(base.parts), 1)
         part = base.parts[0]
         self.assertEqual(part.content_encoding['Content-Type'],
@@ -1117,7 +1122,7 @@ class TestMailBase(unittest.TestCase):
                          ('inline', {'filename': 'filename'}))
         self.assertEqual(part.content_encoding['Content-Transfer-Encoding'],
                          'base64')
-        self.assertEqual(part.body, 'data')
+        self.assertEqual(part.body, b'data') # XXX should this differ on py3
 
     def test_attach_text(self):
         base = self._makeOne()
@@ -1125,7 +1130,10 @@ class TestMailBase(unittest.TestCase):
         self.assertEqual(len(base.parts), 1)
         part = base.parts[0]
         self.assertEqual(part.content_encoding['Content-Type'], ('ctype', {}))
-        self.assertEqual(part.body, 'data')
+        if PY2:
+            self.assertEqual(part.body, b'data')
+        else:
+            self.assertEqual(part.body, 'data')
 
     def test_walk(self):
         base1 = self._makeOne()
@@ -1357,7 +1365,7 @@ class TestMailResponse(unittest.TestCase):
         from pyramid_mailer.response import MIMEPart
         response = self._makeOne(To='To', From='From', Subject='Subject')
         response.multipart = True
-        response.attachments = [{'data': 'data', 'content_type': 'text/html'}]
+        response.attachments = [{'data': b'data', 'content_type': 'text/html'}]
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 
@@ -1366,7 +1374,7 @@ class TestMailResponse(unittest.TestCase):
         response = self._makeOne(To='To', From='From', Subject='Subject')
         response.multipart = True
         response.base.content_encoding['Content-Type'] = ('text/html', None)
-        response.attachments = [{'data': 'data', 'content_type': 'text/html'}]
+        response.attachments = [{'data': b'data', 'content_type': 'text/html'}]
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 

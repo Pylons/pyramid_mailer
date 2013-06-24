@@ -33,6 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import cgi
 import os
 import quopri
 import sys
@@ -41,19 +42,30 @@ import string
 from email.mime.base import MIMEBase
 
 try:
-    from base64 import encodebytes as base64_encodebytes
+    from base64 import encodestring as base64_encodestring
     # pyflakes
-    base64_encodebytes  # pragma: no cover
+    base64_encodestring  # pragma: no cover
 except ImportError:
     # BBB Python 2 compat
-    from base64 import encodestring as base64_encodebytes
+    from base64 import encodestring as base64_encodestring
+
+try:
+    text_type = unicode
+except NameError:
+    text_type = str
 
 
 from repoze.sendmail import encoding
-
+from .exceptions import InvalidMessage
 
 def normalize_header(header):
     return string.capwords(header.lower(), '-')
+
+def parse_header(header):
+    if header:
+        return cgi.parse_header(header)
+    else:
+        return header, {}
 
 
 class EncodingError(Exception):
@@ -108,8 +120,14 @@ class MailBase(object):
         indicates the file name.
         """
         assert filename, "You can't attach a file without a filename."
-        ctype = ctype.lower()
 
+        if not isinstance(data, bytes):
+            raise InvalidMessage(
+                'Attachment data must be bytes if it is not read from '
+                'filename: got %r' % data
+                )
+            
+        ctype = ctype.lower()
         part = MailBase()
         part.body = data
         part.content_encoding['Content-Type'] = (ctype, {'name': filename})
@@ -118,16 +136,38 @@ class MailBase(object):
         part.content_encoding['Content-Transfer-Encoding'] = transfer_encoding
         self.parts.append(part)
 
-    def attach_text(self, data, ctype):
+    def attach_binary(self, data, ctype):
         """
-        This attaches a simpler text encoded part, which doesn't have a
-        filename.
+        This attaches a simple binary part.
         """
+        if not isinstance(data, bytes):
+            raise InvalidMessage(
+                'Attachment data must be bytes; got %r' % data
+                )
+            
         ctype = ctype.lower()
-
         part = MailBase()
         part.body = data
         part.content_encoding['Content-Type'] = (ctype, {})
+        part.content_encoding['Content-Disposition'] = ('attachment', {})
+        part.content_encoding['Content-Transfer-Encoding'] = 'base64'
+        self.parts.append(part)
+        part = MailBase()
+
+    def attach_text(self, data, ctype):
+        """
+        This attaches a simple text part.
+        """
+        ctype = ctype.lower()
+        part = MailBase()
+        ctype, params = parse_header(ctype)
+        body = data
+        charset = params.pop('charset', None)
+        charset, body = charset_encode_body(charset, data)
+        if charset:
+            params['charset'] = charset
+        part.body = body
+        part.content_encoding['Content-Type'] = (ctype, params)
         self.parts.append(part)
 
     def walk(self):
@@ -266,6 +306,7 @@ class MailResponse(object):
         """
         if part:
             self.base.parts.append(part)
+            
         elif filename:
             if not data:
                 # should be opened with binary mode to encode the data later
@@ -273,11 +314,20 @@ class MailResponse(object):
                 data = f.read()
                 f.close()
 
-            self.base.attach_file(filename, data, content_type,
-                                  disposition or 'attachment',
-                                  transfer_encoding or 'base64')
+            self.base.attach_file(
+                filename,
+                data,
+                content_type,
+                disposition or 'attachment',
+                transfer_encoding or 'base64'
+                )
+
         else:
-            self.base.attach_text(data, content_type)
+            if not isinstance(data, bytes):
+                raise InvalidMessage(
+                    'Attachment data must be bytes if it is not a file: '
+                    'got %s' % data)
+            self.base.attach_binary(data, content_type)
 
         ctype = self.base.content_encoding['Content-Type'][0]
 
@@ -298,18 +348,19 @@ class MailResponse(object):
         del self.base.parts[:]
 
         if isinstance(self.Body, MailBase):
-            charset, self.Body.body = encoding.best_charset(self.Body.body)
-            if charset == 'ascii':
-                params = {}
-            else:
-                params = {'charset':charset}
+            body_text = self.Body.body
+            ct, params = self.Body.content_encoding['Content-Type']
+            charset = params.pop('charset', None)
+            charset, self.Body.body = charset_encode_body(charset, body_text)
+            params['charset'] = charset
             self.Body.content_encoding['Content-Type'] = ('text/plain', params)
+            
         if isinstance(self.Html, MailBase):
-            charset, self.Html.body = encoding.best_charset(self.Html.body)
-            if charset == 'ascii':
-                params = {}
-            else:
-                params = {'charset':charset}
+            html_text = self.Html.body
+            ct, params = self.Html.content_encoding['Content-Type']
+            charset = params.pop('charset', None)
+            charset, self.Html.body = charset_encode_body(charset, html_text)
+            params['charset'] = charset
             self.Html.content_encoding['Content-Type'] = ('text/html', params)
 
         part = self.base
@@ -342,16 +393,24 @@ class MailResponse(object):
                 self.base.body = self.Body.body
                 self.base.content_encoding.update(**self.Body.content_encoding)
             else:
-                self.base.body = self.Body
-                self.base.content_encoding['Content-Type'] = ('text/plain', {})
+                params = {}
+                charset, self.base.body = charset_encode_body(None, self.Body)
+                if charset:
+                    params['charset'] = charset
+                self.base.content_encoding['Content-Type'] = (
+                    'text/plain', params)
 
         elif self.Html:
             if isinstance(self.Html, MailBase):
                 self.base.body = self.Html.body
                 self.base.content_encoding.update(**self.Html.content_encoding)
             else:
-                self.base.body = self.Html
-                self.base.content_encoding['Content-Type'] = ('text/html', {})
+                params = {}
+                charset, self.base.body = charset_encode_body(None, self.Html)
+                if charset:
+                    params['charset'] = charset
+                self.base.content_encoding['Content-Type'] = (
+                    'text/html', params)
 
         return to_message(self.base)
 
@@ -388,8 +447,7 @@ def to_message(mail):
 
     try:
         out = MIMEPart(ctype, **params)
-    except TypeError:  # pragma: no cover
-        exc = sys.exc_info()[1]
+    except TypeError as exc:  # pragma: no cover
         raise EncodingError("Content-Type malformed, not allowed: %r; "
                             "%r (Python ERROR: %s" %
                             (ctype, params, exc.message))
@@ -424,8 +482,10 @@ class MIMEPart(MIMEBase):
         MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
     def extract_payload(self, mail):
-        if mail.body == None:
-            return  # only None, '' is still ok
+        if mail.body is None:
+            return
+
+        body = mail.body
 
         ctype, ctype_params = mail.content_encoding['Content-Type']
         cdisp, cdisp_params = mail.content_encoding['Content-Disposition']
@@ -434,17 +494,17 @@ class MIMEPart(MIMEBase):
         assert ctype, ("Extract payload requires that mail.content_encoding "
                        "have a valid Content-Type.")
 
+        charset = ctype_params.get('charset')
+
         if cdisp:
             # replicate the content-disposition settings
             self.add_header('Content-Disposition', cdisp, **cdisp_params)
         if ctenc:
             # need to encode because repoze.sendmail don't handle attachments
-            mail.body = encode_string(ctenc, mail.body)
+            body = transfer_encode_string(ctenc, body, charset)
             self.add_header('Content-Transfer-Encoding', ctenc)
 
-        charset = ctype_params.get('charset')
-
-        self.set_payload(mail.body, charset=charset)
+        self.set_payload(body, charset=charset)
 
     def __repr__(self):
         return "<MIMEPart '%s/%s': '%s', %r, multipart=%r>" % (
@@ -455,16 +515,76 @@ class MIMEPart(MIMEBase):
             self.is_multipart())
 
 
-def is_nonstr_iter(v):  # pragma: no cover
-    if isinstance(v, str):
-        return False
-    return hasattr(v, '__iter__')
-
-
-def encode_string(encoding, data):
+if sys.version < '3':
+    def charset_encode_body(charset, data):
+        # on python 2, must return bytes
+        if isinstance(data, bytes):
+            # - data is bytes and there's a charset
+            #   trust that body and charset match and do nothing
+            if charset:
+                return charset, data
+            else:
+                # - data is bytes and there's no charset
+                #   try to decode body from ascii and raise an exception if cant
+                try:
+                    data.decode('ascii')
+                except UnicodeError:
+                    raise InvalidMessage(
+                        'Body is bytes, but no charset supplied and '
+                        'cannot decode body from ascii'
+                        )
+                return None, data
+        else:
+            if charset:
+                # - data is text and there's a charset
+                #   trust that body can be encoded using charset and encode it
+                return charset, data.encode(charset)
+            else:
+                # - data is text and there's no charset
+                #   use best_charset
+                best_charset, encoded = encoding.best_charset(data)
+                if best_charset == 'ascii':
+                    best_charset = None
+                return best_charset, encoded
+else:
+    def charset_encode_body(charset, data):
+        # on python 3, must return text
+        if isinstance(data, bytes):
+            # - data is bytes and there's a charset
+            #   trust that body and charset match and do nothing
+            if charset:
+                return charset, data.decode(charset)
+            else:
+                # - data is bytes and there's no charset
+                #   try to decode body from ascii and raise an exception if cant
+                try:
+                    return None, data.decode('ascii')
+                except UnicodeError:
+                    raise InvalidMessage(
+                        'Body is bytes, but no charset supplied and '
+                        'cannot decode body from ascii'
+                        )
+        else:
+            if charset:
+                # - data is text and there's a charset
+                #   trust that body can be encoded using charset and encode it
+                return charset, data
+            else:
+                # - data is text and there's no charset
+                #   use best_charset
+                best_charset, encoded = encoding.best_charset(data)
+                if best_charset == 'ascii':
+                    best_charset = None
+                return best_charset, data
+                    
+def transfer_encode_string(encoding, data, charset):
     encoded = data
+    if isinstance(data, text_type):
+        if charset is None:
+            charset = 'ascii'
+        data = data.encode(charset)
     if encoding == 'base64':
-        encoded = base64_encodebytes(data).decode('ascii')
+        encoded = base64_encodestring(data).decode('ascii')
     elif encoding == 'quoted-printable':
         encoded = quopri.encodestring(data).decode('ascii')
     return encoded
@@ -473,3 +593,10 @@ def encode_string(encoding, data):
 if sys.version < '3':
     def is_nonstr_iter(v):
         return hasattr(v, '__iter__')
+else:
+    def is_nonstr_iter(v):  # pragma: no cover
+        if isinstance(v, str):
+            return False
+        return hasattr(v, '__iter__')
+
+    
