@@ -1,11 +1,3 @@
-# BBB Python 2 vs 3 compat
-try:
-    unicode
-except NameError:  # pragma: no cover
-    basestring = (bytes, str)
-else:
-    basestring = (str, unicode)
-
 from pyramid_mailer.response import MailResponse
 from pyramid_mailer.response import MailBase
 from pyramid_mailer.response import parse_header
@@ -39,11 +31,9 @@ class Attachment(object):
 
     @property
     def data(self):
-        if isinstance(self._data, basestring):
-            return self._data
-        self._data = self._data.read()
+        if hasattr(self._data, 'read'):
+            self._data = self._data.read()
         return self._data
-
 
 class Message(object):
     """

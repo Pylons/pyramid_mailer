@@ -5,20 +5,12 @@ import unittest
 import os
 import errno
 
+from pyramid_mailer._compat import (
+    text_type,
+    StringIO,
+    )
+
 PY2 = sys.version < '3'
-
-# BBB Python 2.5 & 3 compat
-try:
-    text = unicode
-except NameError:  # pragma: no cover
-    text = str
-
-try:
-    from io import StringIO
-except ImportError:  # pragma: no cover
-    StringIO  # pyflakes
-    # BBB Python 2.5 compat
-    from StringIO import StringIO
 
 from pyramid import testing
 
@@ -37,7 +29,7 @@ class TestAttachment(unittest.TestCase):
 
         from pyramid_mailer.message import Attachment
 
-        a = Attachment(data=StringIO(text("foo")))
+        a = Attachment(data=StringIO(text_type("foo")))
         self.assertEqual(a.data, "foo")
 
 
@@ -157,7 +149,7 @@ class TestMessage(unittest.TestCase):
                       cc=["tosomeoneelse@example.com"])
 
         response = msg.get_response()
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
 
     def test_cc_without_recipients(self):
 
@@ -172,7 +164,7 @@ class TestMessage(unittest.TestCase):
         msgid = mailer.send(msg)
         response = msg.get_response()
 
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
         self.assertTrue(msgid)
 
     def test_cc_without_recipients_2(self):
@@ -184,7 +176,7 @@ class TestMessage(unittest.TestCase):
                       body="testing",
                       cc=["tosomeoneelse@example.com"])
         response = msg.get_response()
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
 
     def test_bcc_without_recipients(self):
 
@@ -199,7 +191,8 @@ class TestMessage(unittest.TestCase):
         msgid = mailer.send(msg)
         response = msg.get_response()
 
-        self.assertFalse("Bcc: tosomeoneelse@example.com" in text(response))
+        self.assertFalse(
+            "Bcc: tosomeoneelse@example.com" in text_type(response))
         self.assertTrue(msgid)
 
     def test_attach(self):
@@ -1252,7 +1245,7 @@ class TestMailResponse(unittest.TestCase):
     def test___str__(self):
         response = self._makeOne(To='To', From='From', Subject='Subject',
                                  Body='Body', Html='Html')
-        s = text(response)
+        s = text_type(response)
         self.assertTrue('Content-Type' in s)
 
     def test_to_message(self):
@@ -1269,7 +1262,7 @@ class TestMailResponse(unittest.TestCase):
             From='From', Subject='Subject',
             Body='Body', Html='Html')
         message = response.to_message()
-        self.assertEqual(text(message['To']),
+        self.assertEqual(text_type(message['To']),
                          'chrism@plope.com, billg@microsoft.com')
 
     def test_to_message_multipart(self):

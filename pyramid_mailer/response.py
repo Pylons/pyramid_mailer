@@ -41,21 +41,14 @@ import mimetypes
 import string
 from email.mime.base import MIMEBase
 
-try:
-    from base64 import encodestring as base64_encodestring
-    # pyflakes
-    base64_encodestring  # pragma: no cover
-except ImportError:
-    # BBB Python 2 compat
-    from base64 import encodestring as base64_encodestring
-
-try:
-    text_type = unicode
-except NameError:
-    text_type = str
-
-
 from repoze.sendmail import encoding
+
+from ._compat import (
+    base64_encodestring,
+    is_nonstr_iter,
+    text_type
+    )
+
 from .exceptions import InvalidMessage
 
 def normalize_header(header):
@@ -591,14 +584,3 @@ def transfer_encode_string(encoding, data):
         return quopri.encodestring(data).decode('ascii')
     raise RuntimeError('Unknown transfer encoding %s' % encoding)
 
-# BBB Python 2 vs 3 compat
-if sys.version < '3':
-    def is_nonstr_iter(v):
-        return hasattr(v, '__iter__')
-else:
-    def is_nonstr_iter(v):  # pragma: no cover
-        if isinstance(v, str):
-            return False
-        return hasattr(v, '__iter__')
-
-    
