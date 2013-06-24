@@ -352,7 +352,8 @@ class MailResponse(object):
             ct, params = self.Body.content_encoding['Content-Type']
             charset = params.pop('charset', None)
             charset, self.Body.body = charset_encode_body(charset, body_text)
-            params['charset'] = charset
+            if charset:
+                params['charset'] = charset
             self.Body.content_encoding['Content-Type'] = ('text/plain', params)
             
         if isinstance(self.Html, MailBase):
@@ -360,7 +361,8 @@ class MailResponse(object):
             ct, params = self.Html.content_encoding['Content-Type']
             charset = params.pop('charset', None)
             charset, self.Html.body = charset_encode_body(charset, html_text)
-            params['charset'] = charset
+            if charset:
+                params['charset'] = charset
             self.Html.content_encoding['Content-Type'] = ('text/html', params)
 
         part = self.base
