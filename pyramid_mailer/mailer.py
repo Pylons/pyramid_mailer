@@ -118,8 +118,8 @@ class Mailer(object):
     :param default_sender: default "from" address
     :param sendmail_app: path to "sendmail" binary.
            repoze defaults to "/usr/sbin/sendmail"
-    :param sendmail_template: custom commandline template passed to sendmail binary
-           repoze defaults to'["{sendmail_app}", "-t", "-i", "-f", "{sender}"]'
+    :param sendmail_template: custom commandline template passed to sendmail
+           binary, defaults to'["{sendmail_app}", "-t", "-i", "-f", "{sender}"]'
     :param debug: SMTP debug level
     """
 
