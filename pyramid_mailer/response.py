@@ -510,7 +510,7 @@ class MIMEPart(MIMEBase):
             self.is_multipart())
 
 
-if sys.version < '3':
+if sys.version < '3': # python 2
     def charset_encode_body(charset, data):
         # on python 2, must return bytes
         if isinstance(data, bytes):
@@ -541,7 +541,7 @@ if sys.version < '3':
                 if best_charset == 'ascii':
                     best_charset = None
                 return best_charset, encoded
-else:
+else: # python 3
     def charset_encode_body(charset, data):
         # on python 3, must return text
         if isinstance(data, bytes):
