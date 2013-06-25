@@ -670,7 +670,7 @@ if sys.version < '3': # on python 2, we must return bytes
                 if charset == 'ascii':
                     charset = None
                 return charset, encoded
-else: # on python 3, we must return text
+else: # pragma: no cover (on python 3, we must return text)
     def charset_encode_body(charset, data):
         if isinstance(data, bytes):
             # - data is bytes and there's a charset
