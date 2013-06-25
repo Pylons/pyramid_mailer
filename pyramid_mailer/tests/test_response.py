@@ -182,15 +182,6 @@ class TestMailResponse(unittest.TestCase):
         self.assertEqual(attachment['transfer_encoding'], None)
         self.assertEqual(attachment['part'], 'part')
 
-    def test_attach_all_parts(self):
-        response = self._makeOne()
-        request = DummyMailRequest()
-        response.attach_all_parts(request)
-        self.assertEqual(len(response.attachments), 1)
-        attachment = response.attachments[0]
-        self.assertEqual(attachment['part'], request)
-        self.assertEqual(response.base.content_encoding, {})
-
     def test_clear(self):
         response = self._makeOne()
         response.attachments = [True]
@@ -344,10 +335,6 @@ class TestMailResponse(unittest.TestCase):
         message = response.to_message()
         self.assertEqual(message.__class__, MIMEPart)
 
-    def test_all_parts(self):
-        response = self._makeOne()
-        self.assertEqual(response.all_parts(), [])
-
     def test_keys(self):
         response = self._makeOne()
         self.assertEqual(response.keys(), ['From', 'Subject', 'To'])
@@ -438,10 +425,6 @@ class DummyMailRequest(object):
     def __init__(self):
         self.base = Dummy()
         self.base.content_encoding = {}
-
-    def all_parts(self):
-        return [self]
-
 
 class DummyPart(object):
     def __init__(

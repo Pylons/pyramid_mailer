@@ -53,6 +53,7 @@ def normalize_header(header):
     return string.capwords(header.lower(), '-')
 
 def parse_header(header):
+    # cope with header value being None or ''
     if header:
         return cgi.parse_header(header)
     else:
@@ -285,16 +286,6 @@ class MailResponse(object):
                                  'part': part,
                                  })
 
-    def attach_all_parts(self, mail_request):
-        """
-        Used for copying the attachment parts of a mail.MailRequest
-        object for mailing lists that need to maintain attachments.
-        """
-        for part in mail_request.all_parts():
-            self.attach_part(part)
-
-        self.base.content_encoding = mail_request.base.content_encoding.copy()
-
     def clear(self):
         """
         Clears out the attachments so you can redo them.  Use this to keep the
@@ -439,13 +430,6 @@ class MailResponse(object):
 
         return to_message(self.base)
 
-    def all_parts(self):
-        """
-        Returns all the encoded parts.  Only useful for debugging
-        or inspecting after calling to_message().
-        """
-        return self.base.parts
-
     def keys(self):
         return self.base.keys()
 
@@ -543,6 +527,7 @@ class MIMEPart(MIMEBase):
             self['Content-Disposition'],
             self.is_multipart()
             )
+
 
 if sys.version < '3': # on python 2, we must return bytes
     def charset_encode_body(charset, data):

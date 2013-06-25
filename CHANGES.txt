@@ -6,6 +6,8 @@ Next release
 
 - Pull #35:  aadded support for sendmail binary via repoze.sendmail >= 4.0b2.
 
+- Remove "all_parts" and "attach_all_parts" from MailResponse object.
+
 0.11 (2013-03-28)
 -----------------
 
