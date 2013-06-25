@@ -20,12 +20,14 @@ class Attachment(object):
     :param transfer_encoding: content-transfer-encoding (if any)
     """
 
-    def __init__(self,
-                 filename=None,
-                 content_type=None,
-                 data=None,
-                 disposition=None,
-                 transfer_encoding=None):
+    def __init__(
+        self,
+        filename=None,
+        content_type=None,
+        data=None,
+        disposition=None,
+        transfer_encoding=None
+        ):
 
         self.filename = filename
         self.content_type = content_type
@@ -57,17 +59,19 @@ class Message(object):
     sent.
     """
 
-    def __init__(self,
-                 subject=None,
-                 recipients=None,
-                 body=None,
-                 html=None,
-                 sender=None,
-                 cc=None,
-                 bcc=None,
-                 extra_headers=None,
-                 attachments=None):
-
+    def __init__(
+        self,
+        subject=None,
+        recipients=None,
+        body=None,
+        html=None,
+        sender=None,
+        cc=None,
+        bcc=None,
+        extra_headers=None,
+        attachments=None
+        ):
+        
         self.subject = subject or ''
         self.sender = sender
         self.body = body
