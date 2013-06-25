@@ -178,7 +178,7 @@ class Mailer(object):
     @classmethod
     def from_settings(cls, settings, prefix='mail.'):
         """
-        Creates a new instance of **Message** from settings dict.
+        Creates a new instance of **Mailer** from settings dict.
 
         :param settings: a settings dict-like
         :param prefix: prefix separating **pyramid_mailer** settings

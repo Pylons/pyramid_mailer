@@ -88,7 +88,7 @@ class TestMailBase(unittest.TestCase):
         self.assertEqual(part.content_encoding['Content-Type'], ('ctype', {}))
         if PY2:
             self.assertEqual(part.body, b'data')
-        else:
+        else: # pragma: no cover
             self.assertEqual(part.body, 'data')
 
     def test_walk(self):
@@ -469,7 +469,7 @@ class DummyPart(object):
         return self.content_encoding['Content-Type']
 
     def set_content_type(self, type, params=None):
-        if params is None:
+        if params is None: # pragma: no cover
             params = {}
         self.content_encoding['Content-Type'] = (type, params)
 

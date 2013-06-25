@@ -17,9 +17,6 @@ class DummyRegistry(object):
         self.result = result
         self.registered = {}
 
-    def getUtility(self, iface):
-        return self.result
-
     def registerUtility(self, impl, iface):
         self.registered[iface] = impl
 

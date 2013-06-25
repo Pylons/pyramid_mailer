@@ -449,7 +449,7 @@ class TestMessage(unittest.TestCase):
                 reconstituted = parser.parse(foo)
                 checkit(reconstituted)
                 
-        finally:
+        finally: # pragma: no cover
             try:
                 os.remove(fn)
             except:
