@@ -4,14 +4,14 @@ try: # pragma: no cover
     from base64 import encodestring as base64_encodestring
     # pyflakes
     base64_encodestring  # pragma: no cover
-except ImportError:
+except ImportError: # pragma: no cover
     # BBB Python 2 compat
     from base64 import encodestring as base64_encodestring
     base64_encodestring # pyflakes
 
-try:
+try: # pragma: no cover
     text_type = unicode
-except NameError:
+except NameError: # pragma: no cover
     text_type = str
 
 
