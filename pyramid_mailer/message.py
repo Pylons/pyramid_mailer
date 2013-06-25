@@ -51,11 +51,11 @@ class Attachment(object):
         base.set_body(self.data)
         # self.data above will be *either* text or bytes, that's OK
         base.set_content_type(self.content_type)
-        # part.content_type above *may* be None, that's OK
+        # self.content_type above *may* be None, that's OK
         base.set_content_disposition(self.disposition)
-        # part.content_disposition above *may* be None, that's OK
+        # self.content_disposition above *may* be None, that's OK
         base.set_transfer_encoding(self.transfer_encoding)
-        # part.content_transfer_encoding above *may* be None, that's OK
+        # self.content_transfer_encoding above *may* be None, that's OK
         return base
 
 class Message(object):
