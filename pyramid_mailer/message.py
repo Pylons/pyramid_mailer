@@ -1,9 +1,13 @@
-from pyramid_mailer.response import MailResponse
-from pyramid_mailer.response import MailBase
-from pyramid_mailer.response import parse_header
+from pyramid_mailer.response import (
+    MailResponse,
+    MailBase,
+    parse_header,
+    )
 
-from pyramid_mailer.exceptions import BadHeaders
-from pyramid_mailer.exceptions import InvalidMessage
+from pyramid_mailer.exceptions import (
+    BadHeaders,
+    InvalidMessage,
+    )
 
 class Attachment(object):
     """
