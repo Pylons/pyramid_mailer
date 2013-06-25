@@ -610,11 +610,6 @@ class TestMailerSendmail(unittest.TestCase):
         self.assertEqual(len(mailer.outbox), 1)
 
     def test_send_sendmail(self):
-        """
-            since we're in a transaction, we don't have to worry 
-            about actually sending an email
-        """
-
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
@@ -627,31 +622,60 @@ class TestMailerSendmail(unittest.TestCase):
         mailer.send_sendmail(msg)
 
     def test_send_immediately_sendmail(self):
-        """
-            since we're not in transaction, we will worry
-            about actually sending an email.
-            
-            this test is only included for when you want to `tail -f mail.log`
-        """
-        I_ACTUALLY_WANT_TO_SEND_EMAIL = False
         email_sender = "sender@example.com"
         email_recipient = "tester@example.com"
-        
-        if not I_ACTUALLY_WANT_TO_SEND_EMAIL:
-            return
-        
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
         mailer = Mailer()
+        sendmail_mailer = DummySendmailMailer()
+        mailer.sendmail_mailer = sendmail_mailer
 
         msg = Message(subject="test_send_immediately_sendmail",
                       sender = email_sender,
                       recipients = [ email_recipient ],
                       body="body-test_send_immediately_sendmail")
         mailer.send_immediately_sendmail(msg)
-        
+        out = sendmail_mailer.out
+        self.assertEqual(len(out), 1)
+        first = out[0]
+        self.assertEqual(first[0], 'sender@example.com')
+        self.assertEqual(first[1], set(['tester@example.com']))
 
+    def test_send_immediately_sendmail_with_exc_fail_silently(self):
+        email_sender = "sender@example.com"
+        email_recipient = "tester@example.com"
+        from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.message import Message
+
+        mailer = Mailer()
+        sendmail_mailer = DummySendmailMailer(ValueError())
+        mailer.sendmail_mailer = sendmail_mailer
+
+        msg = Message(subject="test_send_immediately_sendmail",
+                      sender = email_sender,
+                      recipients = [ email_recipient ],
+                      body="body-test_send_immediately_sendmail")
+        mailer.send_immediately_sendmail(msg, fail_silently=True)
+        out = sendmail_mailer.out
+        self.assertEqual(len(out), 0)
+
+    def test_send_immediately_sendmail_with_exc_fail_loudly(self):
+        email_sender = "sender@example.com"
+        email_recipient = "tester@example.com"
+        from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer.message import Message
+
+        mailer = Mailer()
+        sendmail_mailer = DummySendmailMailer(ValueError())
+        mailer.sendmail_mailer = sendmail_mailer
+
+        msg = Message(subject="test_send_immediately_sendmail",
+                      sender = email_sender,
+                      recipients = [ email_recipient ],
+                      body="body-test_send_immediately_sendmail")
+        self.assertRaises(ValueError, mailer.send_immediately_sendmail, msg)
+        
 class TestMailer(unittest.TestCase):
 
     def test_dummy_send_immediately(self):
@@ -1504,3 +1528,14 @@ class DummyPart(object):
 
     def keys(self):
         return []
+
+class DummySendmailMailer(object):
+    def __init__(self, raises=None):
+        self.out = []
+        self.raises = raises
+
+    def send(self, frm, to, msg):
+        if self.raises:
+            raise self.raises
+        self.out.append((frm, to, msg))
+        

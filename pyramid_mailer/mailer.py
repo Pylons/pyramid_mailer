@@ -283,6 +283,6 @@ class Mailer(object):
 
         try:
             return self.sendmail_mailer.send(*self._message_args(message))
-        except :
+        except:
             if not fail_silently:
                 raise
