@@ -834,9 +834,6 @@ class DummyPart(object):
         self.parts = []
         self.body = body
 
-    def keys(self):
-        return []
-
     def get_body(self):
         return self.body
 
