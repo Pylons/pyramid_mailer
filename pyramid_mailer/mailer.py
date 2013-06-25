@@ -170,8 +170,8 @@ class Mailer(object):
         else:
             self.queue_delivery = None
             
-        self.sendmail_mailer = SendmailMailer( sendmail_app , sendmail_template )
-        self.sendmail_delivery = DirectMailDelivery(self.sendmail_mailer)        
+        self.sendmail_mailer = SendmailMailer(sendmail_app, sendmail_template)
+        self.sendmail_delivery = DirectMailDelivery(self.sendmail_mailer)
 
         self.default_sender = default_sender
 
