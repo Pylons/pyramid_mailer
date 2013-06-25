@@ -45,13 +45,16 @@ class Message(object):
 
     :param subject: email subject header
     :param recipients: list of email addresses
-    :param body: plain text message
-    :param html: HTML message
+    :param body: plain text message (may be an Attachment or text)
+    :param html: HTML message (may be an Attachment or text)
     :param sender: email sender address
     :param cc: CC list
     :param bcc: BCC list
     :param extra_headers: dict of extra email headers
     :param attachments: list of Attachment instances
+
+    The message must have a body or html part (or both) to be successfully
+    sent.
     """
 
     def __init__(self,
@@ -86,7 +89,6 @@ class Message(object):
         """
 
         self.validate()
-
         return self.get_response().to_message()
 
     def get_response(self):
@@ -101,7 +103,7 @@ class Message(object):
 
             base = MailBase()
             base.body = part.data
-            # base.body here will be *either* text or bytes
+            # base.body above will be *either* text or bytes
             content_type, ct_params = parse_header(part.content_type)
             base.content_encoding['Content-Type'] = (content_type, ct_params)
             disp, disp_params = parse_header(part.disposition)

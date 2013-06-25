@@ -315,7 +315,8 @@ class MailResponse(object):
             if not isinstance(data, bytes):
                 raise EncodingError(
                     'Attachment data must be bytes if it is not a file: '
-                    'got %s' % data)
+                    'got %s' % data
+                    )
             self.base.attach_binary(data, content_type)
 
         ctype = self.base.content_encoding['Content-Type'][0]
