@@ -1,5 +1,7 @@
 import sys
 
+PY2 = sys.version < '3'
+
 try: # pragma: no cover
     from base64 import encodestring as base64_encodestring
     # pyflakes
