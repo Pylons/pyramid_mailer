@@ -95,6 +95,7 @@ class MailBase(object):
     def __nonzero__(self):
         return self.body != None or len(
             self.headers) > 0 or len(self.parts) > 0
+    
     __bool__ = __nonzero__
 
     def keys(self):
@@ -111,8 +112,8 @@ class MailBase(object):
 
         if not isinstance(data, bytes):
             raise EncodingError(
-                'Attachment data must be bytes if it is not read from '
-                'filename: got %r' % data
+                'Attachment data fed to attach_file must be bytes, '
+                'got %r' % data
                 )
             
         ctype = ctype.lower()
@@ -126,7 +127,8 @@ class MailBase(object):
 
     def attach_binary(self, data, ctype):
         """
-        This attaches a simple binary part.
+        This attaches a simple binary part, treated as an attachment; eventually
+        it will be base64 encoded in the payload.
         """
         if not isinstance(data, bytes):
             raise EncodingError(
@@ -298,9 +300,8 @@ class MailResponse(object):
         elif filename:
             if not data:
                 # should be opened with binary mode to encode the data later
-                f = open(filename, mode='rb')
-                data = f.read()
-                f.close()
+                with open(filename, mode='rb') as f:
+                    data = f.read()
 
             self.base.attach_file(
                 filename,
@@ -510,7 +511,7 @@ class MIMEPart(MIMEBase):
             self.is_multipart())
 
 
-if sys.version < '3': # python 2
+if sys.version < '3': # on python 2, we must return bytes
     def charset_encode_body(charset, data):
         # on python 2, must return bytes
         if isinstance(data, bytes):
@@ -541,9 +542,8 @@ if sys.version < '3': # python 2
                 if best_charset == 'ascii':
                     best_charset = None
                 return best_charset, encoded
-else: # python 3
+else: # on python 3, we must return text
     def charset_encode_body(charset, data):
-        # on python 3, must return text
         if isinstance(data, bytes):
             # - data is bytes and there's a charset
             #   trust that body and charset match and do nothing
