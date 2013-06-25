@@ -252,10 +252,9 @@ class Mailer(object):
     def _message_args(self, message):
 
         message.sender = message.sender or self.default_sender
-
-        return (message.sender, 
-                message.send_to,
-                message.to_message())
+        # convert Lamson message to Python email package msessage
+        msg = message.to_message() 
+        return (message.sender, message.send_to, msg)
 
     def send_sendmail(self, message ):
         """
