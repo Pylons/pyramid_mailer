@@ -220,7 +220,8 @@ class MailResponse(object):
         self.Body = Body
         self.Html = Html
         self.base = MailBase(
-            [('To', To), ('From', From), ('Subject', Subject)])
+            [('To', To), ('From', From), ('Subject', Subject)]
+            )
         self.multipart = self.Body and self.Html
         self.attachments = []
 
