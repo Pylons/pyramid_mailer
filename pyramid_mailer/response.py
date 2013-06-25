@@ -41,8 +41,6 @@ import mimetypes
 import string
 from email.mime.base import MIMEBase
 
-from repoze.sendmail import encoding
-
 from ._compat import (
     base64_encodestring,
     is_nonstr_iter,
@@ -74,6 +72,38 @@ class MailBase(object):
                                  'Content-Disposition': (None, {}),
                                  'Content-Transfer-Encoding': None}
 
+    def set_content_type(self, content_type, params=None):
+        if params is None:
+            params = {}
+        content_type, ct_params = parse_header(content_type)
+        ct_params.update(params)
+        self.content_encoding['Content-Type'] = (content_type, ct_params)
+
+    def get_content_type(self):
+        return self.content_encoding['Content-Type']
+
+    def set_content_disposition(self, disposition, params=None):
+        if params is None:
+            params = {}
+        disp, disp_params = parse_header(disposition)
+        disp_params.update(params)
+        self.content_encoding['Content-Disposition'] = (disp, disp_params)
+
+    def get_content_disposition(self):
+        return self.content_encoding['Content-Disposition']
+
+    def set_transfer_encoding(self, encoding):
+        self.content_encoding['Content-Transfer-Encoding'] = encoding
+
+    def get_transfer_encoding(self):
+        return self.content_encoding['Content-Transfer-Encoding']
+
+    def set_body(self, body):
+        self.body = body
+
+    def get_body(self):
+        return self.body
+
     def __getitem__(self, key):
         return self.headers.get(normalize_header(key), None)
 
@@ -102,6 +132,9 @@ class MailBase(object):
         """Returns the sorted keys."""
         return sorted(self.headers.keys())
 
+    def attach_part(self, part):
+        self.parts.append(part)
+
     def attach_file(self, filename, data, ctype, disposition,
                     transfer_encoding=None):
         """
@@ -118,11 +151,10 @@ class MailBase(object):
             
         ctype = ctype.lower()
         part = MailBase()
-        part.body = data
-        part.content_encoding['Content-Type'] = (ctype, {'name': filename})
-        part.content_encoding['Content-Disposition'] = (disposition,
-                                                        {'filename': filename})
-        part.content_encoding['Content-Transfer-Encoding'] = transfer_encoding
+        part.set_body(data)
+        part.set_content_type(ctype, {'name':filename})
+        part.set_content_disposition(disposition, {'filename':filename})
+        part.set_transfer_encoding(transfer_encoding)
         self.parts.append(part)
 
     def attach_binary(self, data, ctype):
@@ -137,12 +169,11 @@ class MailBase(object):
             
         ctype = ctype.lower()
         part = MailBase()
-        part.body = data
-        part.content_encoding['Content-Type'] = (ctype, {})
-        part.content_encoding['Content-Disposition'] = ('attachment', {})
-        part.content_encoding['Content-Transfer-Encoding'] = 'base64'
+        part.set_body(data)
+        part.set_content_type(ctype)
+        part.set_content_disposition('attachment')
+        part.set_transfer_encoding('base64')
         self.parts.append(part)
-        part = MailBase()
 
     def attach_text(self, data, ctype):
         """
@@ -156,8 +187,8 @@ class MailBase(object):
         charset, body = charset_encode_body(charset, data)
         if charset:
             params['charset'] = charset
-        part.body = body
-        part.content_encoding['Content-Type'] = (ctype, params)
+        part.set_body(body)
+        part.set_content_type(ctype, params)
         self.parts.append(part)
 
     def walk(self):
@@ -319,7 +350,7 @@ class MailResponse(object):
                     )
             self.base.attach_binary(data, content_type)
 
-        ctype = self.base.content_encoding['Content-Type'][0]
+        ctype = self.base.get_content_type()[0]
 
         if ctype and not ctype.startswith('multipart'):
             self.base.content_encoding[
@@ -338,42 +369,44 @@ class MailResponse(object):
         del self.base.parts[:]
 
         if isinstance(self.Body, MailBase):
-            body_text = self.Body.body
-            ct, params = self.Body.content_encoding['Content-Type']
+            body_text = self.Body.get_body()
+            ct, params = self.Body.get_content_type()
             charset = params.pop('charset', None)
-            charset, self.Body.body = charset_encode_body(charset, body_text)
+            charset, encbody = charset_encode_body(charset, body_text)
+            self.Body.set_body(encbody)
             if charset:
                 params['charset'] = charset
-            self.Body.content_encoding['Content-Type'] = ('text/plain', params)
+            self.Body.set_content_type('text/plain', params)
             
         if isinstance(self.Html, MailBase):
-            html_text = self.Html.body
-            ct, params = self.Html.content_encoding['Content-Type']
+            html_text = self.Html.get_body()
+            ct, params = self.Html.get_content_type()
             charset = params.pop('charset', None)
-            charset, self.Html.body = charset_encode_body(charset, html_text)
+            charset, encbody = charset_encode_body(charset, html_text)
+            self.Html.set_body(encbody)
             if charset:
                 params['charset'] = charset
-            self.Html.content_encoding['Content-Type'] = ('text/html', params)
+            self.Html.set_content_type('text/html', params)
 
         part = self.base
+        
         if self.Body and self.Html:
             self.multipart = True
             if self.attachments:
                 part = MailBase()
-                self.base.parts.append(part)
-            part.content_encoding['Content-Type'] = (
-                'multipart/alternative', {})
+                self.base.attach_part(part)
+            part.set_content_type('multipart/alternative', {})
 
         if self.multipart:
-            self.base.body = None
+            self.base.set_body(None)
             if isinstance(self.Body, MailBase):
-                part.parts.append(self.Body)
+                part.attach_part(self.Body)
             elif self.Body:
                 part.attach_text(self.Body, 'text/plain')
 
             # Per RFC2046, HTML part is last in multipart/alternative
             if isinstance(self.Html, MailBase):
-                part.parts.append(self.Html)
+                part.attach_part(self.Html)
             elif self.Html:
                 part.attach_text(self.Html, 'text/html')
 
@@ -382,27 +415,27 @@ class MailResponse(object):
 
         elif self.Body:
             if isinstance(self.Body, MailBase):
-                self.base.body = self.Body.body
+                self.base.set_body(self.Body.body)
                 self.base.content_encoding.update(**self.Body.content_encoding)
             else:
                 params = {}
-                charset, self.base.body = charset_encode_body(None, self.Body)
+                charset, encbody = charset_encode_body(None, self.Body)
+                self.base.set_body(encbody)
                 if charset:
                     params['charset'] = charset
-                self.base.content_encoding['Content-Type'] = (
-                    'text/plain', params)
+                self.base.set_content_type('text/plain', params)
 
         elif self.Html:
             if isinstance(self.Html, MailBase):
-                self.base.body = self.Html.body
+                self.base.set_body(self.Html.body)
                 self.base.content_encoding.update(**self.Html.content_encoding)
             else:
                 params = {}
-                charset, self.base.body = charset_encode_body(None, self.Html)
+                charset, encbody = charset_encode_body(None, self.Html)
+                self.base.set_body(encbody)
                 if charset:
                     params['charset'] = charset
-                self.base.content_encoding['Content-Type'] = (
-                    'text/html', params)
+                self.base.set_content_type('text/html', params)
 
         return to_message(self.base)
 
@@ -422,7 +455,7 @@ def to_message(mail):
     Given a MailBase message, this will construct a MIMEPart
     that is canonicalized for use with the Python email API.
     """
-    ctype, params = mail.content_encoding['Content-Type']
+    ctype, params = mail.get_content_type()
 
     if not ctype:
         if mail.parts:
@@ -435,7 +468,7 @@ def to_message(mail):
                 "Content type should be multipart or message, not %r" % ctype)
 
     # adjust the content type according to what it should be now
-    mail.content_encoding['Content-Type'] = (ctype, params)
+    mail.set_content_type(ctype, params)
 
     try:
         out = MIMEPart(ctype, **params)
@@ -446,7 +479,7 @@ def to_message(mail):
 
     for k in mail.keys():
         value = mail[k]
-        if k.lower() in encoding.ADDR_HEADERS:
+        if k.lower() in ADDR_HEADERS:
             if is_nonstr_iter(value):  # not a string
                 value = ", ".join(value)
         if value == '':
@@ -474,14 +507,13 @@ class MIMEPart(MIMEBase):
         MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
     def extract_payload(self, mail):
-        if mail.body is None:
+        body = mail.get_body()
+        if body is None:
             return
 
-        body = mail.body
-
-        ctype, ctype_params = mail.content_encoding['Content-Type']
-        cdisp, cdisp_params = mail.content_encoding['Content-Disposition']
-        ctenc = mail.content_encoding.get('Content-Transfer-Encoding')
+        ctype, ctype_params = mail.get_content_type()
+        cdisp, cdisp_params = mail.get_content_disposition()
+        ctenc = mail.get_transfer_encoding()
 
         assert ctype, ("Extract payload requires that mail.content_encoding "
                        "have a valid Content-Type.")
@@ -509,8 +541,8 @@ class MIMEPart(MIMEBase):
             self.maintype,
             self['Content-Type'],
             self['Content-Disposition'],
-            self.is_multipart())
-
+            self.is_multipart()
+            )
 
 if sys.version < '3': # on python 2, we must return bytes
     def charset_encode_body(charset, data):
@@ -539,10 +571,10 @@ if sys.version < '3': # on python 2, we must return bytes
             else:
                 # - data is text and there's no charset
                 #   use best_charset
-                best_charset, encoded = encoding.best_charset(data)
-                if best_charset == 'ascii':
-                    best_charset = None
-                return best_charset, encoded
+                charset, encoded = best_charset(data)
+                if charset == 'ascii':
+                    charset = None
+                return charset, encoded
 else: # on python 3, we must return text
     def charset_encode_body(charset, data):
         if isinstance(data, bytes):
@@ -568,10 +600,10 @@ else: # on python 3, we must return text
             else:
                 # - data is text and there's no charset
                 #   use best_charset
-                best_charset, encoded = encoding.best_charset(data)
-                if best_charset == 'ascii':
-                    best_charset = None
-                return best_charset, data
+                charset, encoded = best_charset(data)
+                if charset == 'ascii':
+                    charset = None
+                return charset, data
                     
 def transfer_encode_string(encoding, data):
     if encoding == 'base64':
@@ -580,3 +612,32 @@ def transfer_encode_string(encoding, data):
         return quopri.encodestring(data).decode('ascii')
     raise RuntimeError('Unknown transfer encoding %s' % encoding)
 
+def best_charset(text):
+    """
+    Find the most human-readable and/or conventional encoding for unicode text.
+
+    Prefers `ascii` or `iso-8859-1` and falls back to `utf-8`.
+    """
+    encoded = text
+    for charset in 'ascii', 'iso-8859-1', 'utf-8':
+        try:
+            encoded = text.encode(charset)
+        except UnicodeError:
+            pass
+        else:
+            return charset, encoded
+
+# From http://tools.ietf.org/html/rfc5322#section-3.6
+ADDR_HEADERS = (
+    'resent-from',
+    'resent-sender',
+    'resent-to',
+    'resent-cc',
+    'resent-bcc',
+    'from',
+    'sender',
+    'reply-to',
+    'to',
+    'cc',
+    'bcc'
+    )

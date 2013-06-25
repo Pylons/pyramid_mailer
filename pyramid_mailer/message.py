@@ -1,7 +1,6 @@
 from pyramid_mailer.response import (
     MailResponse,
     MailBase,
-    parse_header,
     )
 
 from pyramid_mailer.exceptions import (
@@ -13,11 +12,18 @@ class Attachment(object):
     """
     Encapsulates file attachment information.
 
-    :param filename: filename of attachment
-    :param content_type: file mimetype
-    :param data: the raw file data, either as string or file obj
-    :param disposition: content-disposition (if any)
-    :param transfer_encoding: content-transfer-encoding (if any)
+    :param filename: filename of attachment (if any)
+    :param content_type: file mimetype (if any, may contain extra params in
+           the form "text/plain; charset='utf-8'").
+    :param data: the raw file data, either as text or a file object
+    :param disposition: content-disposition (if any, may contain extra
+           params in the form 'attachment; filename="fred.txt"').  If filename
+           is supplied in the disposition, it will be used if no filename
+           is supplied to the Attachment constructor.  If disposition is
+           not supplied, it will default to 'attachment'.
+    :param transfer_encoding: content-transfer-encoding (if any, may be
+           'base64' or 'quoted-printable').  If it is not supplied, it will
+           default to 'base64'.
     """
 
     def __init__(
@@ -28,7 +34,6 @@ class Attachment(object):
         disposition=None,
         transfer_encoding=None
         ):
-
         self.filename = filename
         self.content_type = content_type
         self.disposition = disposition or 'attachment'
@@ -104,16 +109,15 @@ class Message(object):
         for idx, part in enumerate(bodies):
             if not isinstance(part, Attachment):
                 continue
-
             base = MailBase()
-            base.body = part.data
-            # base.body above will be *either* text or bytes
-            content_type, ct_params = parse_header(part.content_type)
-            base.content_encoding['Content-Type'] = (content_type, ct_params)
-            disp, disp_params = parse_header(part.disposition)
-            base.content_encoding['Content-Disposition'] = (disp, disp_params)
-            base.content_encoding[
-                'Content-Transfer-Encoding'] = part.transfer_encoding
+            base.set_body(part.data)
+            # part.data above will be *either* text or bytes
+            base.set_content_type(part.content_type)
+            # part.content_type above *may* be None, that's OK
+            base.set_content_disposition(part.disposition)
+            # part.content_disposition above *may* be None, that's OK
+            base.set_transfer_encoding(part.transfer_encoding)
+            # part.content_transfer_encoding above *may* be None, that's OK
             bodies[idx] = base
 
         response = MailResponse(

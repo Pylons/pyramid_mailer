@@ -1459,7 +1459,7 @@ class TestMIMEPart(unittest.TestCase):
         part = self._makeOne('text/html')
         L = []
         part.set_payload = lambda body, charset=None: L.append((body, charset))
-        mail = DummyMail('body')
+        mail = DummyPart('body')
         part.extract_payload(mail)
         self.assertEqual(L, [('body', None)])
 
@@ -1467,7 +1467,7 @@ class TestMIMEPart(unittest.TestCase):
         part = self._makeOne('text/html')
         L = []
         part.set_payload = lambda body, charset=None: L.append((body, charset))
-        mail = DummyMail('body', 'application/octet-stream')
+        mail = DummyPart('body', 'application/octet-stream')
         part.extract_payload(mail)
         self.assertEqual(L, [('body', None)])
 
@@ -1476,7 +1476,7 @@ class TestMIMEPart(unittest.TestCase):
         L = []
         part.set_payload = lambda body, charset=None: L.append((body, charset))
         part.add_header = lambda h, d, **x: L.append((h, d, x))
-        mail = DummyMail('body', 'application/octet-stream', 'foo')
+        mail = DummyPart('body', 'application/octet-stream', 'foo')
         part.extract_payload(mail)
         self.assertEqual(
             L,
@@ -1487,25 +1487,11 @@ class TestMIMEPart(unittest.TestCase):
         part = self._makeOne('text/html')
         L = []
         part.set_payload = lambda body, charset=None: L.append((body, charset))
-        mail = DummyMail('body')
-        mail.content_type_params = {'charset':'utf-8'}
+        mail = DummyPart('body')
+        mail.set_content_type('text/html', {'charset':'utf-8'})
         part.extract_payload(mail)
         self.assertEqual(L, [('body', 'utf-8')])
         
-class DummyMail(object):
-    def __init__(self, body, content_type='text/plain',
-                 content_disposition=None):
-        self.body = body
-        self.content_type = content_type
-        self.content_disposition = content_disposition
-        self.content_type_params = {}
-
-    @property
-    def content_encoding(self):
-        return {'Content-Type': (self.content_type, self.content_type_params),
-                'Content-Disposition': (self.content_disposition, {})}
-
-
 class Dummy(object):
     pass
 
@@ -1520,14 +1506,40 @@ class DummyMailRequest(object):
 
 
 class DummyPart(object):
-    def __init__(self):
-        self.content_encoding = {'Content-Type': ('text/html', {}),
-                                 'Content-Disposition': ('inline', {})}
+    def __init__(
+        self,
+        body='body',
+        content_type='text/html',
+        content_disposition='inline',
+        transfer_encoding=None,
+        ):
+        self.content_encoding = {
+            'Content-Type': (content_type, {}),
+            'Content-Disposition': (content_disposition, {}),
+            'Content-Transfer-Encoding': transfer_encoding,
+            }
         self.parts = []
-        self.body = 'body'
+        self.body = body
 
     def keys(self):
         return []
+
+    def get_body(self):
+        return self.body
+
+    def get_content_type(self):
+        return self.content_encoding['Content-Type']
+
+    def set_content_type(self, type, params=None):
+        if params is None:
+            params = {}
+        self.content_encoding['Content-Type'] = (type, params)
+
+    def get_content_disposition(self):
+        return self.content_encoding['Content-Disposition']
+
+    def get_transfer_encoding(self):
+        return self.content_encoding['Content-Transfer-Encoding']
 
 class DummySendmailMailer(object):
     def __init__(self, raises=None):
