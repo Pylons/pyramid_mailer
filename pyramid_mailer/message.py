@@ -46,6 +46,18 @@ class Attachment(object):
             self._data = self._data.read()
         return self._data
 
+    def to_mailbase(self):
+        base = MailBase()
+        base.set_body(self.data)
+        # self.data above will be *either* text or bytes, that's OK
+        base.set_content_type(self.content_type)
+        # part.content_type above *may* be None, that's OK
+        base.set_content_disposition(self.disposition)
+        # part.content_disposition above *may* be None, that's OK
+        base.set_transfer_encoding(self.transfer_encoding)
+        # part.content_transfer_encoding above *may* be None, that's OK
+        return base
+
 class Message(object):
     """
     Encapsulates an email message.
@@ -109,15 +121,7 @@ class Message(object):
         for idx, part in enumerate(bodies):
             if not isinstance(part, Attachment):
                 continue
-            base = MailBase()
-            base.set_body(part.data)
-            # part.data above will be *either* text or bytes
-            base.set_content_type(part.content_type)
-            # part.content_type above *may* be None, that's OK
-            base.set_content_disposition(part.disposition)
-            # part.content_disposition above *may* be None, that's OK
-            base.set_transfer_encoding(part.transfer_encoding)
-            # part.content_transfer_encoding above *may* be None, that's OK
+            base = part.to_mailbase()
             bodies[idx] = base
 
         response = MailResponse(
