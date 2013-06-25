@@ -435,25 +435,25 @@ class MailResponse(object):
         return self.base.keys()
 
 
-def to_message(mail):
+def to_message(base):
     """
-    Given a MailBase message, this will construct a MIMEPart
-    that is canonicalized for use with the Python email API.
+    Given a MailBase, this will construct a MIMEPart that is canonicalized for
+    use with the Python email API.
     """
-    ctype, params = mail.get_content_type()
+    ctype, params = base.get_content_type()
 
     if not ctype:
-        if mail.parts:
+        if base.parts:
             ctype = 'multipart/mixed'
         else:
             ctype = 'text/plain'
     else:
-        if mail.parts:
+        if base.parts:
             assert ctype.startswith(("multipart", "message")), (
                 "Content type should be multipart or message, not %r" % ctype)
 
     # adjust the content type according to what it should be now
-    mail.set_content_type(ctype, params)
+    base.set_content_type(ctype, params)
 
     try:
         out = MIMEPart(ctype, **params)
@@ -462,8 +462,8 @@ def to_message(mail):
                             "%r (Python ERROR: %s" %
                             (ctype, params, exc.message))
 
-    for k in mail.keys():
-        value = mail[k]
+    for k in base.keys():
+        value = base[k]
         if k.lower() in ADDR_HEADERS:
             if is_nonstr_iter(value):  # not a string
                 value = ", ".join(value)
@@ -471,10 +471,10 @@ def to_message(mail):
             continue
         out[k] = value
 
-    out.extract_payload(mail)
+    out.extract_payload(base)
 
     # go through the children
-    for part in mail.parts:
+    for part in base.parts:
         out.attach(to_message(part))
 
     return out
