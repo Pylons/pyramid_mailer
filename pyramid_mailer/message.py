@@ -503,12 +503,7 @@ def to_message(base):
     # adjust the content type according to what it should be now
     base.set_content_type(ctype, params)
 
-    try:
-        out = MIMEPart(ctype, **params)
-    except TypeError as exc:  # pragma: no cover
-        raise EncodingError("Content-Type malformed, not allowed: %r; "
-                            "%r (Python ERROR: %s" %
-                            (ctype, params, exc.message))
+    out = MIMEPart(ctype, **params)
 
     for k in base.keys():
         value = base[k]
