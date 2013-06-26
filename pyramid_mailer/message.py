@@ -50,7 +50,6 @@ from .exceptions import (
 
 from ._compat import (
     base64_encodestring,
-    is_nonstr_iter,
     text_type
     )
 
