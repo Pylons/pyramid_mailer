@@ -205,7 +205,7 @@ class Message(object):
             elif isinstance(val, Attachment):
                 bodies[idx] = val.to_mailbase(content_type, encode=True)
             else:
-                # presumed to be text
+                # presumed to be a textual val
                 attachment = Attachment(
                     data=val,
                     content_type=content_type,
@@ -216,7 +216,7 @@ class Message(object):
         body, html = bodies
 
         base = MailBase([
-            ('To', self.recipients),
+            ('To', ', '.join(self.recipients)),
             ('From', self.sender),
             ('Subject', self.subject),
             ])
@@ -244,7 +244,7 @@ class Message(object):
         # - a text/html type if there is only an html part
 
         if self.cc:
-            base['Cc'] = self.cc
+            base['Cc'] = ', '.join(self.cc)
             
         if self.extra_headers:
             base.update(dict(self.extra_headers))
@@ -262,7 +262,6 @@ class Message(object):
             # Per RFC2046, HTML part comes last in multipart/alternative
             altpart.attach_part(body)
             altpart.attach_part(html)
-
         elif body is not None:
             altpart.merge_part(body)
         elif html is not None:
@@ -514,10 +513,7 @@ def to_message(base):
 
     for k in base.keys():
         value = base[k]
-        if k.lower() in ADDR_HEADERS:
-            if is_nonstr_iter(value):  # not a string
-                value = ", ".join(value)
-        if value == '':
+        if not value:
             continue
         out[k] = value
 
