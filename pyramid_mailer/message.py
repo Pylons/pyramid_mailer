@@ -93,58 +93,16 @@ class Attachment(object):
             self._data = self._data.read()
         return self._data
 
-    def to_mailbase(self):
-        content_type = self.validate()
-        base = MailBase()
-
+    def to_mailbase(self, default_content_type=None, encode=False):
         filename = self.filename
         data = self.data
-
-        ctparams = {}
-        dparams = {}
-        
-        if filename:
-            ctparams = {'name':filename}
-            dparams = {'filename':filename}
-            if not data:
-                # should be opened with binary mode to encode the data later
-                with open(filename, mode='rb') as f:
-                    data = f.read()
-
+        content_type = self.content_type or default_content_type
         disposition = self.disposition or 'attachment'
         transfer_encoding = self.transfer_encoding or 'base64'
-
-        base.set_body(data)
-        base.set_content_type(content_type, ctparams)
-        base.set_content_disposition(disposition, dparams)
-        base.set_transfer_encoding(transfer_encoding or 'base64')
-
-        return base
-
-    def to_mailbase_textual(self, default_content_type):
-        base = MailBase()
-        base.set_content_type(self.content_type)
-        base.set_content_disposition(self.disposition)
-        base.set_transfer_encoding(self.transfer_encoding)
-        ct, params = base.get_content_type()
-        charset = params.pop('charset', None)
-        body_text = self.data
-        charset, encbody = charset_encode_body(charset, body_text)
-        base.set_body(encbody)
-        if charset:
-            params['charset'] = charset
-        if not ct:
-            ct = default_content_type
-        base.set_content_type(ct, params)
-        return base
-
-    def validate(self):
-        filename = self.filename
-        data = self.data
-        content_type = self.content_type
         
         assert filename or data, ("You must give a filename or some data to "
                                   "attach.")
+
         assert data or os.path.exists(filename), ("File doesn't exist, and no "
                                                   "data given.")
 
@@ -154,14 +112,44 @@ class Attachment(object):
         assert content_type, ("No content type given, and couldn't guess "
                               "from the filename: %r" % filename)
 
+        content_type, ctparams = parse_header(content_type)
+        disposition, dparams = parse_header(disposition)
+        
+        if filename:
+            tmp = {'name':filename}
+            tmp.update(ctparams)
+            ctparams = tmp
+            tmp = {'filename':filename}
+            tmp.update(dparams)
+            dparams = tmp
+            if not data:
+                # should be opened with binary mode to encode the data later
+                with open(filename, mode='rb') as f:
+                    data = f.read()
+
+        base = MailBase()
+        base.set_content_type(content_type, ctparams)
+        
         if not filename:
             if not isinstance(data, bytes):
-                raise EncodingError(
-                    'Attachment data must be bytes if it is not a file: '
-                    'got %s' % data
-                    )
+                if encode:
+                    charset = ctparams.pop('charset', None)
+                    body_text = self.data
+                    charset, data = charset_encode_body(charset, body_text)
+                    if charset:
+                        ctparams['charset'] = charset
+                else:
+                    raise EncodingError(
+                        'Attachment data must be bytes if it is not a file: '
+                        'got %s' % data
+                        )
 
-        return content_type
+        base.set_body(data)
+        base.set_content_type(content_type, ctparams)
+        base.set_content_disposition(disposition, dparams)
+        base.set_transfer_encoding(transfer_encoding)
+
+        return base
 
 class Message(object):
     """
@@ -222,7 +210,7 @@ class Message(object):
             if val is None:
                 bodies[idx] = None
             elif isinstance(val, Attachment):
-                bodies[idx] = val.to_mailbase_textual(content_type)
+                bodies[idx] = val.to_mailbase(content_type, encode=True)
             else:
                 # presumed to be text
                 attachment = Attachment(
@@ -230,7 +218,7 @@ class Message(object):
                     content_type=content_type,
                     disposition='inline'
                     )
-                bodies[idx] = attachment.to_mailbase_textual(content_type)
+                bodies[idx] = attachment.to_mailbase(content_type, encode=True)
 
         body, html = bodies
 
