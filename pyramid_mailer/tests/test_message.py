@@ -714,15 +714,6 @@ class TestMailBase(unittest.TestCase):
                               ('Content-Disposition', 'inline')])
         self.assertEqual(base.keys(), ['Content-Disposition', 'Content-Type'])
 
-    def test_walk(self):
-        base1 = self._makeOne()
-        base2 = self._makeOne()
-        base3 = self._makeOne()
-        base1.parts = [base2]
-        base2.parts = [base3]
-        self.assertEqual(list(base1.walk()), [base2, base3])
-
-
 class Test_to_message(unittest.TestCase):
     def _callFUT(self, mail):
         from pyramid_mailer.message import to_message

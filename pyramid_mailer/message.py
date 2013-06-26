@@ -424,13 +424,6 @@ class MailBase(object):
     def attach_part(self, part):
         self.parts.append(part)
 
-    def walk(self):
-        for p in self.parts:
-            yield p
-            for x in p.walk():
-                yield x
-        
-
 class MIMEPart(MIMEBase):
     """
     A reimplementation of nearly everything in email.mime to be more useful
