@@ -7,26 +7,118 @@ import quopri
 from pyramid_mailer._compat import (
     text_type,
     StringIO,
-    PY2,
     )
 
 class TestAttachment(unittest.TestCase):
 
-    def test_data_from_string(self):
-
+    def _makeOne(self, **kw):
         from pyramid_mailer.message import Attachment
+        return Attachment(**kw)
 
-        a = Attachment(data="foo")
+    def test_data_from_string(self):
+        a = self._makeOne(data="foo")
         self.assertEqual(a.data, "foo")
 
     def test_data_from_file_obj(self):
-
-        from pyramid_mailer.message import Attachment
-
-        a = Attachment(data=StringIO(text_type("foo")))
+        a = self._makeOne(data=StringIO(text_type("foo")))
         self.assertEqual(a.data, "foo")
 
+    def test_to_mailbase_no_data(self):
+        a = self._makeOne()
+        self.assertRaises(RuntimeError, a.to_mailbase)
 
+    def test_to_mailbase_content_type_derives_from_filename(self):
+        a = self._makeOne(filename='foo.txt', data='bar')
+        base = a.to_mailbase()
+        self.assertEqual(
+            base.get_content_type(),
+            ('text/plain', {'name':'foo.txt', 'charset':'us-ascii'})
+            )
+        self.assertEqual(
+            base.get_content_disposition(),
+            ('attachment', {'filename':'foo.txt'})
+            )
+
+    def test_to_mailbase_content_type_cannot_be_derived_from_filename(self):
+        a = self._makeOne(data='bar')
+        self.assertRaises(RuntimeError, a.to_mailbase)
+        
+    def test_to_mailbase_disposition_header_provides_filename(self):
+        a = self._makeOne(
+            data='bar',
+            disposition='attachment; filename="foo.txt"',
+            content_type='text/plain',
+            )
+        base = a.to_mailbase()
+        self.assertEqual(
+            base.get_content_type(),
+            ('text/plain', {'name':'foo.txt', 'charset':'us-ascii'})
+            )
+        self.assertEqual(
+            base.get_content_disposition(),
+            ('attachment', {'filename':'foo.txt'})
+            )
+
+    def test_to_mailbase_text_type_sets_charset(self):
+        text = 'bar'
+        a = self._makeOne(
+            data=text,
+            disposition='attachment',
+            content_type='text/plain',
+            )
+        base = a.to_mailbase()
+        self.assertEqual(
+            base.get_content_type(),
+            ('text/plain', {'charset':'us-ascii'})
+            )
+        self.assertEqual(base.get_body(), text)
+
+    def test_to_mailbase_text_type_sets_charset_unicode_latin1(self):
+        charset = 'iso-8859-1'
+        text_encoded = b'LaPe\xf1a'
+        text = text_encoded.decode(charset)
+        a = self._makeOne(
+            data=text,
+            disposition='attachment',
+            content_type='text/plain',
+            )
+        base = a.to_mailbase()
+        self.assertEqual(
+            base.get_content_type(),
+            ('text/plain', {'charset':'iso-8859-1'})
+            )
+        self.assertEqual(base.get_body(), text)
+
+    def test_to_mailbase_text_type_sets_charset_unicode_utf8(self):
+        charset = 'utf-8'
+        # greek small letter iota with dialtyika and tonos; this character
+        # cannot be encoded to either ascii or latin-1, so utf-8 is chosen
+        text_encoded = b'\xce\x90'
+        text = text_encoded.decode(charset)
+        a = self._makeOne(
+            data=text,
+            disposition='attachment',
+            content_type='text/plain',
+            )
+        base = a.to_mailbase()
+        self.assertEqual(
+            base.get_content_type(),
+            ('text/plain', {'charset':'utf-8'})
+            )
+        self.assertEqual(base.get_body(), text)
+
+    def test_to_mailbase_disposition_set(self):
+        a = self._makeOne(
+            data='abc',
+            disposition='foo',
+            content_type='text/plain',
+            )
+        base = a.to_mailbase()
+        self.assertEqual(
+            base.get_content_disposition(),
+            ('foo', {})
+            )
+        
 class TestMessage(unittest.TestCase):
 
     def _read_filedata(self, filename, mode='r'):
@@ -257,13 +349,10 @@ class TestMessage(unittest.TestCase):
         message = msg.to_message()
         body_part, html_part = message.get_payload()
 
-        # different repoze.sendmail versions use a different string to
-        # represent the charset, so we permit either.
-        self.assertTrue(
-            body_part['Content-Type'] in 
-                ('text/plain; charset="iso-8859-1"',
-                 'text/plain; charset="latin_1"'),
-                )
+        self.assertEqual(
+            body_part['Content-Type'],
+            'text/plain; charset="iso-8859-1"'
+            )
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
         encoder = codecs.getencoder('quopri_codec')
@@ -272,13 +361,10 @@ class TestMessage(unittest.TestCase):
         expected = encoder(encoded_text)[0].decode('ascii')
         self.assertEqual(payload, expected)
 
-        # different repoze.sendmail versions use a different string to
-        # represent the charset, so we permit either.
-        self.assertTrue(
-            html_part['Content-Type'] in 
-                ('text/html; charset="iso-8859-1"',
-                 'text/html; charset="latin_1"'),
-                )
+        self.assertEqual(
+            html_part['Content-Type'], 
+            'text/html; charset="iso-8859-1"'
+            )
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
         payload = html_part.get_payload()
@@ -309,13 +395,10 @@ class TestMessage(unittest.TestCase):
         message = msg.to_message()
         body_part, html_part = message.get_payload()
 
-        # different repoze.sendmail versions use a different string to
-        # represent the charset, so we permit either.
-        self.assertTrue(
-            body_part['Content-Type'] in 
-                ('text/plain; charset="utf-8"',
-                 'text/plain; charset="utf_8"'),
-                )
+        self.assertEqual(
+            body_part['Content-Type'],
+            'text/plain; charset="utf-8"'
+            )
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
         encoder = codecs.getencoder('quopri_codec')
@@ -324,13 +407,10 @@ class TestMessage(unittest.TestCase):
         expected = encoder(encoded_text)[0].decode('ascii')
         self.assertEqual(payload, expected)
 
-        # different repoze.sendmail versions use a different string to
-        # represent the charset, so we permit either.
-        self.assertTrue(
-            html_part['Content-Type'] in 
-                ('text/html; charset="utf-8"',
-                 'text/html; charset="utf_8"'),
-                )
+        self.assertEqual(
+            html_part['Content-Type'],
+            'text/html; charset="utf-8"'
+            )
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
         payload = html_part.get_payload()
@@ -355,13 +435,10 @@ class TestMessage(unittest.TestCase):
                       body=body)
         body_part = msg.to_message()
 
-        # different repoze.sendmail versions use a different string to
-        # represent the charset, so we permit either.
-        self.assertTrue(
-            body_part['Content-Type'] in 
-                ('text/plain; charset="iso-8859-1"',
-                 'text/plain; charset="latin_1"'),
-                )
+        self.assertEqual(
+            body_part['Content-Type'],
+            'text/plain; charset="iso-8859-1"'
+            )
         self.assertEqual(
             body_part['Content-Transfer-Encoding'], transfer_encoding)
         self.assertEqual(body_part.get_payload(),
@@ -391,13 +468,10 @@ class TestMessage(unittest.TestCase):
 
         html_part = msg.to_message()
 
-        # different repoze.sendmail versions use a different string to
-        # represent the charset, so we permit either.
-        self.assertTrue(
-            html_part['Content-Type'] in 
-                ('text/html; charset="iso-8859-1"',
-                 'text/html; charset="latin_1"'),
-                )
+        self.assertEqual(
+            html_part['Content-Type'],
+            'text/html; charset="iso-8859-1"'
+            )
         self.assertEqual(
             html_part['Content-Transfer-Encoding'], transfer_encoding)
         self.assertEqual(html_part.get_payload(),
@@ -563,7 +637,7 @@ class TestMessage(unittest.TestCase):
         data = open(this, 'rb')
         attachment = Attachment(
             filename=this,
-            content_type='text/plain',
+            content_type='application/octet-stream',
             disposition='disposition',
             transfer_encoding='base64',
             data=data,
@@ -575,7 +649,7 @@ class TestMessage(unittest.TestCase):
         self.assertEqual(payload.get('Content-Transfer-Encoding'), 'base64')
         self.assertEqual(
             payload.get_payload(),
-            base64_encodestring(self._read_filedata(this)).decode('ascii')
+            base64_encodestring(self._read_filedata(this, 'rb')).decode('ascii')
             )
 
     def test_to_message_multipart_with_qpencoding(self):
@@ -591,7 +665,7 @@ class TestMessage(unittest.TestCase):
         data = open(this, 'rb')
         attachment = Attachment(
             filename=this,
-            content_type='text/plain',
+            content_type='application/octet-stream',
             disposition='disposition',
             transfer_encoding='quoted-printable',
             data=data,
@@ -604,7 +678,7 @@ class TestMessage(unittest.TestCase):
                          'quoted-printable')
         self.assertEqual(
             payload.get_payload(),
-            quopri.encodestring(self._read_filedata(this)).decode('ascii')
+            quopri.encodestring(self._read_filedata(this,'rb')).decode('ascii')
             )
 
     def test_to_message_with_parts3(self):
@@ -839,11 +913,10 @@ class TestFunctional(unittest.TestCase):
         from repoze.sendmail.delivery import copy_message
 
         def checkit(msg):
-            self.assertTrue(
-                msg['Content-Type'] in 
-                    ('text/plain; charset="iso-8859-1"',
-                     'text/plain; charset="latin_1"'),
-                    )
+            self.assertEqual(
+                msg['Content-Type'],
+                'text/plain; charset="iso-8859-1"'
+                )
             self.assertEqual(
                 msg['Content-Transfer-Encoding'], transfer_encoding)
 

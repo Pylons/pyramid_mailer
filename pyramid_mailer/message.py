@@ -37,7 +37,6 @@ import cgi
 import mimetypes
 import os
 import string
-import sys
 import quopri
 
 from email.mime.base import MIMEBase
@@ -78,7 +77,7 @@ class Attachment(object):
         content_type=None,
         data=None,
         disposition=None,
-        transfer_encoding=None
+        transfer_encoding=None,
         ):
         self.filename = filename
         self.content_type = content_type
@@ -92,7 +91,7 @@ class Attachment(object):
             self._data = self._data.read()
         return self._data
 
-    def to_mailbase(self, default_content_type=None, encode=False):
+    def to_mailbase(self, default_content_type=None):
         filename = self.filename
         data = self.data
         content_type = self.content_type or default_content_type
@@ -105,38 +104,34 @@ class Attachment(object):
         if filename and not content_type:
             content_type, _ = mimetypes.guess_type(filename)
 
-        assert content_type, ("No content type given, and couldn't guess "
-                              "from the filename: %r" % filename)
+        if not content_type:
+            raise RuntimeError(
+                "No content type given, and couldn't guess "
+                "the content type from a filename provided (%r)" % filename
+                )
 
         content_type, ctparams = parse_header(content_type)
         disposition, dparams = parse_header(disposition)
+
+        if filename is None:
+            filename = dparams.get('filename')
         
         if filename:
             filename = os.path.split(filename)[1]
-            tmp = {'name':filename}
-            tmp.update(ctparams)
-            ctparams = tmp
-            tmp = {'filename':filename}
-            tmp.update(dparams)
-            dparams = tmp
+            ctparams['name'] = filename
+            dparams['filename'] = filename
 
         base = MailBase()
         base.set_content_type(content_type, ctparams)
         
-        if not isinstance(data, bytes):
-            if encode:
-                charset = ctparams.pop('charset', None)
-                body_text = self.data
-                charset, data = charset_encode_body(charset, body_text)
-                if charset:
-                    ctparams['charset'] = charset
-            else:
-                raise EncodingError(
-                    'Attachment data must be bytes if it is not a file: '
-                    'got %r' % data
-                    )
+        body = self.data
+        
+        if content_type.startswith('text/'):
+            charset = ctparams.get('charset', None)
+            charset, body = charset_decode_body(charset, self.data)
+            ctparams['charset'] = charset
 
-        base.set_body(data)
+        base.set_body(body)
         base.set_content_type(content_type, ctparams)
         base.set_content_disposition(disposition, dparams)
         base.set_transfer_encoding(transfer_encoding)
@@ -202,7 +197,7 @@ class Message(object):
             if val is None:
                 bodies[idx] = None
             elif isinstance(val, Attachment):
-                bodies[idx] = val.to_mailbase(content_type, encode=True)
+                bodies[idx] = val.to_mailbase(content_type)
             else:
                 # presumed to be a textual val
                 attachment = Attachment(
@@ -210,7 +205,7 @@ class Message(object):
                     content_type=content_type,
                     disposition='inline'
                     )
-                bodies[idx] = attachment.to_mailbase(content_type, encode=True)
+                bodies[idx] = attachment.to_mailbase(content_type)
 
         body, html = bodies
 
@@ -448,15 +443,9 @@ class MIMEPart(MIMEBase):
         charset = ctype_params.get('charset')
 
         if cdisp:
-            # replicate the content-disposition settings
             self.add_header('Content-Disposition', cdisp, **cdisp_params)
         if ctenc:
-            if isinstance(body, text_type):
-                # probably only true on py3
-                if charset is None:
-                    charset = 'ascii'
-                body = body.encode(charset)
-            body = transfer_encode_string(ctenc, body)
+            body = transfer_encode_string(ctenc, body, charset)
             self.add_header('Content-Transfer-Encoding', ctenc)
 
         self.set_payload(body, charset=charset)
@@ -519,73 +508,45 @@ def normalize_header(header):
     return string.capwords(header.lower(), '-')
 
 
-if sys.version < '3': # on python 2, we must return bytes
-    def charset_encode_body(charset, data):
-        # on python 2, must return bytes
-        if isinstance(data, bytes):
-            # - data is bytes and there's a charset
-            #   trust that body and charset match and do nothing
-            if charset:
-                return charset, data
-            else:
-                # - data is bytes and there's no charset
-                #   try to decode body from ascii and raise an exception if cant
-                try:
-                    data.decode('ascii')
-                except UnicodeError:
-                    raise EncodingError(
-                        'Body is bytes, but no charset supplied and '
-                        'cannot decode body from ascii'
-                        )
-                return None, data
+def charset_decode_body(charset, data):
+    if isinstance(data, bytes):
+        # - data is bytes and there's a charset
+        #   trust that body can be decoded using charset and decode it
+        if charset:
+            return charset, data.decode(charset)
         else:
-            if charset:
-                # - data is text and there's a charset
-                #   trust that body can be encoded using charset and encode it
-                return charset, data.encode(charset)
-            else:
-                # - data is text and there's no charset
-                #   use best_charset
-                charset, encoded = best_charset(data)
-                if charset == 'ascii':
-                    charset = None
-                return charset, encoded
-else: # pragma: no cover (on python 3, we must return text)
-    def charset_encode_body(charset, data):
-        if isinstance(data, bytes):
-            # - data is bytes and there's a charset
-            #   trust that body and charset match and do nothing
-            if charset:
-                return charset, data.decode(charset)
-            else:
-                # - data is bytes and there's no charset
-                #   try to decode body from ascii and raise an exception if cant
-                try:
-                    return None, data.decode('ascii')
-                except UnicodeError:
-                    raise EncodingError(
-                        'Body is bytes, but no charset supplied and '
-                        'cannot decode body from ascii'
-                        )
+            # - data is bytes and there's no charset
+            #   try to decode body from ascii and raise an exception if cant
+            try:
+                return 'us-ascii', data.decode('us-ascii')
+            except UnicodeError:
+                raise EncodingError(
+                    'Body is bytes, but no charset supplied and '
+                    'cannot decode body from us-ascii'
+                    )
+    else:
+        if charset:
+            # - data is text and there's a charset
+            #   trust and do nothing
+            return charset, data
         else:
-            if charset:
-                # - data is text and there's a charset
-                #   trust that body can be encoded using charset and encode it
-                return charset, data
-            else:
-                # - data is text and there's no charset
-                #   use best_charset
-                charset, encoded = best_charset(data)
-                if charset == 'ascii':
-                    charset = None
-                return charset, data
+            # - data is text and there's no charset
+            #   use best_charset
+            charset, _ = best_charset(data)
+            return charset, data
 
 
-def transfer_encode_string(encoding, data):
+def transfer_encode_string(encoding, body, charset):
+    encoding = encoding.lower()
+    charset = charset or 'ascii'
+    if isinstance(body, text_type):
+        body = body.encode(charset)
     if encoding == 'base64':
-        return base64_encodestring(data).decode('ascii')
+        return base64_encodestring(body).decode('ascii')
     elif encoding == 'quoted-printable':
-        return quopri.encodestring(data).decode('ascii')
+        return quopri.encodestring(body).decode('ascii')
+    elif encoding in ('8bit', '7bit', 'binary'):
+        return body
     raise RuntimeError('Unknown transfer encoding %s' % encoding)
 
 
@@ -596,7 +557,7 @@ def best_charset(text):
     Prefers `ascii` or `iso-8859-1` and falls back to `utf-8`.
     """
     encoded = text
-    for charset in 'ascii', 'iso-8859-1', 'utf-8':
+    for charset in 'us-ascii', 'iso-8859-1', 'utf-8':
         try:
             encoded = text.encode(charset)
         except UnicodeError:
