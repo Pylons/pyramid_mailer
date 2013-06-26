@@ -287,10 +287,7 @@ class TestMailer(unittest.TestCase):
         try:
             test_queue = os.path.join(tmpdir, 'test_queue')
             for dir in ('cur', 'new', 'tmp'):
-                try:
-                    os.makedirs(os.path.join(test_queue, dir))
-                except OSError:
-                    pass
+                os.makedirs(os.path.join(test_queue, dir))
 
             mailer = Mailer(queue_path=test_queue)
 
@@ -391,6 +388,46 @@ class TestMailer(unittest.TestCase):
         self.assertEqual(mailer.queue_delivery.queuePath, '/tmp')
         self.assertEqual(mailer.direct_delivery.mailer.debug_smtp, 1)
 
+class TestSMTP_SSLMailer(unittest.TestCase):
+    def _makeOne(self, *arg, **kw):
+        from pyramid_mailer.mailer import SMTP_SSLMailer
+        return SMTP_SSLMailer(*arg, **kw)
+    
+    def test_ctor(self):
+        inst = self._makeOne(keyfile='keyfile', certfile='certfile')
+        self.assertEqual(inst.keyfile, 'keyfile')
+        self.assertEqual(inst.certfile, 'certfile')
+        
+    def test_smtp_factory_smtp_is_None(self):
+        inst = self._makeOne()
+        inst.smtp = None
+        self.assertRaises(RuntimeError, inst.smtp_factory)
+
+    def test_smtp_factory_smtp_is_not_None(self):
+        inst = self._makeOne(
+            debug_smtp=9,
+            hostname='hostname',
+            port=25,
+            certfile='certfile',
+            keyfile='keyfile'
+            )
+        inst.smtp = DummyConnectionFactory
+        conn = inst.smtp_factory()
+        self.assertEqual(conn.hostname, 'hostname')
+        self.assertEqual(conn.port, '25')
+        self.assertEqual(conn.certfile, 'certfile')
+        self.assertEqual(conn.keyfile, 'keyfile')
+        self.assertEqual(conn.debuglevel, 9)
+
+class DummyConnectionFactory(object):
+    def __init__(self, hostname, port, keyfile=None, certfile=None):
+        self.hostname = hostname
+        self.port = port
+        self.keyfile = keyfile
+        self.certfile = certfile
+
+    def set_debuglevel(self, level):
+        self.debuglevel = level
 
 class DummyMailer(object):
     def __init__(self, raises=None):

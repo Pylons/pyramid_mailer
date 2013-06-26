@@ -84,7 +84,7 @@ class SMTP_SSLMailer(SMTPMailer):
         super(SMTP_SSLMailer, self).__init__(*args, **kwargs)
 
     def smtp_factory(self):
-        if self.stmp is None:
+        if self.smtp is None:
             raise RuntimeError('No SMTP_SSL support in Python usable by mailer')
             
         connection = self.smtp(
