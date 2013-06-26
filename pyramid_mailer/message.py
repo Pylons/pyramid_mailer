@@ -357,9 +357,7 @@ class MailBase(object):
     def set_content_type(self, content_type, params=None):
         if params is None:
             params = {}
-        content_type, ct_params = parse_header(content_type)
-        ct_params.update(params)
-        self.content_encoding['Content-Type'] = (content_type, ct_params)
+        self.content_encoding['Content-Type'] = (content_type, params)
 
     def get_content_type(self):
         return self.content_encoding['Content-Type']
@@ -367,9 +365,7 @@ class MailBase(object):
     def set_content_disposition(self, disposition, params=None):
         if params is None:
             params = {}
-        disp, disp_params = parse_header(disposition)
-        disp_params.update(params)
-        self.content_encoding['Content-Disposition'] = (disp, disp_params)
+        self.content_encoding['Content-Disposition'] = (disposition, params)
 
     def get_content_disposition(self):
         return self.content_encoding['Content-Disposition']
