@@ -9,6 +9,11 @@ Next release
 - Remove "all_parts" and "attach_all_parts" from MailResponse object (unused by
   pyramid_mailer).
 
+- The Attachment class no longer supports reading data from the a file based on
+  the ``filename`` it is passed.  Instead, use the filename argument only as
+  something that should go in the Content-Disposition header, and pass a
+  filelike object as ``data``.
+
 0.11 (2013-03-28)
 -----------------
 

@@ -99,13 +99,10 @@ class Attachment(object):
         content_type = self.content_type or default_content_type
         disposition = self.disposition or 'attachment'
         transfer_encoding = self.transfer_encoding or 'base64'
+
+        if not data:
+            raise RuntimeError('No data provided to attachment')
         
-        assert filename or data, ("You must give a filename or some data to "
-                                  "attach.")
-
-        assert data or os.path.exists(filename), ("File doesn't exist, and no "
-                                                  "data given.")
-
         if filename and not content_type:
             content_type, _ = mimetypes.guess_type(filename)
 
@@ -116,33 +113,29 @@ class Attachment(object):
         disposition, dparams = parse_header(disposition)
         
         if filename:
+            filename = os.path.split(filename)[1]
             tmp = {'name':filename}
             tmp.update(ctparams)
             ctparams = tmp
             tmp = {'filename':filename}
             tmp.update(dparams)
             dparams = tmp
-            if not data:
-                # should be opened with binary mode to encode the data later
-                with open(filename, mode='rb') as f:
-                    data = f.read()
 
         base = MailBase()
         base.set_content_type(content_type, ctparams)
         
-        if not filename:
-            if not isinstance(data, bytes):
-                if encode:
-                    charset = ctparams.pop('charset', None)
-                    body_text = self.data
-                    charset, data = charset_encode_body(charset, body_text)
-                    if charset:
-                        ctparams['charset'] = charset
-                else:
-                    raise EncodingError(
-                        'Attachment data must be bytes if it is not a file: '
-                        'got %s' % data
-                        )
+        if not isinstance(data, bytes):
+            if encode:
+                charset = ctparams.pop('charset', None)
+                body_text = self.data
+                charset, data = charset_encode_body(charset, body_text)
+                if charset:
+                    ctparams['charset'] = charset
+            else:
+                raise EncodingError(
+                    'Attachment data must be bytes if it is not a file: '
+                    'got %r' % data
+                    )
 
         base.set_body(data)
         base.set_content_type(content_type, ctparams)
