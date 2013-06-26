@@ -323,12 +323,8 @@ class TestMailer(unittest.TestCase):
 
     def test_from_settings_factory(self):
 
-        try:
-            from smtplib import SMTP_SSL
-            ssl_enabled = True
-        except ImportError:  # pragma: no cover
-            from smtplib import SMTP
-            ssl_enabled = False
+        from pyramid_mailer._compat import SMTP_SSL
+        from smtplib import SMTP
         from pyramid_mailer import mailer_factory_from_settings
 
         settings = {'mymail.host': 'my.server.com',
@@ -350,7 +346,7 @@ class TestMailer(unittest.TestCase):
         self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
         self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
         self.assertEqual(mailer.direct_delivery.mailer.force_tls, True)
-        if ssl_enabled:
+        if SMTP_SSL is not None:
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
         else:  # pragma: no cover
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
@@ -362,12 +358,8 @@ class TestMailer(unittest.TestCase):
 
     def test_from_settings(self):
 
-        try:
-            from smtplib import SMTP_SSL
-            ssl_enabled = True
-        except ImportError:  # pragma: no cover
-            from smtplib import SMTP
-            ssl_enabled = False
+        from pyramid_mailer._compat import SMTP_SSL
+        from smtplib import SMTP
         from pyramid_mailer.mailer import Mailer
 
         settings = {'mymail.host': 'my.server.com',
@@ -389,7 +381,7 @@ class TestMailer(unittest.TestCase):
         self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
         self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
         self.assertEqual(mailer.direct_delivery.mailer.force_tls, False)
-        if ssl_enabled:
+        if SMTP_SSL is not None:
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
         else:  # pragma: no cover
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
