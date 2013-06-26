@@ -378,12 +378,17 @@ class TestMessage(unittest.TestCase):
         text = text_encoded.decode(charset)
         text_html = '<p>' + text + '</p>'
         transfer_encoding = 'quoted-printable'
-        html = Attachment(data=text_html,
-                          transfer_encoding=transfer_encoding)
-        msg = Message(subject="testing",
-                      sender="from@example.com",
-                      recipients=["to@example.com"],
-                      html=html)
+        html = Attachment(
+            data=text_html,
+            transfer_encoding=transfer_encoding
+            )
+        msg = Message(
+            subject="testing",
+            sender="from@example.com",
+            recipients=["to@example.com"],
+            html=html,
+            )
+
         html_part = msg.to_message()
 
         # different repoze.sendmail versions use a different string to
@@ -720,30 +725,6 @@ class TestMailBase(unittest.TestCase):
         base = self._makeOne([('Content-Type', 'text/html'),
                               ('Content-Disposition', 'inline')])
         self.assertEqual(base.keys(), ['Content-Disposition', 'Content-Type'])
-
-    def test_attach_file(self):
-        base = self._makeOne()
-        base.attach_file('filename', b'data', 'ctype', 'inline', 'base64')
-        self.assertEqual(len(base.parts), 1)
-        part = base.parts[0]
-        self.assertEqual(part.content_encoding['Content-Type'],
-                         ('ctype', {'name': 'filename'}))
-        self.assertEqual(part.content_encoding['Content-Disposition'],
-                         ('inline', {'filename': 'filename'}))
-        self.assertEqual(part.content_encoding['Content-Transfer-Encoding'],
-                         'base64')
-        self.assertEqual(part.body, b'data') # XXX should this differ on py3
-
-    def test_attach_text(self):
-        base = self._makeOne()
-        base.attach_text('data', 'ctype')
-        self.assertEqual(len(base.parts), 1)
-        part = base.parts[0]
-        self.assertEqual(part.content_encoding['Content-Type'], ('ctype', {}))
-        if PY2:
-            self.assertEqual(part.body, b'data')
-        else: # pragma: no cover
-            self.assertEqual(part.body, 'data')
 
     def test_walk(self):
         base1 = self._makeOne()

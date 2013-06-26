@@ -94,22 +94,41 @@ class Attachment(object):
         return self._data
 
     def to_mailbase(self):
+        content_type = self.validate()
         base = MailBase()
-        base.set_body(self.data)
-        # self.data above will be *either* text or bytes, that's OK
-        base.set_content_type(self.content_type)
-        # self.content_type above *may* be None, that's OK
-        base.set_content_disposition(self.disposition)
-        # self.content_disposition above *may* be None, that's OK
-        base.set_transfer_encoding(self.transfer_encoding)
-        # self.content_transfer_encoding above *may* be None, that's OK
+
+        filename = self.filename
+        data = self.data
+
+        ctparams = {}
+        dparams = {}
+        
+        if filename:
+            ctparams = {'name':filename}
+            dparams = {'filename':filename}
+            if not data:
+                # should be opened with binary mode to encode the data later
+                with open(filename, mode='rb') as f:
+                    data = f.read()
+
+        disposition = self.disposition or 'attachment'
+        transfer_encoding = self.transfer_encoding or 'base64'
+
+        base.set_body(data)
+        base.set_content_type(content_type, ctparams)
+        base.set_content_disposition(disposition, dparams)
+        base.set_transfer_encoding(transfer_encoding or 'base64')
+
         return base
 
     def to_mailbase_textual(self, default_content_type):
-        base = self.to_mailbase()
-        body_text = base.get_body()
+        base = MailBase()
+        base.set_content_type(self.content_type)
+        base.set_content_disposition(self.disposition)
+        base.set_transfer_encoding(self.transfer_encoding)
         ct, params = base.get_content_type()
         charset = params.pop('charset', None)
+        body_text = self.data
         charset, encbody = charset_encode_body(charset, body_text)
         base.set_body(encbody)
         if charset:
@@ -143,39 +162,6 @@ class Attachment(object):
                     )
 
         return content_type
-
-    def add_to_part(self, part):
-        # part is a MailBase instance
-        filename = self.filename
-        data = self.data
-        content_type = self.content_type
-        disposition = self.disposition
-        transfer_encoding = self.transfer_encoding
-        
-        content_type = self.validate()
-        
-        if filename:
-            if not data:
-                # should be opened with binary mode to encode the data later
-                with open(filename, mode='rb') as f:
-                    data = f.read()
-
-            part.attach_file(
-                filename,
-                data,
-                content_type,
-                disposition or 'attachment',
-                transfer_encoding or 'base64'
-                )
-
-        else:
-            part.attach_binary(data, content_type)
-
-        ctype = part.get_content_type()[0]
-
-        if ctype and not ctype.startswith('multipart'):
-            part.set_content_type('multipart/mixed')
-    
 
 class Message(object):
     """
@@ -233,11 +219,18 @@ class Message(object):
         bodies = [(self.body, 'text/plain'), (self.html, 'text/html')]
 
         for idx, (val, content_type) in enumerate(bodies):
-            if isinstance(val, Attachment):
-                base = val.to_mailbase_textual(content_type)
-                bodies[idx] = base
+            if val is None:
+                bodies[idx] = None
+            elif isinstance(val, Attachment):
+                bodies[idx] = val.to_mailbase_textual(content_type)
             else:
-                bodies[idx] = val
+                # presumed to be text
+                attachment = Attachment(
+                    data=val,
+                    content_type=content_type,
+                    disposition='inline'
+                    )
+                bodies[idx] = attachment.to_mailbase_textual(content_type)
 
         body, html = bodies
 
@@ -276,33 +269,27 @@ class Message(object):
             base.update(dict(self.extra_headers))
 
         if self.attachments:
-            base.set_content_type('multipart/mixed', {})
+            base.set_content_type('multipart/mixed')
             altpart = MailBase()
             base.attach_part(altpart)
         else:
             altpart = base
             
         if body and html:
-            altpart.set_content_type('multipart/alternative', {})
+            altpart.set_content_type('multipart/alternative')
             altpart.set_body(None)
-            if isinstance(body, MailBase):
-                altpart.attach_part(body)
-            elif body:
-                altpart.attach_text(body, 'text/plain')
+            # Per RFC2046, HTML part comes last in multipart/alternative
+            altpart.attach_part(body)
+            altpart.attach_part(html)
 
-            # Per RFC2046, HTML part is last in multipart/alternative
-            if isinstance(html, MailBase):
-                altpart.attach_part(html)
-            elif html:
-                altpart.attach_text(html, 'text/html')
-
-        elif body:
-            setbody(altpart, body, 'text/plain')
-        elif html:
-            setbody(altpart, html, 'text/html')
+        elif body is not None:
+            altpart.merge_part(body)
+        elif html is not None:
+            altpart.merge_part(html)
 
         for attachment in self.attachments:
-            attachment.add_to_part(base)
+            attachment_mailbase = attachment.to_mailbase()
+            base.attach_part(attachment_mailbase)
 
         return to_message(base)
 
@@ -452,63 +439,14 @@ class MailBase(object):
         for k, v in other.items():
             self[k] = v
 
+    def merge_part(self, part):
+        body = part.get_body()
+        self.set_body(body)
+        self.content_encoding.update(part.content_encoding)
+        self.headers.update(part.headers)
+        self.parts = part.parts[:]
+
     def attach_part(self, part):
-        self.parts.append(part)
-
-    def attach_file(self, filename, data, ctype, disposition,
-                    transfer_encoding=None):
-        """
-        A file attachment is a raw attachment with a disposition that
-        indicates the file name.
-        """
-        assert filename, "You can't attach a file without a filename."
-
-        if not isinstance(data, bytes):
-            raise EncodingError(
-                'Attachment data fed to attach_file must be bytes, '
-                'got %r' % data
-                )
-            
-        ctype = ctype.lower()
-        part = MailBase()
-        part.set_body(data)
-        part.set_content_type(ctype, {'name':filename})
-        part.set_content_disposition(disposition, {'filename':filename})
-        part.set_transfer_encoding(transfer_encoding)
-        self.parts.append(part)
-
-    def attach_binary(self, data, ctype):
-        """
-        This attaches a simple binary part, treated as an attachment; eventually
-        it will be base64 encoded in the payload.
-        """
-        if not isinstance(data, bytes):
-            raise EncodingError(
-                'Attachment data must be bytes; got %r' % data
-                )
-            
-        ctype = ctype.lower()
-        part = MailBase()
-        part.set_body(data)
-        part.set_content_type(ctype)
-        part.set_content_disposition('attachment')
-        part.set_transfer_encoding('base64')
-        self.parts.append(part)
-
-    def attach_text(self, data, ctype):
-        """
-        This attaches a simple text part.
-        """
-        ctype = ctype.lower()
-        part = MailBase()
-        ctype, params = parse_header(ctype)
-        body = data
-        charset = params.pop('charset', None)
-        charset, body = charset_encode_body(charset, data)
-        if charset:
-            params['charset'] = charset
-        part.set_body(body)
-        part.set_content_type(ctype, params)
         self.parts.append(part)
 
     def walk(self):
@@ -566,7 +504,6 @@ class MIMEPart(MIMEBase):
             self['Content-Disposition'],
             self.is_multipart()
             )
-
 
 def to_message(base):
     """
