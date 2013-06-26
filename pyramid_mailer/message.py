@@ -473,7 +473,6 @@ class MIMEPart(MIMEBase):
             # replicate the content-disposition settings
             self.add_header('Content-Disposition', cdisp, **cdisp_params)
         if ctenc:
-            # need to encode because repoze.sendmail don't handle attachments
             if isinstance(body, text_type):
                 # probably only true on py3
                 if charset is None:
