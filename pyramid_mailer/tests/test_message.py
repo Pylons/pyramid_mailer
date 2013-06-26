@@ -197,6 +197,19 @@ class TestMessage(unittest.TestCase):
             "Bcc: tosomeoneelse@example.com" in text_type(response))
         self.assertTrue(msgid)
 
+    def test_extra_headers(self):
+
+        from pyramid_mailer.message import Message
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["to@example.com"],
+                      body="testing",
+                      extra_headers=[('X-Foo', 'Joe')])
+
+        response = msg.to_message()
+        self.assertTrue("X-Foo: Joe" in text_type(response))
+
     def test_attach(self):
 
         from pyramid_mailer.message import Message

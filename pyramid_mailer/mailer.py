@@ -7,6 +7,7 @@ from repoze.sendmail.delivery import QueuedMailDelivery
 
 from pyramid.settings import asbool
 
+from pyramid_mailer._compat import SMTP_SSL
 
 class DummyMailer(object):
     """
@@ -75,31 +76,26 @@ class SMTP_SSLMailer(SMTPMailer):
     Subclass of SMTPMailer enabling SSL.
     """
 
-    try:
-        # support disabled if pre-2.6
-        smtp = smtplib.SMTP_SSL
-        ssl_support = True
-    except AttributeError: # pragma: no cover
-        smtp = smtplib.SMTP
-        ssl_support = False
+    smtp = SMTP_SSL
 
     def __init__(self, *args, **kwargs):
         self.keyfile = kwargs.pop('keyfile', None)
         self.certfile = kwargs.pop('certfile', None)
-
         super(SMTP_SSLMailer, self).__init__(*args, **kwargs)
 
     def smtp_factory(self):
+        if self.stmp is None:
+            raise RuntimeError('No SMTP_SSL support in Python usable by mailer')
+            
+        connection = self.smtp(
+            self.hostname,
+            str(self.port),
+            keyfile=self.keyfile,
+            certfile=self.certfile
+            )
 
-        if self.ssl_support is False: # pragma: no cover
-            return super(SMTP_SSLMailer, self).smtp_factory()
-
-        connection = self.smtp(self.hostname, str(self.port),
-                               keyfile=self.keyfile,
-                               certfile=self.certfile)
-
-        connection.set_debuglevel(self.debug_smtp) # pragma: no cover
-        return connection # pragma: no cover
+        connection.set_debuglevel(self.debug_smtp)
+        return connection
 
 
 class Mailer(object):

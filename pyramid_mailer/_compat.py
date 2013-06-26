@@ -32,3 +32,8 @@ try: # pragma: no cover
 except ImportError:  # pragma: no cover
     from StringIO import StringIO
 
+try:
+    from smtplib import SMTP_SSL
+except ImportError:  # pragma: no cover
+    SMTP_SSL = None
+    

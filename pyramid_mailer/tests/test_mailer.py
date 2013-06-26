@@ -70,7 +70,7 @@ class TestMailerSendmail(unittest.TestCase):
         from pyramid_mailer.message import Message
 
         mailer = Mailer()
-        sendmail_mailer = DummySendmailMailer()
+        sendmail_mailer = DummyMailer()
         mailer.sendmail_mailer = sendmail_mailer
 
         msg = Message(subject="test_send_immediately_sendmail",
@@ -91,7 +91,7 @@ class TestMailerSendmail(unittest.TestCase):
         from pyramid_mailer.message import Message
 
         mailer = Mailer()
-        sendmail_mailer = DummySendmailMailer(ValueError())
+        sendmail_mailer = DummyMailer(ValueError())
         mailer.sendmail_mailer = sendmail_mailer
 
         msg = Message(subject="test_send_immediately_sendmail",
@@ -109,7 +109,7 @@ class TestMailerSendmail(unittest.TestCase):
         from pyramid_mailer.message import Message
 
         mailer = Mailer()
-        sendmail_mailer = DummySendmailMailer(ValueError())
+        sendmail_mailer = DummyMailer(ValueError())
         mailer.sendmail_mailer = sendmail_mailer
 
         msg = Message(subject="test_send_immediately_sendmail",
@@ -236,7 +236,13 @@ class TestMailer(unittest.TestCase):
                       body=text_string,
                       html=html_string)
 
+        smtp_mailer = DummyMailer()
+
+        mailer.smtp_mailer = smtp_mailer
+
         mailer.send_immediately(msg, True)
+
+        self.assertEqual(len(smtp_mailer.out), 1)
 
     def test_send(self):
 
@@ -250,7 +256,10 @@ class TestMailer(unittest.TestCase):
                       recipients=["tester@example.com"],
                       body="test")
 
+        smtp_mailer = DummyMailer()
+        mailer.smtp_mailer = smtp_mailer
         mailer.send(msg)
+        self.assertEqual(len(smtp_mailer.out), 0)
 
     def test_send_to_queue_unconfigured(self):
 
@@ -269,57 +278,48 @@ class TestMailer(unittest.TestCase):
 
         import os
         import tempfile
+        import shutil
 
         from pyramid_mailer.mailer import Mailer
         from pyramid_mailer.message import Message
 
-        test_queue = os.path.join(tempfile.gettempdir(), 'test_queue')
-        for dir in ('cur', 'new', 'tmp'):
-            try:
-                os.makedirs(os.path.join(test_queue, dir))
-            except OSError:
-                pass
+        tmpdir = tempfile.mkdtemp()
+        try:
+            test_queue = os.path.join(tmpdir, 'test_queue')
+            for dir in ('cur', 'new', 'tmp'):
+                try:
+                    os.makedirs(os.path.join(test_queue, dir))
+                except OSError:
+                    pass
 
-        mailer = Mailer(queue_path=test_queue)
+            mailer = Mailer(queue_path=test_queue)
 
-        msg = Message(subject="testing",
-                      sender="sender@example.com",
-                      recipients=["tester@example.com"],
-                      body="test")
+            msg = Message(subject="testing",
+                          sender="sender@example.com",
+                          recipients=["tester@example.com"],
+                          body="test")
 
-        mailer.send_to_queue(msg)
+            queuedelivery = DummyMailer()
+            mailer.queue_delivery = queuedelivery
+
+            mailer.send_to_queue(msg)
+            self.assertEqual(len(queuedelivery.out), 1)
+        finally:
+            shutil.rmtree(tmpdir, ignore_errors=True)
 
     def test_use_ssl_mailer(self):
 
-        try:
-            from smtplib import SMTP_SSL
-            ssl_enabled = True
-        except ImportError:  # pragma: no cover
-            from smtplib import SMTP
-            ssl_enabled = False
         from pyramid_mailer.mailer import Mailer
+        from pyramid_mailer._compat import SMTP_SSL
+        from smtplib import SMTP
 
         mailer = Mailer(ssl=True)
-        if ssl_enabled:
+        mailer
+        if SMTP_SSL is not None:
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
-            from ssl import SSLError
-            try:
-                self.assertTrue(mailer.direct_delivery.mailer.smtp_factory())
-            except (IOError, SSLError):
-                pass
 
         else:  # pragma: no cover
             self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
-            import socket
-            try:
-                self.assertTrue(mailer.direct_delivery.mailer.smtp_factory())
-            except socket.error as e:
-                error_number = e.args[0]
-                # smtp mailer might fail to resolve hostname
-                self.assertTrue(error_number in
-                                (errno.ENODATA,
-                                 errno.ECONNREFUSED  # BBB Python 2.5 compat
-                                 ))
 
     def test_from_settings_factory(self):
 
@@ -400,7 +400,7 @@ class TestMailer(unittest.TestCase):
         self.assertEqual(mailer.direct_delivery.mailer.debug_smtp, 1)
 
 
-class DummySendmailMailer(object):
+class DummyMailer(object):
     def __init__(self, raises=None):
         self.out = []
         self.raises = raises
@@ -409,4 +409,4 @@ class DummySendmailMailer(object):
         if self.raises:
             raise self.raises
         self.out.append((frm, to, msg))
-        
+

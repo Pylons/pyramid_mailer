@@ -327,7 +327,7 @@ class Message(object):
 
         headers = [self.subject, self.sender]
         headers += list(self.send_to)
-        headers += self.extra_headers.values()
+        headers += dict(self.extra_headers).values()
 
         for val in headers:
             for c in '\r\n':
