@@ -3,15 +3,6 @@ import sys
 PY2 = sys.version < '3'
 
 try: # pragma: no cover
-    from base64 import encodestring as base64_encodestring
-    # pyflakes
-    base64_encodestring  # pragma: no cover
-except ImportError: # pragma: no cover
-    # BBB Python 2 compat
-    from base64 import encodestring as base64_encodestring
-    base64_encodestring # pyflakes
-
-try: # pragma: no cover
     text_type = unicode
 except NameError: # pragma: no cover
     text_type = str
@@ -36,4 +27,17 @@ try:
     from smtplib import SMTP_SSL
 except ImportError:  # pragma: no cover
     SMTP_SSL = None
-    
+
+if PY2:
+    # this works in Py2
+    from email.encoders import _qencode
+
+else: # pragma: no cover
+    # but they are broken in Py3 (_qencode was not ported properly and
+    # still wants to use str instead of bytes to do space replacement)
+    import quopri
+    def _qencode(s):
+        enc = quopri.encodestring(s, quotetabs=True)
+        # Must encode spaces, which quopri.encodestring() doesn't do
+        return enc.replace(b' ', b'=20')
+

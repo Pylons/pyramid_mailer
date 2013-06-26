@@ -37,19 +37,21 @@ import cgi
 import mimetypes
 import os
 import string
-import quopri
 
-from email.mime.base import MIMEBase
+from email.mime.nonmultipart import MIMENonMultipart
+from email.mime.multipart import MIMEMultipart
+
+from email.encoders import _bencode
 
 from .exceptions import (
     BadHeaders,
     InvalidMessage,
-    EncodingError,
     )
 
 from ._compat import (
-    base64_encodestring,
-    text_type
+    text_type,
+    PY2,
+    _qencode,
     )
 
 
@@ -110,8 +112,8 @@ class Attachment(object):
                 "the content type from a filename provided (%r)" % filename
                 )
 
-        content_type, ctparams = parse_header(content_type)
-        disposition, dparams = parse_header(disposition)
+        content_type, ctparams = cgi.parse_header(content_type)
+        disposition, dparams = cgi.parse_header(disposition)
 
         if filename is None:
             filename = dparams.get('filename')
@@ -124,14 +126,14 @@ class Attachment(object):
         base = MailBase()
         base.set_content_type(content_type, ctparams)
         
-        body = self.data
+        charset = ctparams.get('charset', None)
         
         if content_type.startswith('text/'):
-            charset = ctparams.get('charset', None)
-            charset, body = charset_decode_body(charset, self.data)
+            if charset is None:
+                charset = best_charset(self.data)[0]
             ctparams['charset'] = charset
 
-        base.set_body(body)
+        base.set_body(self.data)
         base.set_content_type(content_type, ctparams)
         base.set_content_disposition(disposition, dparams)
         base.set_transfer_encoding(transfer_encoding)
@@ -419,67 +421,54 @@ class MailBase(object):
     def attach_part(self, part):
         self.parts.append(part)
 
-class MIMEPart(MIMEBase):
-    """
-    A reimplementation of nearly everything in email.mime to be more useful
-    for actually attaching things.  Rather than one class for every type of
-    thing you'd encode, there's just this one, and it figures out how to
-    encode what you ask it.
-    """
-    def __init__(self, type, **params):
-        self.maintype, self.subtype = type.split('/')
-        MIMEBase.__init__(self, self.maintype, self.subtype, **params)
-
-    def extract_payload(self, mail):
-        # mail is a MailBase object
-        body = mail.get_body()
-        if body is None:
-            return
-
-        ctype, ctype_params = mail.get_content_type()
-        cdisp, cdisp_params = mail.get_content_disposition()
-        ctenc = mail.get_transfer_encoding()
-
-        charset = ctype_params.get('charset')
-
-        if cdisp:
-            self.add_header('Content-Disposition', cdisp, **cdisp_params)
-        if ctenc:
-            body = transfer_encode_string(ctenc, body, charset)
-            self.add_header('Content-Transfer-Encoding', ctenc)
-
-        self.set_payload(body, charset=charset)
-
-    def __repr__(self):
-        return "<MIMEPart '%s/%s': '%s', %r, multipart=%r>" % (
-            self.subtype,
-            self.maintype,
-            self['Content-Type'],
-            self['Content-Disposition'],
-            self.is_multipart()
-            )
-
 def to_message(base):
     """
-    Given a MailBase, this will construct a MIMEPart that is canonicalized for
+    Given a MailBase, this will construct a MIME part that is canonicalized for
     use with the Python email API.
     """
-    ctype, params = base.get_content_type()
+    ctype, ctparams = base.get_content_type()
 
     if not ctype:
         if base.parts:
             ctype = 'multipart/mixed'
         else:
             ctype = 'text/plain'
+
+    maintype, subtype = ctype.split('/')
+    is_text = maintype == 'text'
+    is_multipart = maintype == 'multipart'
+
+    if base.parts and not is_multipart:
+        raise RuntimeError(
+            'Content type should be multipart, not %r' % ctype
+            )
+
+    body = base.get_body()
+    ctenc = base.get_transfer_encoding()
+    charset = ctparams.get('charset')
+
+    if is_multipart:
+        out = MIMEMultipart(subtype, **ctparams)
     else:
-        if base.parts:
-            assert ctype.startswith(("multipart", "message")), (
-                "Content type should be multipart or message, not %r" % ctype)
-
-    # adjust the content type according to what it should be now
-    base.set_content_type(ctype, params)
-
-    out = MIMEPart(ctype, **params)
+        out = MIMENonMultipart(maintype, subtype, **ctparams)
+        if ctenc:
+            out['Content-Transfer-Encoding'] = ctenc
+        if isinstance(body, text_type):
+            if not charset:
+                if is_text:
+                    charset, _ = best_charset(body)
+                else:
+                    charset = 'utf-8'
+            if PY2:
+                body = body.encode(charset)
+            else: # pragma: no cover
+                body = body.encode(charset, 'surrogateescape')
+        if body is not None:
+            if ctenc:
+                body = transfer_encode(ctenc, body)
+            if not PY2: # pragma: no cover
+                body = body.decode(charset or 'ascii', 'replace')
+        out.set_payload(body, charset) 
 
     for k in base.keys(): # returned sorted
         value = base[k]
@@ -487,76 +476,39 @@ def to_message(base):
             continue
         out[k] = value
 
-    out.extract_payload(base)
+    cdisp, cdisp_params = base.get_content_disposition()
+
+    if cdisp:
+        out.add_header('Content-Disposition', cdisp, **cdisp_params)
 
     # go through the children
     for part in base.parts:
-        out.attach(to_message(part))
+        sub = to_message(part)
+        out.attach(sub)
 
     return out
-
-
-def parse_header(header):
-    # cope with header value being None or ''
-    if header:
-        return cgi.parse_header(header)
-    else:
-        return header, {}
-
 
 def normalize_header(header):
     return string.capwords(header.lower(), '-')
 
-
-def charset_decode_body(charset, data):
-    if isinstance(data, bytes):
-        # - data is bytes and there's a charset
-        #   trust that body can be decoded using charset and decode it
-        if charset:
-            return charset, data.decode(charset)
-        else:
-            # - data is bytes and there's no charset
-            #   try to decode body from ascii and raise an exception if cant
-            try:
-                return 'us-ascii', data.decode('us-ascii')
-            except UnicodeError:
-                raise EncodingError(
-                    'Body is bytes, but no charset supplied and '
-                    'cannot decode body from us-ascii'
-                    )
-    else:
-        if charset:
-            # - data is text and there's a charset
-            #   trust and do nothing
-            return charset, data
-        else:
-            # - data is text and there's no charset
-            #   use best_charset
-            charset, _ = best_charset(data)
-            return charset, data
-
-
-def transfer_encode_string(encoding, body, charset):
+def transfer_encode(encoding, payload):
+    # payload must be bytes
     encoding = encoding.lower()
-    charset = charset or 'ascii'
-    if isinstance(body, text_type):
-        body = body.encode(charset)
     if encoding == 'base64':
-        return base64_encodestring(body).decode('ascii')
+        return _bencode(payload)
     elif encoding == 'quoted-printable':
-        return quopri.encodestring(body).decode('ascii')
-    elif encoding in ('8bit', '7bit', 'binary'):
-        return body
-    raise RuntimeError('Unknown transfer encoding %s' % encoding)
-
+        return _qencode(payload)
+    else:
+        raise RuntimeError('Unknown transfer encoding %s' % encoding)
 
 def best_charset(text):
     """
     Find the most human-readable and/or conventional encoding for unicode text.
 
-    Prefers `ascii` or `iso-8859-1` and falls back to `utf-8`.
+    Prefers `us-ascii` or `iso-8859-1` and falls back to `utf-8`.
     """
-    encoded = text
+    if isinstance(text, bytes):
+        text = text.decode('ascii')
     for charset in 'us-ascii', 'iso-8859-1', 'utf-8':
         try:
             encoded = text.encode(charset)
