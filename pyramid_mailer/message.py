@@ -501,7 +501,7 @@ def to_message(base):
 
     out = MIMEPart(ctype, **params)
 
-    for k in base.keys():
+    for k in base.keys(): # returned sorted
         value = base[k]
         if not value:
             continue
