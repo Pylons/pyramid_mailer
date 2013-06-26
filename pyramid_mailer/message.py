@@ -105,6 +105,20 @@ class Attachment(object):
         # self.content_transfer_encoding above *may* be None, that's OK
         return base
 
+    def to_mailbase_textual(self, default_content_type):
+        base = self.to_mailbase()
+        body_text = base.get_body()
+        ct, params = base.get_content_type()
+        charset = params.pop('charset', None)
+        charset, encbody = charset_encode_body(charset, body_text)
+        base.set_body(encbody)
+        if charset:
+            params['charset'] = charset
+        if ct is None:
+            ct = default_content_type
+        base.set_content_type(ct, params)
+        return base
+
 class Message(object):
     """
     Encapsulates an email message.
@@ -158,38 +172,22 @@ class Message(object):
 
         self.validate()
         
-        bodies = [self.body, self.html]
+        bodies = [(self.body, 'text/plain'), (self.html, 'text/html')]
 
-        for idx, val in enumerate(bodies):
+        for idx, (val, content_type) in enumerate(bodies):
             if isinstance(val, Attachment):
-                base = val.to_mailbase()
+                base = val.to_mailbase_textual(content_type)
                 bodies[idx] = base
+            else:
+                bodies[idx] = val
 
-        body = bodies[0]
-        html = bodies[1]
+        body, html = bodies
 
-        # fix up any poorly-created body or html parts that were specified as
-        # attachments
-
-        if isinstance(body, MailBase):
-            body_text = body.get_body()
-            ct, params = body.get_content_type()
-            charset = params.pop('charset', None)
-            charset, encbody = charset_encode_body(charset, body_text)
-            body.set_body(encbody)
-            if charset:
-                params['charset'] = charset
-            body.set_content_type('text/plain', params)
-            
-        if isinstance(html, MailBase):
-            html_text = html.get_body()
-            ct, params = html.get_content_type()
-            charset = params.pop('charset', None)
-            charset, encbody = charset_encode_body(charset, html_text)
-            html.set_body(encbody)
-            if charset:
-                params['charset'] = charset
-            html.set_content_type('text/html', params)
+        base = MailBase([
+            ('To', self.recipients),
+            ('From', self.sender),
+            ('Subject', self.subject),
+            ])
 
         # base represents the outermost mime part; it will be one of the
         # following types:
@@ -212,12 +210,6 @@ class Message(object):
         # - a text/plain type if there is only a plaintext part
         #
         # - a text/html type if there is only an html part
-
-        base = MailBase([
-            ('To', self.recipients),
-            ('From', self.sender),
-            ('Subject', self.subject),
-            ])
 
         if self.cc:
             base['Cc'] = self.cc
@@ -247,28 +239,9 @@ class Message(object):
                 altpart.attach_text(html, 'text/html')
 
         elif body:
-            if isinstance(body, MailBase):
-                altpart.set_body(body.get_body())
-                altpart.content_encoding.update(**body.content_encoding)
-            else:
-                params = {}
-                charset, encbody = charset_encode_body(None, body)
-                altpart.set_body(encbody)
-                if charset:
-                    params['charset'] = charset
-                altpart.set_content_type('text/plain', params)
-
+            setbody(altpart, body, 'text/plain')
         elif html:
-            if isinstance(html, MailBase):
-                altpart.set_body(html.get_body())
-                altpart.content_encoding.update(**html.content_encoding)
-            else:
-                params = {}
-                charset, encbody = charset_encode_body(None, html)
-                altpart.set_body(encbody)
-                if charset:
-                    params['charset'] = charset
-                altpart.set_content_type('text/html', params)
+            setbody(altpart, html, 'text/html')
 
         for attachment in self.attachments:
             self._add_attachment_to_part(attachment, base)
@@ -724,6 +697,20 @@ def best_charset(text):
         else:
             return charset, encoded
 
+def setbody(part, body, default_content_type):
+    if isinstance(body, MailBase):
+        body_text = body.get_body()
+        part.set_body(body_text)
+        part.content_encoding.update(**body.content_encoding)
+    else:
+        params = {}
+        charset, encbody = charset_encode_body(None, body)
+        part.set_body(encbody)
+        if charset:
+            params['charset'] = charset
+        part.set_content_type(default_content_type, params)
+
+    return part
 
 # From http://tools.ietf.org/html/rfc5322#section-3.6
 ADDR_HEADERS = (
