@@ -114,17 +114,15 @@ class Attachment(object):
         base.set_body(encbody)
         if charset:
             params['charset'] = charset
-        if ct is None:
+        if not ct:
             ct = default_content_type
         base.set_content_type(ct, params)
         return base
 
-    def add_to_part(self, part):
+    def validate(self):
         filename = self.filename
         data = self.data
         content_type = self.content_type
-        disposition = self.disposition
-        transfer_encoding = self.transfer_encoding
         
         assert filename or data, ("You must give a filename or some data to "
                                   "attach.")
@@ -132,11 +130,30 @@ class Attachment(object):
                                                   "data given.")
 
         if filename and not content_type:
-            content_type, enc = mimetypes.guess_type(filename)
+            content_type, _ = mimetypes.guess_type(filename)
 
         assert content_type, ("No content type given, and couldn't guess "
                               "from the filename: %r" % filename)
 
+        if not filename:
+            if not isinstance(data, bytes):
+                raise EncodingError(
+                    'Attachment data must be bytes if it is not a file: '
+                    'got %s' % data
+                    )
+
+        return content_type
+
+    def add_to_part(self, part):
+        # part is a MailBase instance
+        filename = self.filename
+        data = self.data
+        content_type = self.content_type
+        disposition = self.disposition
+        transfer_encoding = self.transfer_encoding
+        
+        content_type = self.validate()
+        
         if filename:
             if not data:
                 # should be opened with binary mode to encode the data later
@@ -152,11 +169,6 @@ class Attachment(object):
                 )
 
         else:
-            if not isinstance(data, bytes):
-                raise EncodingError(
-                    'Attachment data must be bytes if it is not a file: '
-                    'got %s' % data
-                    )
             part.attach_binary(data, content_type)
 
         ctype = part.get_content_type()[0]
