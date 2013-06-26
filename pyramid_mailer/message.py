@@ -436,6 +436,7 @@ class MIMEPart(MIMEBase):
         MIMEBase.__init__(self, self.maintype, self.subtype, **params)
 
     def extract_payload(self, mail):
+        # mail is a MailBase object
         body = mail.get_body()
         if body is None:
             return
@@ -443,9 +444,6 @@ class MIMEPart(MIMEBase):
         ctype, ctype_params = mail.get_content_type()
         cdisp, cdisp_params = mail.get_content_disposition()
         ctenc = mail.get_transfer_encoding()
-
-        assert ctype, ("Extract payload requires that mail.content_encoding "
-                       "have a valid Content-Type.")
 
         charset = ctype_params.get('charset')
 
