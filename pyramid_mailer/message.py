@@ -119,6 +119,52 @@ class Attachment(object):
         base.set_content_type(ct, params)
         return base
 
+    def add_to_part(self, part):
+        filename = self.filename
+        data = self.data
+        content_type = self.content_type
+        disposition = self.disposition
+        transfer_encoding = self.transfer_encoding
+        
+        assert filename or data, ("You must give a filename or some data to "
+                                  "attach.")
+        assert data or os.path.exists(filename), ("File doesn't exist, and no "
+                                                  "data given.")
+
+        if filename and not content_type:
+            content_type, enc = mimetypes.guess_type(filename)
+
+        assert content_type, ("No content type given, and couldn't guess "
+                              "from the filename: %r" % filename)
+
+        if filename:
+            if not data:
+                # should be opened with binary mode to encode the data later
+                with open(filename, mode='rb') as f:
+                    data = f.read()
+
+            part.attach_file(
+                filename,
+                data,
+                content_type,
+                disposition or 'attachment',
+                transfer_encoding or 'base64'
+                )
+
+        else:
+            if not isinstance(data, bytes):
+                raise EncodingError(
+                    'Attachment data must be bytes if it is not a file: '
+                    'got %s' % data
+                    )
+            part.attach_binary(data, content_type)
+
+        ctype = part.get_content_type()[0]
+
+        if ctype and not ctype.startswith('multipart'):
+            part.set_content_type('multipart/mixed')
+    
+
 class Message(object):
     """
     Encapsulates an email message.
@@ -244,55 +290,10 @@ class Message(object):
             setbody(altpart, html, 'text/html')
 
         for attachment in self.attachments:
-            self._add_attachment_to_part(attachment, base)
+            attachment.add_to_part(base)
 
         return to_message(base)
 
-    def _add_attachment_to_part(self, attachment, part):
-        filename = attachment.filename
-        data = attachment.data
-        content_type = attachment.content_type
-        disposition = attachment.disposition
-        transfer_encoding = attachment.transfer_encoding
-        
-        assert filename or data, ("You must give a filename or some data to "
-                                  "attach.")
-        assert data or os.path.exists(filename), ("File doesn't exist, and no "
-                                                  "data given.")
-
-        if filename and not content_type:
-            content_type, enc = mimetypes.guess_type(filename)
-
-        assert content_type, ("No content type given, and couldn't guess "
-                              "from the filename: %r" % filename)
-
-        if filename:
-            if not data:
-                # should be opened with binary mode to encode the data later
-                with open(filename, mode='rb') as f:
-                    data = f.read()
-
-            part.attach_file(
-                filename,
-                data,
-                content_type,
-                disposition or 'attachment',
-                transfer_encoding or 'base64'
-                )
-
-        else:
-            if not isinstance(data, bytes):
-                raise EncodingError(
-                    'Attachment data must be bytes if it is not a file: '
-                    'got %s' % data
-                    )
-            part.attach_binary(data, content_type)
-
-        ctype = part.get_content_type()[0]
-
-        if ctype and not ctype.startswith('multipart'):
-            part.set_content_type('multipart/mixed')
-            
     def is_bad_headers(self):
         """
         Checks for bad headers i.e. newlines in subject, sender or recipients.
