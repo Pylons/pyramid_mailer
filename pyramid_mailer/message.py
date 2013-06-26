@@ -617,21 +617,6 @@ def best_charset(text):
         else:
             return charset, encoded
 
-def setbody(part, body, default_content_type):
-    if isinstance(body, MailBase):
-        body_text = body.get_body()
-        part.set_body(body_text)
-        part.content_encoding.update(**body.content_encoding)
-    else:
-        params = {}
-        charset, encbody = charset_encode_body(None, body)
-        part.set_body(encbody)
-        if charset:
-            params['charset'] = charset
-        part.set_content_type(default_content_type, params)
-
-    return part
-
 # From http://tools.ietf.org/html/rfc5322#section-3.6
 ADDR_HEADERS = (
     'resent-from',
