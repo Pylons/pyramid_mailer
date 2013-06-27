@@ -3,3 +3,7 @@
 
 - Support 7bit, 8bit, binary transfer encodings.
 
+- Figure out BCC.
+
+- Support *filename encoding.
+
