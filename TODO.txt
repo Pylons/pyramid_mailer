@@ -1,0 +1,2 @@
+- Add a "pmailqp" queue processor script which reads mail configuration from a
+  Pyramid ini file (one is in KUIU now as ``qpwrapper``).
