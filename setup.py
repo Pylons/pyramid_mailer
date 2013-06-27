@@ -45,7 +45,7 @@ testing_extras = tests_require + [
 
 setup(
     name='pyramid_mailer',
-    version='0.12dev',
+    version='0.12',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
@@ -59,7 +59,7 @@ setup(
     platforms='any',
     install_requires=[
         'pyramid',
-        'repoze.sendmail>=4.0b2',
+        'repoze.sendmail>=4.1',
     ],
     tests_require = tests_require,
     extras_require = {

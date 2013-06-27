@@ -1,8 +1,8 @@
 Next release
 ------------
 
-Next release
-------------
+0.12 (2013-06-26)
+-----------------
 
 - Pull #35:  aadded support for sendmail binary via repoze.sendmail >= 4.0b2.
 
@@ -16,6 +16,8 @@ Next release
 
 - Major code overhaul: nonascii attachment sending now actually works, most of
   the code stolen from Lamson was gutted and replaced.
+
+- Requires repoze.sendmail >= 4.1
 
 0.11 (2013-03-28)
 -----------------
