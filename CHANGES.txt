@@ -14,6 +14,9 @@ Next release
   something that should go in the Content-Disposition header, and pass a
   filelike object as ``data``.
 
+- Major code overhaul: nonascii attachment sending now actually works, most of
+  the code stolen from Lamson was gutted and replaced.
+
 0.11 (2013-03-28)
 -----------------
 
