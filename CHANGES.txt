@@ -1,5 +1,5 @@
-Next release
-------------
+0.13 (2013-07-13)
+-----------------
 
 - Default transfer encoding for mail messages is now 'quoted-printable'.  See
   https://github.com/Pylons/pyramid_mailer/pull/45 and
