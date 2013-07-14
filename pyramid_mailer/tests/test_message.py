@@ -804,6 +804,19 @@ class TestMessage(unittest.TestCase):
             _bencode(data).decode('ascii')
             )
 
+    def test_message_is_quoted_printable_with_text_body(self):
+        from pyramid_mailer.message import Message
+
+        msg = Message(
+            recipients=['test@example.com'],
+            subject="testing",
+            sender="sender@example.com",
+            body="THISSHOULDBEINMESSAGEBODY",
+            )
+
+        response = msg.to_message()
+        self.assertTrue("THISSHOULDBEINMESSAGEBODY" in text_type(response))
+
 class Test_normalize_header(unittest.TestCase):
     def _callFUT(self, header):
         from pyramid_mailer.message import normalize_header

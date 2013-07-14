@@ -205,6 +205,7 @@ class Message(object):
                 attachment = Attachment(
                     data=val,
                     content_type=content_type,
+                    transfer_encoding='quoted-printable',
                     disposition='inline'
                     )
                 bodies[idx] = attachment.to_mailbase(content_type)
