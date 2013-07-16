@@ -8,6 +8,40 @@ from repoze.sendmail.delivery import QueuedMailDelivery
 from pyramid.settings import asbool
 
 from pyramid_mailer._compat import SMTP_SSL
+from os.path import exists, join
+from os import makedirs
+from datetime import datetime
+from random import sample
+
+class DebugMailer(object):
+    """
+    Debug mailer for testing 
+    """
+    def __init__(self, top_level_directory='/tmp/app-messages'):
+        if not exists(top_level_directory):
+            makedirs(top_level_directory)
+        self.tld = top_level_directory
+    @classmethod
+    def from_settings(cls, settings, prefix='mail.'):
+        return cls()
+
+    def send_impl(self, message, fail_silently=False):
+        """
+        Sends message to a file for debugging
+        """
+        seeds = '1234567890qwertyuiopasdfghjklzxcvbnm'
+        file_part1 = datetime.now().strftime('%Y%m%d%H%M%S')
+        file_part2 = ''.join(sample(seeds, 4))
+        filename = join(self.tld,'%s_%s.msg' % (file_part1, file_part2))
+        fd = open(filename, 'w')
+        fd.write(str(message.to_message()))
+        fd.close()
+        
+    send = send_impl
+    send_immediately = send_impl
+    send_to_queue = send_impl
+    send_sendmail = send_impl
+    send_immediately_sendmail = send_impl
 
 class DummyMailer(object):
     """
