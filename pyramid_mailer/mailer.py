@@ -21,6 +21,7 @@ class DebugMailer(object):
         if not exists(top_level_directory):
             makedirs(top_level_directory)
         self.tld = top_level_directory
+
     @classmethod
     def from_settings(cls, settings, prefix='mail.'):
         return cls()
@@ -33,9 +34,8 @@ class DebugMailer(object):
         file_part1 = datetime.now().strftime('%Y%m%d%H%M%S')
         file_part2 = ''.join(sample(seeds, 4))
         filename = join(self.tld,'%s_%s.msg' % (file_part1, file_part2))
-        fd = open(filename, 'w')
-        fd.write(str(message.to_message()))
-        fd.close()
+        with open(filename, 'w') as fd:
+            fd.write(str(message.to_message()))
         
     send = send_impl
     send_immediately = send_impl
