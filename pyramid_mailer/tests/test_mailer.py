@@ -439,3 +439,70 @@ class DummyMailer(object):
             raise self.raises
         self.out.append((frm, to, msg))
 
+
+class TestDebugMailer(unittest.TestCase):
+
+    def setUp(self):
+        from os.path import exists, join
+        from os import makedirs, listdir, remove
+        if exists('/tmp/app-messages'):
+            for fl in listdir('/tmp/app-messages'):
+                remove(join('/tmp/app-messages',fl))
+                
+    def check_number_files(self):
+        from os.path import exists, join
+        from os import makedirs, listdir, remove
+        if exists('/tmp/app-messages'):
+            return len(listdir('/tmp/app-messages'))
+        else:
+            return 0
+        
+        
+    def test_debug_send_immediately_sendmail(self):
+        from pyramid_mailer.mailer import DebugMailer
+        from pyramid_mailer.message import Message
+
+        mailer = DebugMailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_immediately_sendmail(msg)
+
+        self.assertEqual(self.check_number_files(), 1)
+
+    def test_debug_send_immediately_sendmail_and_fail_silently(self):
+
+        from pyramid_mailer.mailer import DebugMailer
+        from pyramid_mailer.message import Message
+
+        mailer = DebugMailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_immediately_sendmail(msg, True)
+
+        self.assertEqual(self.check_number_files(), 1)
+
+    def test_debug_send_sendmail(self):
+
+        from pyramid_mailer.mailer import DebugMailer
+        from pyramid_mailer.message import Message
+
+        mailer = DebugMailer()
+
+        msg = Message(subject="testing",
+                      sender="sender@example.com",
+                      recipients=["tester@example.com"],
+                      body="test")
+
+        mailer.send_sendmail(msg)
+
+        self.assertEqual(self.check_number_files(), 1)
+
+    
