@@ -1069,6 +1069,23 @@ class Test_transfer_encode(unittest.TestCase):
             _qencode(text_encoded)
             )
 
+    def test_body_is_7bit(self):
+        text_encoded = b'LaPe\xf1a'
+        text_7bit = b'LaPena'
+        self.assertEqual(
+            self._callFUT('7bit', text_7bit),
+            text_7bit
+            )
+        with self.assertRaises(RuntimeError):
+            self._callFUT('7bit', text_encoded) 
+
+    def test_body_is_8bit(self):
+        text_encoded = b'LaPe\xf1a'
+        self.assertEqual(
+            self._callFUT('8bit', text_encoded),
+            text_encoded
+            )
+
     def test_unknown_encoding(self):
         text_encoded = b'LaPe\xf1a'
         self.assertRaises(

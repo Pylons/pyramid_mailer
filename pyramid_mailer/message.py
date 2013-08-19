@@ -499,6 +499,14 @@ def transfer_encode(encoding, payload):
         return _bencode(payload)
     elif encoding == 'quoted-printable':
         return _qencode(payload)
+    elif encoding == '7bit':
+        try:
+            text_type(payload, 'ascii')
+        except UnicodeDecodeError:
+            raise RuntimeError('Payload contains an octet that is not 7bit safe')
+        return payload
+    elif encoding == '8bit':
+        return payload
     else:
         raise RuntimeError('Unknown transfer encoding %s' % encoding)
 
