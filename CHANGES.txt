@@ -1,3 +1,9 @@
+0.14 (2013-XX-XX)
+-----------------
+
+- Support '7bit' and '8bit' transfer-encoding.
+  See https://github.com/Pylons/pyramid_mailer/pull/49 .
+
 0.13 (2013-07-13)
 -----------------
 
