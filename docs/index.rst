@@ -413,3 +413,4 @@ API
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
 .. _repoze_sendmail: http://pypi.python.org/pypi/repoze.sendmail/
 .. _Lamson: http://pypi.python.org/pypi/lamson/
+.. _WebTest: http://pypi.python.org/pypi/WebTest/
