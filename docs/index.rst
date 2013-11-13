@@ -313,7 +313,8 @@ One can also use the ``DummyMailer`` to keep track of emails sent from a `WebTes
     class FunctionalTests(unittest.TestCase):
         def setUp(self):
             from myapp import main
-            app = main({}, pyramid.includes='pyramid_mailer.testing')
+            settings = {'pyramid.includes' : 'pyramid_mailer.testing'}
+            app = main({}, **settings)
             from webtest import TestApp
             self.testapp = TestApp(app)
 
