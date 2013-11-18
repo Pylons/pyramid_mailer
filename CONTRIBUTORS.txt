@@ -128,3 +128,5 @@ Contributors
 - Bert JW Regeer, 2013-07-13
 
 - Supreet Sethi, 2013-07-23
+
+- Nejc Zupan, 2013-11-08
