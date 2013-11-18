@@ -1,3 +1,9 @@
+0.14 (Unreleased)
+-----------------
+
+- Add pyramid_mailer.debug shorthand to easily enable (one line in
+  development.ini) writing emails to a file instead of sending them out.
+
 0.13 (2013-07-13)
 -----------------
 

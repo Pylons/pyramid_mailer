@@ -277,15 +277,30 @@ arguments to specify ``Content-Transfer-Encoding`` or other
     message = Message(body=body, html=html)
 
 
+Debugging
+---------
+
+If your site is in development and you want to avoid accidental sending of any
+emails to customers, but still see what emails would get sent, you can use
+``config.include('pyramid_mailer.debug')`` to make the current mailer an
+instance of the :class:`pyramid_mailer.mailer.DebugMailer`, hence writing all
+emails to a file instead of sending them out. In other words if you add
+``pyramid_mailer.debug`` to your development.ini, all emails that would be sent
+out will instead get written to files so you can inspect them::
+
+   pyramid.includes =
+      pyramid_mailer.debug
+      ...
+      pyramid_debugtoolbar
+      pyramid_tm
+
+
 Unit tests
 ----------
 
 When running unit tests you probably don't want to actually send any emails
 inadvertently. However it's still useful to keep track of what emails would
 be sent in your tests.
-
-Another case is if your site is in development and you want to avoid
-accidental sending of any emails to customers.
 
 In either case, ``config.include('pyramid_mailer.testing')`` can be used to
 make the current mailer an instance of the
