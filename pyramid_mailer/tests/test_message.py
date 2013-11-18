@@ -708,17 +708,17 @@ class TestMessage(unittest.TestCase):
             )
 
         this = os.path.abspath(__file__)
-        data = open(this, 'rb')
-        attachment = Attachment(
-            filename=this,
-            content_type='application/octet-stream',
-            disposition='disposition',
-            transfer_encoding='base64',
-            data=data,
-            )
-        response.attach(attachment)
-        message = response.to_message()
-        payload = message.get_payload()[1]
+        with open(this, 'rb') as data:
+            attachment = Attachment(
+                filename=this,
+                content_type='application/octet-stream',
+                disposition='disposition',
+                transfer_encoding='base64',
+                data=data,
+                )
+            response.attach(attachment)
+            message = response.to_message()
+            payload = message.get_payload()[1]
         self.assertEqual(payload.get('Content-Transfer-Encoding'), 'base64')
         self.assertEqual(
             payload.get_payload(),
@@ -735,17 +735,17 @@ class TestMessage(unittest.TestCase):
             html='Html'
             )
         this = os.path.abspath(__file__)
-        data = open(this, 'rb')
-        attachment = Attachment(
-            filename=this,
-            content_type='application/octet-stream',
-            disposition='disposition',
-            transfer_encoding='quoted-printable',
-            data=data,
-            )
-        response.attach(attachment)
-        message = response.to_message()
-        payload = message.get_payload()[1]
+        with open(this, 'rb') as data:
+            attachment = Attachment(
+                filename=this,
+                content_type='application/octet-stream',
+                disposition='disposition',
+                transfer_encoding='quoted-printable',
+                data=data,
+                )
+            response.attach(attachment)
+            message = response.to_message()
+            payload = message.get_payload()[1]
         self.assertEqual(
             payload.get('Content-Transfer-Encoding'),
             'quoted-printable'
