@@ -18,4 +18,3 @@ build
 docs/output
 docs/_build
 *\$py.class
-.idea
