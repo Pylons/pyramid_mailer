@@ -5,7 +5,7 @@ from os.path import join
 from random import sample
 import smtplib
 
-from pyramid.settings import asbool
+from pyramid.settings import asbool, aslist
 from repoze.sendmail.mailer import SMTPMailer
 from repoze.sendmail.mailer import SendmailMailer
 from repoze.sendmail.delivery import DirectMailDelivery
@@ -220,7 +220,8 @@ class Mailer(object):
         kwarg_names = [prefix + k for k in (
                        'host', 'port', 'username',
                        'password', 'tls', 'ssl', 'keyfile',
-                       'certfile', 'queue_path', 'debug', 'default_sender')]
+                       'certfile', 'queue_path', 'debug', 'default_sender',
+                       'sendmail_app', 'sendmail_template')]
 
         size = len(prefix)
 
@@ -231,6 +232,11 @@ class Mailer(object):
             val = kwargs.get(key)
             if val:
                 kwargs[key] = asbool(val)
+
+        # list values
+        for key in ('sendmail_template', ):
+            if key in kwargs:
+                kwargs[key] = aslist(kwargs.get(key))
 
         return cls(**kwargs)
 

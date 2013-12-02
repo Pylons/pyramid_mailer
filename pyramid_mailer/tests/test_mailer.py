@@ -177,7 +177,9 @@ class MailerTests(_Base):
                     'mymail.keyfile': 'ssl.key',
                     'mymail.certfile': 'ssl.crt',
                     'mymail.queue_path': '/tmp',
-                    'mymail.debug': 1}
+                    'mymail.debug': 1,
+                    'mymail.sendmail_app': 'sendmail_app',
+                    'mymail.sendmail_template': '{sendmail_app} --option1 --option2 {sender}'}
         mailer = self._getTargetClass().from_settings(settings,
                                                       prefix='mymail.')
         self.assertEqual(mailer.direct_delivery.mailer.hostname,
@@ -194,6 +196,9 @@ class MailerTests(_Base):
         self.assertEqual(mailer.direct_delivery.mailer.certfile, 'ssl.crt')
         self.assertEqual(mailer.queue_delivery.queuePath, '/tmp')
         self.assertEqual(mailer.direct_delivery.mailer.debug_smtp, 1)
+        self.assertEqual(mailer.sendmail_mailer.sendmail_app, 'sendmail_app')
+        self.assertEqual(mailer.sendmail_mailer.sendmail_template,
+                         '{sendmail_app} --option1 --option2 {sender}'.split())
 
     def test_send_immediately(self):
         import socket
