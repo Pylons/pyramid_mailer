@@ -5,7 +5,8 @@ from os.path import join
 from random import sample
 import smtplib
 
-from pyramid.settings import asbool, aslist
+from pyramid.settings import asbool
+from pyramid.settings import aslist
 from repoze.sendmail.mailer import SMTPMailer
 from repoze.sendmail.mailer import SendmailMailer
 from repoze.sendmail.delivery import DirectMailDelivery
