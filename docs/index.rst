@@ -165,21 +165,23 @@ If you don't use Paste, just pass the settings directly into your Pyramid
 
 The available settings are listed below.
 
-=========================  ===============    =====================
-Setting                    Default            Description
-=========================  ===============    =====================
-**mail.host**              ``localhost``      SMTP host
-**mail.port**              ``25``             SMTP port
-**mail.username**          **None**           SMTP username
-**mail.password**          **None**           SMTP password
-**mail.tls**               **False**          Use TLS
-**mail.ssl**               **False**          Use SSL
-**mail.keyfile**           **None**           SSL key file
-**mail.certfile**          **None**           SSL certificate file
-**mail.queue_path**        **None**           Location of maildir
-**mail.default_sender**    **None**           Default from address
-**mail.debug**             **0**              SMTP debug level
-=========================  ===============    =====================
+==========================      ====================================            ===============================
+Setting                         Default                                         Description
+==========================      ====================================            ===============================
+**mail.host**                   ``localhost``                                   SMTP host
+**mail.port**                   ``25``                                          SMTP port
+**mail.username**               **None**                                        SMTP username
+**mail.password**               **None**                                        SMTP password
+**mail.tls**                    **False**                                       Use TLS
+**mail.ssl**                    **False**                                       Use SSL
+**mail.keyfile**                **None**                                        SSL key file
+**mail.certfile**               **None**                                        SSL certificate file
+**mail.queue_path**             **None**                                        Location of maildir
+**mail.default_sender**         **None**                                        Default from address
+**mail.debug**                  **0**                                           SMTP debug level
+**mail.sendmail_app**           **/usr/sbin/sendmail**                          Sendmail executable
+**mail.sendmail_template**      **{sendmail_app} -t -i -f {sender}**            Template for sendmail execution
+==========================      ====================================            ===============================
 
 **Note:** SSL will only work with **pyramid_mailer** if you are using Python
   **2.6** or higher, as it uses the SSL additions to the ``smtplib``
