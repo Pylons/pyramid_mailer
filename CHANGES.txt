@@ -1,15 +1,19 @@
 0.14 (Unreleased)
 -----------------
 
-- Add ``pyramid_mailer.debug`` shorthand:  via one line in ``development.ini``,
-  enables writing emails to a file instead of sending them.
+- Pull #52: Add configuration options for ``mail.sendmail_app`` and
+  ``mail.sendmail_template`` to allow use with non-default sendmail
+  configurations.
+
+- Pull #50: Add ``pyramid_mailer.debug`` shorthand:  via one line in
+  ``development.ini``, enables writing emails to a file instead of sending
+  them.
 
 0.13 (2013-07-13)
 -----------------
 
-- Default transfer encoding for mail messages is now 'quoted-printable'.  See
-  https://github.com/Pylons/pyramid_mailer/pull/45 and
-  https://github.com/Pylons/pyramid_mailer/issues/44.
+- Pull #45:  Default transfer encoding for mail messages is now
+  'quoted-printable'.
 
 0.12 (2013-06-26)
 -----------------
