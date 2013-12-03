@@ -198,7 +198,7 @@ class MailerTests(_Base):
         self.assertEqual(mailer.direct_delivery.mailer.debug_smtp, 1)
         self.assertEqual(mailer.sendmail_mailer.sendmail_app, 'sendmail_app')
         self.assertEqual(mailer.sendmail_mailer.sendmail_template,
-                         '{sendmail_app} --option1 --option2 {sender}'.split())
+                    ['{sendmail_app}', '--option1', '--option2', '{sender}'])
 
     def test_send_immediately(self):
         import socket
