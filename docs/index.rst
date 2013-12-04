@@ -325,6 +325,21 @@ make the current mailer an instance of the
             mailer = get_mailer(request)
             response = some_view(request)
 
+One can also use the ``DummyMailer`` to keep track of emails sent from a `WebTest`_ functional test.::
+
+    class FunctionalTests(unittest.TestCase):
+        def setUp(self):
+            from myapp import main
+            settings = {'pyramid.includes' : 'pyramid_mailer.testing'}
+            app = main({}, **settings)
+            from webtest import TestApp
+            self.testapp = TestApp(app)
+
+        def test_some_functionality(self):
+            res = self.testapp.get('/post_email', status=200)
+            registry = self.testapp.app.registry
+            mailer = get_mailer(registry)
+
 The ``DummyMailer`` instance keeps track of emails "sent" in two properties:
 `queue` for emails send via
 :meth:`pyramid_mailer.mailer.Mailer.send_to_queue` and `outbox` for emails
@@ -416,3 +431,4 @@ API
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
 .. _repoze_sendmail: http://pypi.python.org/pypi/repoze.sendmail/
 .. _Lamson: http://pypi.python.org/pypi/lamson/
+.. _WebTest: http://pypi.python.org/pypi/WebTest/
