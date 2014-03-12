@@ -46,6 +46,8 @@ class DebugMailer(object):
         file_part2 = ''.join(sample(seeds, 4))
         filename = join(self.tld, '%s_%s.msg' % (file_part1, file_part2))
         with open(filename, 'w') as fd:
+            if not message.sender:
+                message.sender = 'nobody'
             fd.write(str(message.to_message()))
 
     send = _send
