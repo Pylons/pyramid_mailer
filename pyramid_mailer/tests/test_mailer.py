@@ -179,7 +179,8 @@ class MailerTests(_Base):
                     'mymail.queue_path': '/tmp',
                     'mymail.debug': 1,
                     'mymail.sendmail_app': 'sendmail_app',
-                    'mymail.sendmail_template': '{sendmail_app} --option1 --option2 {sender}'}
+                    'mymail.sendmail_template':
+                        '{sendmail_app} --option1 --option2 {sender}'}
         mailer = self._getTargetClass().from_settings(settings,
                                                       prefix='mymail.')
         self.assertEqual(mailer.direct_delivery.mailer.hostname,
