@@ -1,6 +1,13 @@
 ``pyramid_mailer``
 ==================
 
+.. image:: https://travis-ci.org/Pylons/pyramid_mailer.png?branch=master
+   :target: https://travis-ci.org/Pylons/pyramid_mailer
+
+.. image:: https://readthedocs.org/projects/pyramid_mailer/badge/?version=master
+   :target: http://docs.pylonsproject.org/projects/pyramid_mailer/en/master/
+   :alt: Documentation Status
+
 pyramid_mailer is a package for sending email from your Pyramid application.
 It is compatible with Python 2.6. 2.7, 3.2, 3.3, and 3.4, as well as PyPy
 and PyPy3.
