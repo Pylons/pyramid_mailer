@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.14 (Unreleased)
+0.14 (2014-12-10)
 -----------------
 
 - Added support for Python3.4, PyPy3.

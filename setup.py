@@ -21,7 +21,7 @@ with open('CHANGES.rst') as f:
 
 setup(
     name='pyramid_mailer',
-    version='0.14dev',
+    version='0.14',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
