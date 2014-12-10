@@ -1,6 +1,8 @@
 0.14 (Unreleased)
 -----------------
 
+- Added support for Python3.4, PyPy3.
+
 - Pull #52: Add configuration options for ``mail.sendmail_app`` and
   ``mail.sendmail_template`` to allow use with non-default sendmail
   configurations.
