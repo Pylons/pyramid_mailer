@@ -6,6 +6,9 @@ Changelog
 
 - Added support for Python3.4, PyPy3.
 
+- Pull #56: Ensure that ``DebugMailer`` emulates ``Mailer`` by generating
+  a sender if none is passed.
+
 - Pull #52: Add configuration options for ``mail.sendmail_app`` and
   ``mail.sendmail_template`` to allow use with non-default sendmail
   configurations.
