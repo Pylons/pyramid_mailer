@@ -1,3 +1,4 @@
+import os
 import unittest
 
 
@@ -57,6 +58,15 @@ class DebugMailerTests(_Base):
         mailer.send_sendmail(msg)
         files = self._listFiles()
         self.assertEqual(len(files), 1)
+
+    def test_default_sender(self):
+        mailer = self._makeOne()
+        msg = _makeMessage(sender=None)
+        mailer.send_sendmail(msg)
+        files = self._listFiles()
+        self.assertEqual(len(files), 1)
+        msg = open(os.path.join(self._tempdir, files[0]), 'r')
+        self.assertIn('From: nobody', msg.read())
 
 
 class DummyMailerTests(unittest.TestCase):
