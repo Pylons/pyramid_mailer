@@ -66,7 +66,7 @@ class DebugMailerTests(_Base):
         files = self._listFiles()
         self.assertEqual(len(files), 1)
         msg = open(os.path.join(self._tempdir, files[0]), 'r')
-        self.assertIn('From: nobody', msg.read())
+        self.assertTrue('From: nobody' in msg.read())
 
 
 class DummyMailerTests(unittest.TestCase):
