@@ -4,8 +4,8 @@
 .. image:: https://travis-ci.org/Pylons/pyramid_mailer.png?branch=master
    :target: https://travis-ci.org/Pylons/pyramid_mailer
 
-.. image:: https://readthedocs.org/projects/pyramid_mailer/badge/?version=master
-   :target: http://docs.pylonsproject.org/projects/pyramid_mailer/en/master/
+.. image:: https://readthedocs.org/projects/pyramid_mailer/badge/?version=latest
+   :target: http://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/
    :alt: Documentation Status
 
 pyramid_mailer is a package for sending email from your Pyramid application.
