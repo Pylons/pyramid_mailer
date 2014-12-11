@@ -26,6 +26,34 @@ sending, queuing and transaction management, and it borrows code from Zed
 Shaw's `Lamson`_ library for low-level multipart message encoding and
 wrapping.
 
+Pre-Installation
+------------
+
+For local development, a developer has a few options:
+
+1. Use the debug_ setting of pyramid_mailer so mails save to a local file.
+
+   .. _Debugging:
+
+2. Use your ISP's mail relay.
+
+3. Ensure an SMTP server is installed and running (usually done in a 
+   production environment).
+
+For option 3, follow instructions for the appropriate operating system:
+
+Linux/OSX
+    For Linux users, a common SMTP server to use is Postfix. Most Linux
+    distributions carry Postfix, so ensure it is installed and running.
+    Ubuntu/Debian users see `Ubuntu's Postfix guide`_. Other Linux users
+    can follow the `ArchLinux Postfix guide`_. OSX users can
+    check out the `OSX Postfix instructions`_.
+
+Windows
+   Windows users can use Windows' built-in Internet Information
+   Services to `setup an SMTP with IIS`_ (Windows' built-in Internet Information
+   Services).
+
 Installation
 ------------
 
@@ -429,6 +457,11 @@ API
 
 .. _Github: https://github.com/Pylons/pyramid_mailer
 .. _Pyramid: http://pypi.python.org/pypi/pyramid/
+.. _Ubuntu's Postfix guide: https://help.ubuntu.com/lts/serverguide/postfix.html
+.. _ArchLinux Postfix guide: https://wiki.archlinux.org/index.php/postfix
+.. _OSX Postfix instructions: http://benjaminrojas.net/configuring-postfix-to-
+    send-mail-from-mac-os-x-mountain-lion
+.. _setup an SMTP with IIS: http://www.neatcomponents.com/enable-SMTP-in-Windows-8
 .. _repoze_sendmail: http://pypi.python.org/pypi/repoze.sendmail/
 .. _Lamson: http://pypi.python.org/pypi/lamson/
 .. _WebTest: http://pypi.python.org/pypi/WebTest/
