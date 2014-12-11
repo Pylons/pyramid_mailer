@@ -27,13 +27,12 @@ Shaw's `Lamson`_ library for low-level multipart message encoding and
 wrapping.
 
 Pre-Installation
-------------
+----------------
 
 For local development, a developer has a few options:
 
-1. Use the debug_ setting of pyramid_mailer so mails save to a local file.
-
-   .. _Debugging:
+1. Include the :mod:`pyramid_mailer.debug` module in your application's
+   configuration (see :ref:`debugging`) so mails save to a local file.
 
 2. Use your ISP's mail relay.
 
@@ -306,6 +305,8 @@ arguments to specify ``Content-Transfer-Encoding`` or other
                       transfer_encoding="quoted-printable")
     message = Message(body=body, html=html)
 
+
+.. _debugging:
 
 Debugging
 ---------
