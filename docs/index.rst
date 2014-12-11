@@ -17,9 +17,9 @@ out of sending emails. It is compatible with Python 2.5, 2.6, 2.7, and
    (for example, a database error) then this ensures that the email is not
    sent.
 
-4. A ``DummyMailer`` class to help with writing unit tests, or other
-   situations where you want to avoid emails being sent accidentally from a
-   non-production install.
+4. A :class:`pyramid_mailer.DummyMailer` class to help with writing unit
+   tests, or other situations where you want to avoid emails being sent
+   accidentally from a non-production install.
 
 **pyramid_mailer** uses the `repoze_sendmail`_ package for general email
 sending, queuing and transaction management, and it borrows code from Zed
