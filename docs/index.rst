@@ -34,21 +34,39 @@ For local development, a developer has a few options:
 1. Include the :mod:`pyramid_mailer.debug` module in your application's
    configuration (see :ref:`debugging`) so mails save to a local file.
 
-2. Use your ISP's mail relay.
+2. Make a fake SMTPD server for debugging *(see below)*.
 
-3. Ensure an SMTP server is installed and running (usually done in a 
-   production environment).
+3. Use your ISP's mail relay.
 
-For option 3, follow instructions for the appropriate operating system:
+4. Ensure an SMTP server is installed and running. This is usually used
+   for a production environment *(see below)*.
 
-Linux/OSX
+For *option 2*, add this to your .bash_profile:
+
+   function start_smtpd {
+      if [ ""$1 == "" ]; then
+         PORT=25
+      else
+         PORT=$1
+      fi
+      python -m smtpd -n -c DebuggingServer localhost:$PORT
+   }
+
+Configure your pyramid_mailer to connect on a port of your choice
+(e.g. 2525). And in a different terminal start the fake SMTP server with:
+
+   start_smtpd 2525
+
+For *option 3*, follow instructions for the appropriate operating system:
+
+**Linux/OSX**
     For Linux users, a common SMTP server to use is Postfix. Most Linux
     distributions carry Postfix, so ensure it is installed and running.
     Ubuntu/Debian users see `Ubuntu's Postfix guide`_. Other Linux users
     can follow the `ArchLinux Postfix guide`_. OSX users can
     check out the `OSX Postfix instructions`_.
 
-Windows
+**Windows**
    Windows users can use Windows' built-in Internet Information
    Services to `setup an SMTP with IIS`_ (Windows' built-in Internet Information
    Services).
