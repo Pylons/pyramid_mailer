@@ -34,24 +34,30 @@ For local development, a developer has a few options:
 1. Include the :mod:`pyramid_mailer.debug` module in your application's
    configuration (see :ref:`debugging`) so mails save to a local file.
 
-2. Use your ISP's mail relay.
+2. Run a fake SMTPD server for developing and debugging your webapp. Python
+   provides an SMTP server in its standard library called **smptd**. We can make
+   use of it by simply running the following command in a new terminal (this
+   example uses port 2525; feel free to change that):
+   
+      python -m smtpd -n -c DebuggingServer localhost:2525
 
-3. Ensure an SMTP server is installed and running (usually done in a 
-   production environment).
+3. Use your ISP's mail relay.
 
-For option 3, follow instructions for the appropriate operating system:
+4. Ensure an SMTP server is installed and running. This is usually used
+   for a production environment. Follow instructions for the appropriate operating
+   system:
 
-Linux/OSX
-    For Linux users, a common SMTP server to use is Postfix. Most Linux
-    distributions carry Postfix, so ensure it is installed and running.
-    Ubuntu/Debian users see `Ubuntu's Postfix guide`_. Other Linux users
-    can follow the `ArchLinux Postfix guide`_. OSX users can
-    check out the `OSX Postfix instructions`_.
-
-Windows
-   Windows users can use Windows' built-in Internet Information
-   Services to `setup an SMTP with IIS`_ (Windows' built-in Internet Information
-   Services).
+   **Linux/OSX**
+       For Linux users, a common SMTP server to use is Postfix. Most Linux
+       distributions carry Postfix, so ensure it is installed and running.
+       Ubuntu/Debian users see `Ubuntu's Postfix guide`_. Other Linux users
+       can follow the `ArchLinux Postfix guide`_. OSX users can
+       check out the `OSX Postfix instructions`_.
+   
+   **Windows**
+      Windows users can use Windows' built-in Internet Information
+      Services to `setup an SMTP with IIS`_ (Windows' built-in Internet Information
+      Services).
 
 Installation
 ------------
