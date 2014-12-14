@@ -56,8 +56,7 @@ For local development, a developer has a few options:
    
    **Windows**
       Windows users can use Windows' built-in Internet Information
-      Services to `setup an SMTP with IIS`_ (Windows' built-in Internet Information
-      Services).
+      Services to `setup an SMTP with IIS`_.
 
 Installation
 ------------
