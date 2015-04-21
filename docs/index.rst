@@ -268,8 +268,8 @@ HTML email
 
 Below is a recipe how to send templatized HTML and plain text email. 
 The email is assembled from three templates: subject, HTML body and text 
-body. It is also recommend to use `premailed <https://pypi.python.org/pypi/premailer>`_
-Python package to transform HTML email CSS styles to inline CSS, as 
+body. It is also recommend to use `premaileR <https://pypi.python.org/pypi/premailer>`_
+Python package to transform email CSS styles to inline CSS, as 
 email clients are pretty restricted  what comes to their ability to understand 
 CSS.
 
