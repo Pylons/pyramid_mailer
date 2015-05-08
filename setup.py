@@ -13,11 +13,16 @@ testing_extras = tests_require + [
     'coverage',
     ]
 
-with open('README.rst') as f:
-    README = f.read()
+try:
+    with open('README.rst') as f:
+        README = f.read()
 
-with open('CHANGES.rst') as f:
-    CHANGES = f.read()
+    with open('CHANGES.rst') as f:
+        CHANGES = f.read()
+
+except IOError:
+    README = ''
+    CHANGES = ''
 
 setup(
     name='pyramid_mailer',
