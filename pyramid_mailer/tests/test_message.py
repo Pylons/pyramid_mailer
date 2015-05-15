@@ -1017,7 +1017,10 @@ class Test_to_message(unittest.TestCase):
             result['Content-Type'],
             'text/plain; charset="us-ascii"'
             )
-        self.assertEqual(result['Content-Transfer-Encoding'], '7bit')
+        # XXX it is ok that a MIME-encoded message doesn't specify
+        # Content-Transfer-Encoding if the payload is supposed to be 7-bit safe.
+        # See RFC2045 6.1. for detail.
+        self.assertEqual(result['Content-Transfer-Encoding'], None)
         payload = result.get_payload()
         self.assertEqual(payload, b'foo'.decode('ascii'))
 
@@ -1046,7 +1049,17 @@ class Test_to_message(unittest.TestCase):
         mail.parts = [another]
         result = self._callFUT(mail)
         self.assertTrue('hello' in result.as_string())
-        
+
+    def text_body_is_byte_and_charset_is_supplied(self):
+        mail = self._makeBase()
+        encoded_body = u'\u30c6\u30b9\u30c8'.encode('Shift_JIS')
+        mail.set_content_type('text/plain; charset=Shift_JIS')
+        mail.set_body(encoded_body)
+        result = self._callFUT(mail)
+        self.assertEqual(result['Content-Type'], 'text/plain; charset=Shift_JIS')
+        payload = result.get_payload()
+        self.assertEqual(payload, encoded_body)
+
 class Test_transfer_encode(unittest.TestCase):
     def _callFUT(self, encoding, payload):
         from pyramid_mailer.message import transfer_encode
@@ -1125,6 +1138,8 @@ class TestFunctional(unittest.TestCase):
         # done in repoze.sendmail via delivery/AbstractMailDelivery/send
         cleanup_message(msg)
 
+        # XXX this may fail because of a bug in repoze.sendmail;
+        # see https://github.com/repoze/repoze.sendmail/pull/26
         checkit(msg)
 
         # done in repoze.sendmail via
