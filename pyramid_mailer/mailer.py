@@ -236,6 +236,11 @@ class Mailer(object):
             if val:
                 kwargs[key] = asbool(val)
 
+        for key in ('debug', 'port'):
+            val = kwargs.get(key)
+            if val:
+                kwargs[key] = int(val)
+
         # list values
         for key in ('sendmail_template', ):
             if key in kwargs:
