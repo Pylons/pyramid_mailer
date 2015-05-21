@@ -211,6 +211,42 @@ class MailerTests(_Base):
         self.assertEqual(mailer.sendmail_mailer.sendmail_template,
                     ['{sendmail_app}', '--option1', '--option2', '{sender}'])
 
+    def test_from_settings_with_str_values(self):
+        from smtplib import SMTP
+        from pyramid_mailer._compat import SMTP_SSL
+        settings = {'mymail.host': 'my.server.com',
+                    'mymail.port': '123',
+                    'mymail.username': 'tester',
+                    'mymail.password': 'test',
+                    'mymail.tls': 'false',
+                    'mymail.ssl': True,
+                    'mymail.keyfile': 'ssl.key',
+                    'mymail.certfile': 'ssl.crt',
+                    'mymail.queue_path': '/tmp',
+                    'mymail.debug': '1',
+                    'mymail.sendmail_app': 'sendmail_app',
+                    'mymail.sendmail_template':
+                        '{sendmail_app} --option1 --option2 {sender}'}
+        mailer = self._getTargetClass().from_settings(settings,
+                                                      prefix='mymail.')
+        self.assertEqual(mailer.direct_delivery.mailer.hostname,
+                         'my.server.com')
+        self.assertEqual(mailer.direct_delivery.mailer.port, 123)
+        self.assertEqual(mailer.direct_delivery.mailer.username, 'tester')
+        self.assertEqual(mailer.direct_delivery.mailer.password, 'test')
+        self.assertEqual(mailer.direct_delivery.mailer.force_tls, False)
+        if SMTP_SSL is not None:
+            self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP_SSL)
+        else:  # pragma: no cover
+            self.assertEqual(mailer.direct_delivery.mailer.smtp, SMTP)
+        self.assertEqual(mailer.direct_delivery.mailer.keyfile, 'ssl.key')
+        self.assertEqual(mailer.direct_delivery.mailer.certfile, 'ssl.crt')
+        self.assertEqual(mailer.queue_delivery.queuePath, '/tmp')
+        self.assertEqual(mailer.direct_delivery.mailer.debug_smtp, 1)
+        self.assertEqual(mailer.sendmail_mailer.sendmail_app, 'sendmail_app')
+        self.assertEqual(mailer.sendmail_mailer.sendmail_template,
+                    ['{sendmail_app}', '--option1', '--option2', '{sender}'])
+
     def test_send_immediately(self):
         import socket
         mailer = self._makeOne(host='localhost', port='28322')
