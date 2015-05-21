@@ -1,6 +1,6 @@
-nosetests.xml
-coverage.xml
-.coverage
+nosetests*.xml
+coverage*.xml
+.coverage*
 *.egg-info
 *.egg
 *.log

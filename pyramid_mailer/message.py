@@ -462,14 +462,14 @@ def to_message(base):
                     charset = 'utf-8'
             if PY2:
                 body = body.encode(charset)
-            else: # pragma: no cover
+            else:
                 body = body.encode(charset, 'surrogateescape')
         if body is not None:
             if ctenc:
                 body = transfer_encode(ctenc, body)
-            if not PY2: # pragma: no cover
+            if not PY2:
                 body = body.decode(charset or 'ascii', 'replace')
-        out.set_payload(body, charset) 
+        out.set_payload(body, charset)
 
     for k in base.keys(): # returned sorted
         value = base[k]

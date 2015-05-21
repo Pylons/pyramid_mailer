@@ -4,6 +4,7 @@ docs_extras = [
     'Sphinx',
     'docutils',
     'repoze.sphinx.autointerface',
+    'pylons-sphinx-themes >= 0.3',
     ]
 
 tests_require = []
