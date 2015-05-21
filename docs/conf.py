@@ -12,6 +12,8 @@
 # serve to show the default value.
 
 import sys, os
+import pkg_resources
+import pylons_sphinx_themes
 import datetime
 import inspect
 import warnings
@@ -37,20 +39,6 @@ LaTeXTranslator.visit_inline = nothing
 LaTeXTranslator.depart_inline = nothing
 
 book = os.environ.get('BOOK')
-
-# If your extensions are in another directory, add it here. If the directory
-# is relative to the documentation root, use os.path.abspath to make it
-# absolute, like shown here.
-parent = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(os.path.abspath(parent))
-wd = os.getcwd()
-os.chdir(parent)
-os.system('%s setup.py test -q' % sys.executable)
-os.chdir(wd)
-
-for item in os.listdir(parent):
-    if item.endswith('.egg'):
-        sys.path.append(os.path.join(parent, item))
 
 # General configuration
 # ---------------------
@@ -86,7 +74,7 @@ copyright = '%s, Dan Jacob' % datetime.datetime.now().year
 # other places throughout the built documents.
 #
 # The short X.Y version.
-version = '0.13'
+version = pkg_resources.get_distribution('pyramid_mailer').version
 # The full version, including alpha/beta/rc tags.
 release = version
 
@@ -132,8 +120,7 @@ if book:
 # -----------------------
 
 # Add and use Pylons theme
-sys.path.append(os.path.abspath('_themes'))
-html_theme_path = ['_themes']
+html_theme_path = pylons_sphinx_themes.get_html_themes_path()
 html_theme = 'pyramid'
 html_theme_options = dict(github_url='http://github.com/Pylons/pyramid_mailer')
 
