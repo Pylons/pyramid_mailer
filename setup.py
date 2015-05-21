@@ -27,13 +27,13 @@ except IOError:
 
 setup(
     name='pyramid_mailer',
-    version='0.14',
+    version='0.14.1',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',
     description='Sendmail package for Pyramid',
     long_description='\n\n'.join([README, CHANGES]),
-    url="http://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/",
+    url="http://docs.pylonsproject.org/projects/pyramid-mailer/en/latest/",
     packages=[
         'pyramid_mailer',
     ],

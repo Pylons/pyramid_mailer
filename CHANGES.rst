@@ -1,8 +1,8 @@
 Changelog
 =========
 
-unreleased
-----------
+0.14.1 (2015-05-21)
+-------------------
 
 - Enable compatibility testing with Pyramid all the way back to 1.2. It may
   work earlier but we aren't testing it any longer.
