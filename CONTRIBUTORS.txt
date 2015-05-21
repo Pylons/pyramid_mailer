@@ -130,3 +130,5 @@ Contributors
 - Supreet Sethi, 2013-07-23
 
 - Nejc Zupan, 2013-11-08
+
+- Mário Idival, 2015-05-21
