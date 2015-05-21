@@ -1,6 +1,17 @@
 Changelog
 =========
 
+unreleased
+----------
+
+- Enable compatibility testing with Pyramid all the way back to 1.2. It may
+  work earlier but we aren't testing it any longer.
+
+- Fix a bug where the ``mailer.debug`` ini option was not properly being
+  cast to an ``int``. This did not show up on Python 2 because string
+  to int comparisons are valid there but it was a latent bug.
+  See https://github.com/Pylons/pyramid_mailer/pull/68
+
 0.14 (2014-12-10)
 -----------------
 
