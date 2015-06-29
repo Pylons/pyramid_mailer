@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Next Release
+------------
+
+- If ``username`` and ``password`` are both set to the empty string,
+  ``Mailer.from_settings``, now interprets them as being set to ``None``.
+  Previously, setting them to the empty string caused SMTP authentication
+  to be force with empty username and password.
+
 0.14.1 (2015-05-21)
 -------------------
 
