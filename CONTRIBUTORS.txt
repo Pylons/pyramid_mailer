@@ -132,3 +132,5 @@ Contributors
 - Nejc Zupan, 2013-11-08
 
 - Mário Idival, 2015-05-21
+
+- Geoffrey T. Dairiki, 2015-06-30
