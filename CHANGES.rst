@@ -8,8 +8,6 @@ Unreleased
   which allows you to set the Content-ID header so you can reference it from
   an HTML body.
 
-- TBD
-
 0.14.1 (2015-05-21)
 -------------------
 
