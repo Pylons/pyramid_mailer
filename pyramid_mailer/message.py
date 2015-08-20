@@ -80,11 +80,13 @@ class Attachment(object):
         data=None,
         disposition=None,
         transfer_encoding=None,
+        content_id=None,
         ):
         self.filename = filename
         self.content_type = content_type
         self.disposition = disposition or 'attachment'
         self.transfer_encoding = transfer_encoding or 'base64'
+        self.content_id = content_id
         self._data = data
 
     @property
@@ -99,6 +101,7 @@ class Attachment(object):
         content_type = self.content_type or default_content_type
         disposition = self.disposition or 'attachment'
         transfer_encoding = self.transfer_encoding or 'base64'
+        content_id = self.content_id
 
         if not data:
             raise RuntimeError('No data provided to attachment')
@@ -137,6 +140,8 @@ class Attachment(object):
         base.set_content_type(content_type, ctparams)
         base.set_content_disposition(disposition, dparams)
         base.set_transfer_encoding(transfer_encoding)
+        if content_id:
+            base['Content-Id'] = content_id
 
         return base
 

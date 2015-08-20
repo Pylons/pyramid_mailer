@@ -122,6 +122,18 @@ class TestAttachment(unittest.TestCase):
             base.get_content_disposition(),
             ('foo', {})
             )
+
+    def test_to_mailbase_content_id_set(self):
+        a = self._makeOne(
+            data='abc',
+            content_type='text/plain',
+            content_id='foo-content',
+            )
+        base = a.to_mailbase()
+        self.assertEqual(
+            base['content-id'],
+            'foo-content'
+            )
         
 class TestMessage(unittest.TestCase):
 
