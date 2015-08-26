@@ -134,3 +134,5 @@ Contributors
 - Mário Idival, 2015-05-21
 
 - Ingmar Steen, 2015-08-20
+
+- Daniel Kraus, 2015-08-27

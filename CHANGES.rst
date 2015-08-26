@@ -8,6 +8,10 @@ Unreleased
   which allows you to set the Content-ID header so you can reference it from
   an HTML body.
 
+- Pull #72: Change file extension to ``.eml`` for mails saved from
+  ``DebugMailer``. ``.eml`` is the standard file format for storing
+  plaintext MIME (rfc822) emails.
+
 0.14.1 (2015-05-21)
 -------------------
 
