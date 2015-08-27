@@ -58,6 +58,7 @@ class DebugMailerTests(_Base):
         mailer.send_sendmail(msg)
         files = self._listFiles()
         self.assertEqual(len(files), 1)
+        self.assertEqual(files[0][-4:], '.eml')
 
     def test_default_sender(self):
         mailer = self._makeOne()
