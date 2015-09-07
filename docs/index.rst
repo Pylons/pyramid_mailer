@@ -35,7 +35,7 @@ For local development, a developer has a few options:
    configuration (see :ref:`debugging`) so mails save to a local file.
 
 2. Run a fake SMTPD server for developing and debugging your webapp. Python
-   provides an SMTP server in its standard library called **smptd**. We can make
+   provides an SMTP server in its standard library called **smtpd**. We can make
    use of it by simply running the following command in a new terminal (this
    example uses port 2525; feel free to change that):
    
