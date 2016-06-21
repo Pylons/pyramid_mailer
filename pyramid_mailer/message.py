@@ -40,6 +40,7 @@ import string
 
 from email.mime.nonmultipart import MIMENonMultipart
 from email.mime.multipart import MIMEMultipart
+from email._policybase import Compat32
 
 from email.encoders import _bencode
 
@@ -491,6 +492,15 @@ def to_message(base):
     for part in base.parts:
         sub = to_message(part)
         out.attach(sub)
+        
+    # Message.policy tells how we format out raw ASCII email
+    # Lone \n is not allowed in email message, but
+    # Python generates this by default.
+    # Sparkpost SMTP would reject us as
+    # smtplib.SMTPDataError:
+    # (550, b'5.6.0 Lone CR or LF in headers (see RFC2822 section 2.2)')
+    policy = Compat32(linesep="\r\n")
+    out.policy = policy        
 
     return out
 
