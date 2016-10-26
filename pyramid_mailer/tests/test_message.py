@@ -618,9 +618,9 @@ class TestMessage(unittest.TestCase):
         
         self.assertEqual(
             msg.send_to,
-            set(["to@example.com",
-                 "somebodyelse@example.com",
-                 "anotherperson@example.com"])
+            {"to@example.com",
+             "somebodyelse@example.com",
+             "anotherperson@example.com"}
             )
         
     def test_is_bad_headers_if_no_bad_headers(self):

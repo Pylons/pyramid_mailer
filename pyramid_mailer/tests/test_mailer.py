@@ -318,7 +318,7 @@ class MailerTests(_Base):
         self.assertEqual(len(out), 1)
         first = out[0]
         self.assertEqual(first[0], 'sender@example.com')
-        self.assertEqual(first[1], set(['tester@example.com']))
+        self.assertEqual(first[1], {'tester@example.com'})
 
     def test_send_immediately_sendmail_with_exc_fail_silently(self):
         email_sender = "sender@example.com"
