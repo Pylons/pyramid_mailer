@@ -2,8 +2,8 @@ pyramid_mailer
 ==================
 
 **pyramid_mailer** is a package for the `Pyramid`_ framework to take the pain
-out of sending emails. It is compatible with Python 2.5, 2.6, 2.7, and
-3.2. It has the following features:
+out of sending emails. It is compatible with Python 2.7, 3.3, and 3.4, as well
+as PyPy and PyPy3. It has the following features:
 
 1. A wrapper around the low-level email functionality of standard
    Python. This includes handling multipart emails with both text and HTML

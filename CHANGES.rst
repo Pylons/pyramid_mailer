@@ -12,6 +12,8 @@ Unreleased
   ``DebugMailer``. ``.eml`` is the standard file format for storing
   plaintext MIME (rfc822) emails.
 
+- Pull #77: Drop Python 2.6 and 3.2 support.
+
 0.14.1 (2015-05-21)
 -------------------
 
