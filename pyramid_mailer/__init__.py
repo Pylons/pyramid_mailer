@@ -30,9 +30,16 @@ def get_mailer(request):
     ``config.include('pyramid_mailer')`` or
     ``config.include('pyramid_mailer.testing')``.
 
+    The mailer instance will be re-bound to the transaction manager set via
+    ``request.tm`` if available.
+
     :versionadded: 0.4
     """
     registry = getattr(request, 'registry', None)
     if registry is None:
         registry = request
-    return registry.getUtility(IMailer)
+    mailer = registry.getUtility(IMailer)
+    tm = getattr(request, 'tm', None)
+    if tm:
+        mailer = mailer.bind(transaction_manager=tm)
+    return mailer

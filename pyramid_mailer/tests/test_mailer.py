@@ -248,6 +248,20 @@ class MailerTests(_Base):
         self.assertEqual(mailer.sendmail_mailer.sendmail_template,
                     ['{sendmail_app}', '--option1', '--option2', '{sender}'])
 
+    def test_invalid_init_options(self):
+        self.assertRaises(ValueError, self._makeOne, foo='bar')
+
+    def test_invalid_bind_options(self):
+        mailer = self._makeOne()
+        self.assertRaises(ValueError, mailer.bind, foo='bar')
+
+    def test_bind(self):
+        mailer = self._makeOne()
+        dummy = object()
+        result = mailer.bind(transaction_manager=dummy, default_sender='foo')
+        self.assertTrue(result.transaction_manager is dummy)
+        self.assertEqual(result.default_sender, 'foo')
+
     def test_from_settings_with_empty_username(self):
         settings = {'mymail.username': '',
                     'mymail.password': ''}

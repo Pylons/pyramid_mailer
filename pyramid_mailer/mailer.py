@@ -11,6 +11,7 @@ from repoze.sendmail.mailer import SMTPMailer
 from repoze.sendmail.mailer import SendmailMailer
 from repoze.sendmail.delivery import DirectMailDelivery
 from repoze.sendmail.delivery import QueuedMailDelivery
+import transaction
 
 from pyramid_mailer._compat import SMTP_SSL
 
@@ -162,54 +163,76 @@ class Mailer(object):
            repoze defaults to "/usr/sbin/sendmail"
     :param sendmail_template: custom commandline template for sendmail binary,
            defaults to'["{sendmail_app}", "-t", "-i", "-f", "{sender}"]'
+    :param transaction_manager: a transaction manager to join with when
+           sending transactional emails
     :param debug: SMTP debug level
     """
 
-    def __init__(self,
-                 host='localhost',
-                 port=25,
-                 username=None,
-                 password=None,
-                 tls=False,
-                 ssl=False,
-                 keyfile=None,
-                 certfile=None,
-                 queue_path=None,
-                 default_sender=None,
-                 sendmail_app=None,
-                 sendmail_template=None,
-                 debug=0):
-        if ssl:
-            self.smtp_mailer = SMTP_SSLMailer(
-                hostname=host,
-                port=port,
-                username=username,
-                password=password,
-                no_tls=not(tls),
-                force_tls=tls,
-                debug_smtp=debug,
-                keyfile=keyfile,
-                certfile=certfile)
-        else:
-            self.smtp_mailer = SMTPMailer(
-                hostname=host,
-                port=port,
-                username=username,
-                password=password,
-                no_tls=not(tls),
-                force_tls=tls,
-                debug_smtp=debug)
+    def __init__(self, **kw):
+        smtp_mailer = kw.pop('smtp_mailer', None)
+        if smtp_mailer is None:
+            host = kw.pop('host', 'localhost')
+            port = kw.pop('port', 25)
+            username = kw.pop('username', None)
+            password = kw.pop('password', None)
+            tls = kw.pop('tls', False)
+            ssl = kw.pop('ssl', False)
+            keyfile = kw.pop('keyfile', None)
+            certfile = kw.pop('certfile', None)
+            debug = kw.pop('debug', 0)
+            if ssl:
+                smtp_mailer = SMTP_SSLMailer(
+                    hostname=host,
+                    port=port,
+                    username=username,
+                    password=password,
+                    no_tls=not(tls),
+                    force_tls=tls,
+                    debug_smtp=debug,
+                    keyfile=keyfile,
+                    certfile=certfile)
+            else:
+                smtp_mailer = SMTPMailer(
+                    hostname=host,
+                    port=port,
+                    username=username,
+                    password=password,
+                    no_tls=not(tls),
+                    force_tls=tls,
+                    debug_smtp=debug)
+        self.smtp_mailer = smtp_mailer
 
-        self.direct_delivery = DirectMailDelivery(self.smtp_mailer)
+        sendmail_mailer = kw.pop('sendmail_mailer', None)
+        if sendmail_mailer is None:
+            sendmail_mailer = SendmailMailer(
+                kw.pop('sendmail_app', None),
+                kw.pop('sendmail_template', None),
+            )
+        self.sendmail_mailer = sendmail_mailer
 
-        if queue_path:
-            self.queue_delivery = QueuedMailDelivery(queue_path)
+        self.queue_path = kw.pop('queue_path', None)
+        self.default_sender = kw.pop('default_sender', None)
+
+        transaction_manager = kw.pop('transaction_manager', None)
+        if transaction_manager is None:
+            transaction_manager = transaction.manager
+        self.transaction_manager = transaction_manager
+
+        if kw:
+            raise ValueError(
+                'invalid options: %s' % ', '.join(sorted(kw.keys())))
+
+        self.direct_delivery = DirectMailDelivery(
+            self.smtp_mailer, transaction_manager=transaction_manager)
+
+        if self.queue_path:
+            self.queue_delivery = QueuedMailDelivery(
+                self.queue_path, transaction_manager=transaction_manager)
         else:
             self.queue_delivery = None
 
-        self.sendmail_mailer = SendmailMailer(sendmail_app, sendmail_template)
-        self.sendmail_delivery = DirectMailDelivery(self.sendmail_mailer)
-        self.default_sender = default_sender
+        self.sendmail_delivery = DirectMailDelivery(
+            self.sendmail_mailer, transaction_manager=transaction_manager)
 
     @classmethod
     def from_settings(cls, settings, prefix='mail.'):
@@ -256,6 +279,31 @@ class Mailer(object):
             username = password = None
 
         return cls(username=username, password=password, **kwargs)
+
+    def bind(self, **kw):
+        """Create a new mailer with the same server configuration but with
+        different delivery options.
+
+        :param default_sender: default "from" address
+        :param transaction_manager: a transaction manager to join with when
+            sending transactional emails
+
+        """
+        default_sender = kw.pop('default_sender', self.default_sender)
+        transaction_manager = kw.pop(
+            'transaction_manager', self.transaction_manager)
+
+        if kw:
+            raise ValueError(
+                'invalid options: %s' % ', '.join(sorted(kw.keys())))
+
+        return self.__class__(
+            smtp_mailer=self.smtp_mailer,
+            sendmail_mailer=self.sendmail_mailer,
+            queue_path=self.queue_path,
+            default_sender=default_sender,
+            transaction_manager=transaction_manager,
+        )
 
     def send(self, message):
         """Send a message.
