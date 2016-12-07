@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+0.15 (2016-12-06)
+-----------------
 
 - Pull #49: Support '7bit' and '8bit' transfer-encoding.
 
