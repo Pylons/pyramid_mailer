@@ -223,16 +223,16 @@ class Mailer(object):
                 'invalid options: %s' % ', '.join(sorted(kw.keys())))
 
         self.direct_delivery = DirectMailDelivery(
-            self.smtp_mailer, transaction_manager=transaction_manager)
+            self.smtp_mailer)
 
         if self.queue_path:
             self.queue_delivery = QueuedMailDelivery(
-                self.queue_path, transaction_manager=transaction_manager)
+                self.queue_path)
         else:
             self.queue_delivery = None
 
         self.sendmail_delivery = DirectMailDelivery(
-            self.sendmail_mailer, transaction_manager=transaction_manager)
+            self.sendmail_mailer)
 
     @classmethod
     def from_settings(cls, settings, prefix='mail.'):
