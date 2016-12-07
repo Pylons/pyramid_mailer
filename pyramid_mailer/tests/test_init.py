@@ -1,5 +1,6 @@
 import unittest
 from pyramid import testing
+from webtest import TestApp
 
 class TestGetMailer(unittest.TestCase):
 
@@ -22,6 +23,19 @@ class TestGetMailer(unittest.TestCase):
         request.registry = registry
         result = self._get_mailer(request)
         self.assertEqual(result, mailer)
+
+    def test_rebind(self):
+        from pyramid_mailer import Mailer
+        class Dummy(object):
+            pass
+        mailer = Mailer()
+        registry = DummyRegistry(mailer)
+        request = Dummy()
+        request.registry = registry
+        request.tm = object()
+        result = self._get_mailer(request)
+        self.assertNotEqual(result, mailer)
+        self.assertTrue(result.transaction_manager is request.tm)
 
 
 class Test_includeme(unittest.TestCase):
@@ -69,6 +83,21 @@ class TestFunctional(unittest.TestCase):
         mailer = get_mailer(request)
         self.assertEqual(mailer.__class__, DummyMailer)
 
+    def test_request_binding(self):
+        from pyramid_mailer import get_mailer
+        from pyramid_mailer.mailer import Mailer
+        self.config.include('pyramid_mailer')
+        result = []
+        def view(request):
+            request.tm = 'foo'
+            mailer = get_mailer(request)
+            result.append(mailer)
+            return request.response
+        self.config.add_view(view)
+        app = self.config.make_wsgi_app()
+        TestApp(app).get('/')
+        self.assertTrue(isinstance(result[0], Mailer))
+        self.assertEqual(result[0].transaction_manager, 'foo')
 
 class DummyRegistry(object):
     def __init__(self, result=None):

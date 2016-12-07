@@ -23,6 +23,9 @@ Unreleased
 
 - Add Python 3.5 support.
 
+- Pull #78: Support per-request transaction managers if available via
+  ``request.tm`` set by ``pyramid_tm``.
+
 0.14.1 (2015-05-21)
 -------------------
 

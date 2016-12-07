@@ -12,6 +12,7 @@ tests_require = []
 testing_extras = tests_require + [
     'nose',
     'coverage',
+    'WebTest',
     ]
 
 try:
@@ -42,6 +43,7 @@ setup(
     install_requires=[
         'pyramid',
         'repoze.sendmail>=4.1',
+        'transaction',
     ],
     tests_require = tests_require,
     extras_require = {
