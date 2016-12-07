@@ -4,6 +4,11 @@ Changelog
 Unreleased
 ----------
 
+- Pull #70: If ``username`` and ``password`` are both set to the empty string,
+  ``Mailer.from_settings``, now interprets them as being set to ``None``.
+  Previously, setting them to the empty string caused SMTP authentication
+  to be force with empty username and password.
+
 - Pull #71: Add a ``content_id`` argument to the ``Attachment`` constructor
   which allows you to set the Content-ID header so you can reference it from
   an HTML body.

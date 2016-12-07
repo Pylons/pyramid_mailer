@@ -246,7 +246,16 @@ class Mailer(object):
             if key in kwargs:
                 kwargs[key] = aslist(kwargs.get(key))
 
-        return cls(**kwargs)
+        username = kwargs.pop('username', None)
+        password = kwargs.pop('password', None)
+        if not (username or password):
+            # Setting both username and password to the empty string,
+            # causes repoze.sendmail.mailer.SMTPMailer to authenticate.
+            # This most likely makes no sense, so, in that case
+            # set username to None to skip authentication.
+            username = password = None
+
+        return cls(username=username, password=password, **kwargs)
 
     def send(self, message):
         """Send a message.

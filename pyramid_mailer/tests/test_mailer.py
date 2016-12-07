@@ -248,6 +248,14 @@ class MailerTests(_Base):
         self.assertEqual(mailer.sendmail_mailer.sendmail_template,
                     ['{sendmail_app}', '--option1', '--option2', '{sender}'])
 
+    def test_from_settings_with_empty_username(self):
+        settings = {'mymail.username': '',
+                    'mymail.password': ''}
+        mailer = self._getTargetClass().from_settings(settings,
+                                                      prefix='mymail.')
+        self.assertEqual(mailer.direct_delivery.mailer.username, None)
+        self.assertEqual(mailer.direct_delivery.mailer.password, None)
+
     def test_send_immediately(self):
         import socket
         mailer = self._makeOne(host='localhost', port='28322')
