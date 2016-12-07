@@ -37,7 +37,7 @@ For local development, a developer has a few options:
 2. Run a fake SMTPD server for developing and debugging your webapp. Python
    provides an SMTP server in its standard library called **smtpd**. We can make
    use of it by simply running the following command in a new terminal (this
-   example uses port 2525; feel free to change that):
+   example uses port 2525; feel free to change that)::
    
       python -m smtpd -n -c DebuggingServer localhost:2525
 
@@ -86,11 +86,9 @@ Or, in your application's configuration stanza use the
 
    config.include('pyramid_mailer')
 
-Thereafter in view code, use the :func:`~pyramid_mailer.get_mailer` API to
-obtain the configured mailer::
+Thereafter, the mailer is available via the ``request.mailer`` attribute::
 
-   from pyramid_mailer import get_mailer
-   mailer = get_mailer(request)
+   mailer = request.mailer
 
 To send a message, you must first create a
 :class:`~pyramid_mailer.message.Message` instance::

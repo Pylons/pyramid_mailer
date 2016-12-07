@@ -21,6 +21,8 @@ def includeme(config):
     prefix = settings.get('pyramid_mailer.prefix', 'mail.')
     mailer = mailer_factory_from_settings(settings, prefix=prefix)
     config.registry.registerUtility(mailer, IMailer)
+    if hasattr(config, 'add_request_method'):
+        config.add_request_method(get_mailer, 'mailer', reify=True)
 
 
 def get_mailer(request):
