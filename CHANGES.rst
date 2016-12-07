@@ -21,6 +21,9 @@ Unreleased
 
 - Pull #77: Drop Python 2.6 and 3.2 support.
 
+- Pull #78: Support per-request transaction managers if available via
+  ``request.tm`` set by ``pyramid_tm``.
+
 0.14.1 (2015-05-21)
 -------------------
 
