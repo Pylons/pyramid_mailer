@@ -358,8 +358,8 @@ could be rewritten::
     message.attach(attachment)
 
 A transfer encoding can be specified via the ``transfer_encoding`` option.
-Supported options are currently ``base64`` (the default) and
-``quoted-printable``.
+Supported options are currently ``quoted-printable`` (default), ``base64``,
+``7bit`` and ``8bit``.
 
 You can also pass an attachment as the ``body`` and/or ``html``
 arguments to specify ``Content-Transfer-Encoding`` or other

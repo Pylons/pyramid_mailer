@@ -4,6 +4,8 @@ Changelog
 Unreleased
 ----------
 
+- Pull #49: Support '7bit' and '8bit' transfer-encoding.
+
 - Pull #70: If ``username`` and ``password`` are both set to the empty string,
   ``Mailer.from_settings``, now interprets them as being set to ``None``.
   Previously, setting them to the empty string caused SMTP authentication
