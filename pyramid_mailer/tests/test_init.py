@@ -83,6 +83,14 @@ class TestFunctional(unittest.TestCase):
         mailer = get_mailer(request)
         self.assertEqual(mailer.__class__, DummyMailer)
 
+    def test_get_mailer_dummy_with_tm(self):
+        from pyramid_mailer import get_mailer
+        from pyramid_mailer.testing import DummyMailer
+        self.config.include('pyramid_mailer.testing')
+        request = testing.DummyRequest(tm='foo')
+        mailer = get_mailer(request)
+        self.assertEqual(mailer.__class__, DummyMailer)
+
     def test_request_binding(self):
         from pyramid_mailer import get_mailer
         from pyramid_mailer.mailer import Mailer
@@ -115,5 +123,3 @@ class DummyConfig(object):
     def __init__(self, registry, settings):
         self.registry = registry
         self.registry.settings = settings
-
-
