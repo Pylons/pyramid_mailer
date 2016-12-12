@@ -1,6 +1,7 @@
-from pyramid_mailer.interfaces import IMailer
+from pyramid_mailer import set_mailer
 from pyramid_mailer.mailer import DummyMailer
+
 
 def includeme(config):
     mailer = DummyMailer()
-    config.registry.registerUtility(mailer, IMailer)
+    set_mailer(config, mailer)
