@@ -333,13 +333,10 @@ class Mailer(object):
             sending transactional emails
 
         """
-        default_sender = kw.pop('default_sender', self.default_sender)
-        transaction_manager = kw.pop(
+        _check_bind_options(kw)
+        default_sender = kw.get('default_sender', self.default_sender)
+        transaction_manager = kw.get(
             'transaction_manager', self.transaction_manager)
-
-        if kw:
-            raise ValueError(
-                'invalid options: %s' % ', '.join(sorted(kw.keys())))
 
         return self.__class__(
             smtp_mailer=self.smtp_mailer,
