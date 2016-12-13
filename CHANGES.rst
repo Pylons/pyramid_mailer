@@ -1,6 +1,13 @@
 Changelog
 =========
 
+unreleased
+----------
+
+- Pull #83: Add the new ``.bind`` method to the ``DebugMailer`` and the
+  ``DummyMailer``. Also ``pyramid_mailer.testing`` and
+  ``pyramid_mailer.debug`` now add the ``request.mailer`` request attribute.
+
 0.15 (2016-12-06)
 -----------------
 
