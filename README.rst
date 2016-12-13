@@ -25,8 +25,8 @@ This package includes:
 
 ``pyramid_mailer`` uses the ``repoze.sendmail`` library for managing email
 sending and transacton management, and borrows code (with permission) from
-Zed Shaw's ``lamson`` for wrapping email messages (https://github.com/zedshaw/lamson).
-See the LICENSE.txt file for more information.
+Zed Shaw's `lamson <https://github.com/zedshaw/lamson>`_  for wrapping email
+messages.  See the ``LICENSE.txt`` file for more information.
 
 Links
 -----
