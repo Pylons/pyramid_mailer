@@ -28,7 +28,7 @@ except IOError:
 
 setup(
     name='pyramid_mailer',
-    version='0.15',
+    version='0.15.1',
     license='BSD',
     author='Dan Jacob',
     author_email='danjac354@gmail.com',

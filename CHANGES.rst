@@ -1,8 +1,8 @@
 Changelog
 =========
 
-unreleased
-----------
+0.15.1 (2016-12-13)
+-------------------
 
 - Pull #83: Add the new ``.bind`` method to the ``DebugMailer`` and the
   ``DummyMailer``. Also ``pyramid_mailer.testing`` and
