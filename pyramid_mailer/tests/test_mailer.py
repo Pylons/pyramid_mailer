@@ -52,6 +52,16 @@ class DebugMailerTests(_Base):
         self.assertRaises(ValueError,
                           self._getTargetClass().from_settings, None)
 
+    def test_invalid_bind_options(self):
+        mailer = self._makeOne()
+        self.assertRaises(ValueError, mailer.bind, foo='bar')
+
+    def test_bind(self):
+        mailer = self._makeOne()
+        dummy = object()
+        result = mailer.bind(transaction_manager=dummy, default_sender='foo')
+        self.assertIs(result, mailer)
+
     def test__send(self):
         mailer = self._makeOne()
         msg = _makeMessage()
@@ -78,6 +88,16 @@ class DummyMailerTests(unittest.TestCase):
 
     def _makeOne(self):
         return self._getTargetClass()()
+
+    def test_invalid_bind_options(self):
+        mailer = self._makeOne()
+        self.assertRaises(ValueError, mailer.bind, foo='bar')
+
+    def test_bind(self):
+        mailer = self._makeOne()
+        dummy = object()
+        result = mailer.bind(transaction_manager=dummy, default_sender='foo')
+        self.assertIs(result, mailer)
 
     def test_send(self):
         mailer = self._makeOne()

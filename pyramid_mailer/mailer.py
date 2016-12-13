@@ -16,6 +16,20 @@ import transaction
 from pyramid_mailer._compat import SMTP_SSL
 
 
+def _check_bind_options(kw):
+    """Check keyword options passed to dummy mailer ``.bind`` method
+    for plausibility.
+
+    Performs the same checks that :method:`Mailer.bind` does.
+
+    """
+    valid_options = ('default_sender', 'transaction_manager')
+    invalid_options = set(kw.keys()).difference(valid_options)
+    if invalid_options:
+        raise ValueError(
+            'invalid options: %s' % ', '.join(sorted(invalid_options)))
+
+
 class DebugMailer(object):
     """ Debug mailer for testing
 
@@ -39,6 +53,21 @@ class DebugMailer(object):
             raise ValueError("DebugMailer:  must specify "
                              "'%stop_level_directory'" % prefix)
         return cls(top_level_directory)
+
+    def bind(self, **kw):
+        """Get mailer with the same server configuration but with
+        different delivery options.
+
+        This method returns ``self``, and is, essentially a no-op, but
+        is included for API compatibility with :class:`Mailer`.
+
+        :param default_sender: default "from" address
+        :param transaction_manager: a transaction manager to join with when
+            sending transactional emails
+
+        """
+        _check_bind_options(kw)
+        return self
 
     def _send(self, message, fail_silently=False):
         """Save message to a file for debugging
@@ -70,6 +99,21 @@ class DummyMailer(object):
     def __init__(self):
         self.outbox = []
         self.queue = []
+
+    def bind(self, **kw):
+        """Get mailer with the same server configuration but with
+        different delivery options.
+
+        This method returns ``self``, and is, essentially a no-op, but
+        is included for API compatibility with :class:`Mailer`.
+
+        :param default_sender: default "from" address
+        :param transaction_manager: a transaction manager to join with when
+            sending transactional emails
+
+        """
+        _check_bind_options(kw)
+        return self
 
     def send(self, message):
         """Mock sending a transactional message via SMTP.
@@ -289,13 +333,10 @@ class Mailer(object):
             sending transactional emails
 
         """
-        default_sender = kw.pop('default_sender', self.default_sender)
-        transaction_manager = kw.pop(
+        _check_bind_options(kw)
+        default_sender = kw.get('default_sender', self.default_sender)
+        transaction_manager = kw.get(
             'transaction_manager', self.transaction_manager)
-
-        if kw:
-            raise ValueError(
-                'invalid options: %s' % ', '.join(sorted(kw.keys())))
 
         return self.__class__(
             smtp_mailer=self.smtp_mailer,
