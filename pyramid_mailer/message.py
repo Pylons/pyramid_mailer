@@ -298,7 +298,7 @@ class Message(object):
         if not (self.recipients or self.cc or self.bcc):
             raise InvalidMessage("No recipients have been added")
 
-        if not self.body and not self.html:
+        if self.body and self.html == None:
             raise InvalidMessage("No body has been set")
 
         if not self.sender:
