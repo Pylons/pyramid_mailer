@@ -24,10 +24,10 @@ class DebugMailerTests(_Base):
         from pyramid_mailer.mailer import DebugMailer
         return DebugMailer
 
-    def _makeOne(self, tld=None):
+    def _makeOne(self, tld=None, include_bcc=False):
         if tld is None:
             tld = self._makeTempdir()
-        return self._getTargetClass()(tld)
+        return self._getTargetClass()(tld, include_bcc)
 
     def _listFiles(self):
         from os import listdir
@@ -69,6 +69,17 @@ class DebugMailerTests(_Base):
         files = self._listFiles()
         self.assertEqual(len(files), 1)
         self.assertEqual(files[0][-4:], '.eml')
+
+    def test__send_w_include_bcc(self):
+        mailer = self._makeOne(include_bcc=True)
+        msg = _makeMessage(bcc=['recipient@example.com'])
+        mailer.send_sendmail(msg)
+        files = self._listFiles()
+
+        self.assertIn('Bcc', msg.extra_headers)
+        self.assertEqual(len(files), 1)
+        with open(os.path.join(self._tempdir, files[0]), 'r') as msg:
+            self.assertTrue('recipient@example.com' in msg.read())
 
     def test_default_sender(self):
         mailer = self._makeOne()
