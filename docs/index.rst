@@ -211,6 +211,7 @@ Setting                         Default                                         
 **mail.debug**                  **0**                                           SMTP debug level
 **mail.sendmail_app**           **/usr/sbin/sendmail**                          Sendmail executable
 **mail.sendmail_template**      **{sendmail_app} -t -i -f {sender}**            Template for sendmail execution
+**mail.debug_include_bcc**      **False**                                       Include Bcc headers when :ref:`debugging`
 ==========================      ====================================            ===============================
 
 **Note:** SSL will only work with **pyramid_mailer** if you are using Python
@@ -392,6 +393,7 @@ out will instead get written to files so you can inspect them::
       pyramid_debugtoolbar
       pyramid_tm
 
+Set the ``mail.debug_include_bcc`` flag to ``True`` if you want the bcc recipients written to the file
 
 Unit tests
 ----------

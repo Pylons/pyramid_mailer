@@ -35,10 +35,11 @@ class DebugMailer(object):
 
     Stores messages as files in the specified directory.
     """
-    def __init__(self, top_level_directory):
+    def __init__(self, top_level_directory, include_bcc=False):
         if not exists(top_level_directory):
             makedirs(top_level_directory)
         self.tld = top_level_directory
+        self.include_bcc = include_bcc
 
     @classmethod
     def from_settings(cls, settings, prefix='mail.'):
@@ -52,7 +53,10 @@ class DebugMailer(object):
         if top_level_directory is None:
             raise ValueError("DebugMailer:  must specify "
                              "'%stop_level_directory'" % prefix)
-        return cls(top_level_directory)
+
+        include_bcc = settings.get(prefix+'debug_include_bcc', False)
+
+        return cls(top_level_directory, include_bcc)
 
     def bind(self, **kw):
         """Get mailer with the same server configuration but with
@@ -76,6 +80,10 @@ class DebugMailer(object):
         file_part1 = datetime.now().strftime('%Y%m%d%H%M%S')
         file_part2 = ''.join(sample(seeds, 4))
         filename = join(self.tld, '%s_%s.eml' % (file_part1, file_part2))
+
+        if self.include_bcc:
+            message.extra_headers['Bcc'] = ', '.join(message.bcc)
+
         with open(filename, 'w') as fd:
             if not message.sender:
                 message.sender = 'nobody'
