@@ -1,5 +1,7 @@
+.. _index:
+
 pyramid_mailer
-==================
+==============
 
 **pyramid_mailer** is a package for the `Pyramid`_ framework to take the pain
 out of sending emails. It is compatible with Python 2.7, 3.3, and 3.4, as well
@@ -263,7 +265,7 @@ transaction will implicitly be aborted and mail will not be sent; otherwise
 it will be committed, and mail will be sent.
 
 HTML email
---------------------
+----------
 
 Below is a recipe how to send templatized HTML and plain text email. 
 The email is assembled from three templates: subject, HTML body and text 
@@ -344,7 +346,6 @@ class::
 
 You can pass the data either as a string or file object, so the above code
 could be rewritten::
-
 
     from pyramid_mailer.message import Attachment
     from pyramid_mailer.message import Message
@@ -524,6 +525,13 @@ API
 
 .. autoclass:: BadHeaders
    :members:
+
+
+Change History
+--------------
+
+.. include:: ../CHANGES.rst
+
 
 .. _Github: https://github.com/Pylons/pyramid_mailer
 .. _Pyramid: https://pypi.org/project/pyramid/
