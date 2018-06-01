@@ -254,7 +254,7 @@ For example::
 
 The email is not actually sent until the transaction is committed.
 
-When the `repoze.tm2 <http://pypi.python.org/pypi/repoze.tm2>`_ ``tm``
+When the `repoze.tm2 <https://pypi.org/project/repoze.tm2/>`_ ``tm``
 middleware is in your Pyramid WSGI pipeline or if you've included the
 ``pyramid_tm`` package in your Pyramid configuration, transactions are
 already managed for you, so you don't need to explicitly commit or abort
@@ -267,7 +267,7 @@ HTML email
 
 Below is a recipe how to send templatized HTML and plain text email. 
 The email is assembled from three templates: subject, HTML body and text 
-body. It is also recommend to use `premailer <https://pypi.python.org/pypi/premailer>`_
+body. It is also recommend to use `premailer <https://pypi.org/project/premailer/>`_
 Python package to transform email CSS styles to inline CSS, as 
 email clients are pretty restricted  what comes to their ability to understand 
 CSS.
@@ -526,12 +526,11 @@ API
    :members:
 
 .. _Github: https://github.com/Pylons/pyramid_mailer
-.. _Pyramid: http://pypi.python.org/pypi/pyramid/
+.. _Pyramid: https://pypi.org/project/pyramid/
 .. _Ubuntu's Postfix guide: https://help.ubuntu.com/lts/serverguide/postfix.html
 .. _ArchLinux Postfix guide: https://wiki.archlinux.org/index.php/postfix
-.. _OSX Postfix instructions: http://benjaminrojas.net/configuring-postfix-to-
-    send-mail-from-mac-os-x-mountain-lion
+.. _OSX Postfix instructions: https://benjaminrojas.net/configuring-postfix-to-send-mail-from-mac-os-x-mountain-lion/
 .. _setup an SMTP with IIS: http://www.neatcomponents.com/enable-SMTP-in-Windows-8
-.. _repoze_sendmail: http://pypi.python.org/pypi/repoze.sendmail/
-.. _Lamson: http://pypi.python.org/pypi/lamson/
-.. _WebTest: http://pypi.python.org/pypi/WebTest/
+.. _repoze_sendmail: https://pypi.org/project/repoze.sendmail/
+.. _Lamson: https://pypi.org/project/lamson/
+.. _WebTest: https://pypi.org/project/WebTest/
