@@ -5,18 +5,18 @@
    :target: https://travis-ci.org/Pylons/pyramid_mailer
 
 .. image:: https://readthedocs.org/projects/pyramid_mailer/badge/?version=latest
-   :target: http://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/
+   :target: https://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/
    :alt: Documentation Status
 
 pyramid_mailer is a package for sending email from your Pyramid application.
-It is compatible with Python 2.7, 3.3, 3.4, and 3.5, as well as PyPy.
+It is compatible with Python 2.7, 3.4, 3.5, and 3.6, as well as PyPy.
 
 This package includes:
 
 1. Wrapping the low-level Python ``email`` library with an easy-to-use
    API, which includes attachments and mulipart content.
 
-2. Send emails immediately or to add to a maildir queue.
+2. Send emails immediately or add to a ``maildir`` queue.
 
 3. Managing email sends inside a transaction, to prevent emails being sent
    if your code raises an exception.
@@ -32,7 +32,7 @@ Links
 -----
 
 - `documentation
-  <http://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/>`_
+  <https://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/>`_
 
-- `development version
+- `code repository
   <https://github.com/Pylons/pyramid_mailer>`_
