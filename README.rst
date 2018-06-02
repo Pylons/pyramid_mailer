@@ -16,7 +16,7 @@ This package includes:
 1. Wrapping the low-level Python ``email`` library with an easy-to-use
    API, which includes attachments and mulipart content.
 
-2. Send emails immediately or add to a ``maildir`` queue.
+2. Sending emails immediately or add to a ``maildir`` queue.
 
 3. Managing email sends inside a transaction, to prevent emails being sent
    if your code raises an exception.
