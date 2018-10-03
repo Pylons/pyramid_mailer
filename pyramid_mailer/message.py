@@ -52,6 +52,7 @@ from ._compat import (
     text_type,
     PY2,
     _qencode,
+    string_to_unicode,
     )
 
 
@@ -105,7 +106,7 @@ class Attachment(object):
 
         if not data:
             raise RuntimeError('No data provided to attachment')
-        
+
         if filename and not content_type:
             content_type, _ = mimetypes.guess_type(filename)
 
@@ -132,11 +133,12 @@ class Attachment(object):
         charset = ctparams.get('charset', None)
         
         if content_type.startswith('text/'):
+            data = string_to_unicode(data)  # handle unicode in Python2 strings
             if charset is None:
-                charset = best_charset(self.data)[0]
+                charset = best_charset(data)[0]
             ctparams['charset'] = charset
 
-        base.set_body(self.data)
+        base.set_body(data)
         base.set_content_type(content_type, ctparams)
         base.set_content_disposition(disposition, dparams)
         base.set_transfer_encoding(transfer_encoding)
@@ -195,7 +197,6 @@ class Message(object):
         """
         Returns raw email.Message instance.  Validates message first.
         """
-
         self.validate()
         
         bodies = [(self.body, 'text/plain'), (self.html, 'text/html')]
@@ -220,7 +221,7 @@ class Message(object):
         base = MailBase([
             ('To', ', '.join(self.recipients)),
             ('From', self.sender),
-            ('Subject', self.subject),
+            ('Subject', string_to_unicode(self.subject)),  # necessary for proper encoding
             ])
 
         # base represents the outermost mime part; it will be one of the

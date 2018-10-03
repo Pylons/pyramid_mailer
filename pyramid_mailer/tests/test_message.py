@@ -7,6 +7,7 @@ from pyramid_mailer._compat import (
     text_type,
     StringIO,
     _qencode,
+    PY2,
     )
 
 from email.encoders import (
@@ -255,6 +256,85 @@ class TestMessage(unittest.TestCase):
         msg.html = "<b>test</b>"
 
         mailer.send(msg)
+
+    def test_body(self):
+
+        from pyramid_mailer.message import Message
+
+        _ascii_content = 'testing'
+        _utf8_content = "Τη γλώσσα μου έδωσαν ελληνική"  # via http://kermitproject.org/utf8.html
+        _utf8_content_string = _utf8_content
+        _utf8_content_unicode = u"Τη γλώσσα μου έδωσαν ελληνική"  # via http://kermitproject.org/utf8.html
+        if PY2:
+            _utf8_content_encoded = '=?utf-8?b?zqTOtyDOs867z47Pg8+DzrEgzrzOv8+FIM6tzrTPic+DzrHOvSDOtc67?=\n =?utf-8?b?zrvOt869zrnOus6u?='
+        else:
+            _utf8_content_encoded = '=?utf-8?b?zqTOtyDOs867z47Pg8+DzrEgzrzOv8+FIM6tzrTPic+DzrHOvSDOtc67zrvOt869zrnOus6u?='
+        _ut8_email = "Dörte@Sörensen.example.com"  # via http://kermitproject.org/utf8.html
+        _utf8_subject_encoded = 'Subject: %s' % _utf8_content_encoded
+        _utf8_subject_string = 'Subject: %s' % _utf8_content_string  # we NEVER want to see this
+        _ascii_subject = "Subject: %s" % _ascii_content
+        _header_plain_ascii = 'Content-Type: text/plain; charset="us-ascii"'
+        _header_plain_utf8 = 'Content-Type: text/plain; charset="utf-8"'
+        _utf8_content_quoted_printable = "=CE=A4=CE=B7=20=CE=B3=CE=BB=CF=8E=CF=83=CF=83=CE=B1=20=CE=BC=CE=BF=CF=85=20=\n=CE=AD=CE=B4=CF=89=CF=83=CE=B1=CE=BD=20=CE=B5=CE=BB=CE=BB=CE=B7=CE=BD=CE=B9=\n=CE=BA=CE=AE"
+
+        # body: ASCII
+        # subject: UTF8 (py2 unicode instance)
+        msg0 = Message(
+            body=_ascii_content,
+            subject=_utf8_content_unicode,
+            sender=_ut8_email,
+            recipients=[_ut8_email],
+            cc=[_ut8_email]
+            )
+        response0 = msg0.to_message()
+        string0 = response0.as_string()
+        self.assertIn(_header_plain_ascii, string0)
+        self.assertIn(_utf8_subject_encoded, string0)
+
+        # body: ASCII
+        # subject: UTF8 (py2 string)
+        msg1 = Message(
+            body=_ascii_content,
+            subject=_utf8_content,
+            sender=_ut8_email,
+            recipients=[_ut8_email],
+            cc=[_ut8_email]
+            )
+        response1 = msg1.to_message()
+        string1 = response1.as_string()
+        self.assertIn(_header_plain_ascii, string1)
+        self.assertNotIn(_utf8_subject_string, string1)
+        self.assertIn(_utf8_subject_encoded, string1)
+
+        # body: UTF8 (py2 unicode instance)
+        # subject: ASCII
+        msg2 = Message(
+            body=_utf8_content_unicode,
+            subject=_ascii_content,
+            sender=_ut8_email,
+            recipients=[_ut8_email],
+            cc=[_ut8_email]
+            )
+        response2 = msg2.to_message()
+        string2 = response2.as_string()
+        self.assertIn(_header_plain_utf8, string2)
+        self.assertIn(_ascii_subject, string2)
+        self.assertIn(_utf8_content_quoted_printable, string2)
+
+        # body: UTF8 (py2 string)
+        # subject: ASCII
+        msg3 = Message(
+            body=_utf8_content_string,
+            subject=_ascii_content,
+            sender=_ut8_email,
+            recipients=[_ut8_email],
+            cc=[_ut8_email]
+            )
+        response3 = msg3.to_message()
+        string3 = response3.as_string()
+        self.assertIn(_header_plain_utf8, string2)
+        self.assertIn(_ascii_subject, string2)
+        self.assertIn(_utf8_content_quoted_printable, string2)
 
     def test_cc(self):
 
