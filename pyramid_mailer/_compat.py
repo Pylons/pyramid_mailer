@@ -23,8 +23,8 @@ if PY2:
 
     def string_to_unicode(text, encoding='utf-8'):
         """
-        This will upgrade a Py2 `string` to a `unicode` object, preferably in `UTF-8`.
-        This is necessary for the proper escaping to happen on `Subject` and `Body`
+        This will upgrade a Py2 ``string`` to a ``unicode`` object, preferably in `UTF-8`.
+        This is necessary for the proper escaping to happen on ``Subject`` and ``Body``.
         """
         if isinstance(text, bytes):
             try:
