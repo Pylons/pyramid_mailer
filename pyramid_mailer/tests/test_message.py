@@ -257,26 +257,46 @@ class TestMessage(unittest.TestCase):
 
         mailer.send(msg)
 
-    def test_body(self):
+    def test_utf8_body_subject(self):
+        """
+        This test is designed to ensure a UTF8 subject and body are encoded properly.
+
+        Two scenarios are used:
+
+            1. non-english content
+            2. emojis in content
+
+        The reason for two subtests is due to differences between PY2 and PY3
+        which make it difficult to carefully craft a single payload which
+        can satisfy both scenarios and maintain a shared set of expected test
+        results.
+        """
 
         from pyramid_mailer.message import Message
 
-        # pass 1, non-english language
-
+        # common test vars
         _ascii_content = 'testing'
+        _ascii_subject = "Subject: %s" % _ascii_content
+        _header_plain_ascii = 'Content-Type: text/plain; charset="us-ascii"'
+        _header_plain_utf8 = 'Content-Type: text/plain; charset="utf-8"'
+        _ut8_email = "Dörte@Sörensen.example.com"  # via http://kermitproject.org/utf8.html
+
+        #
+        # pass 1, non-english language
+        #
+
         _utf8_content = "Τη γλώσσα μου έδωσαν ελληνική"  # via http://kermitproject.org/utf8.html
         _utf8_content_string = _utf8_content
         _utf8_content_unicode = u"Τη γλώσσα μου έδωσαν ελληνική"  # via http://kermitproject.org/utf8.html
         if PY2:
+            # this appears to be an issue in maxchars for an email subject line differing on Python versions
+            # py2 lib/email/headers.py | MAXLINELEN = 76
             _utf8_content_encoded = '=?utf-8?b?zqTOtyDOs867z47Pg8+DzrEgzrzOv8+FIM6tzrTPic+DzrHOvSDOtc67?=\n =?utf-8?b?zrvOt869zrnOus6u?='
         else:
+            # py3 lib/email/headers.py | MAXLINELEN = 78
             _utf8_content_encoded = '=?utf-8?b?zqTOtyDOs867z47Pg8+DzrEgzrzOv8+FIM6tzrTPic+DzrHOvSDOtc67zrvOt869zrnOus6u?='
-        _ut8_email = "Dörte@Sörensen.example.com"  # via http://kermitproject.org/utf8.html
         _utf8_subject_encoded = 'Subject: %s' % _utf8_content_encoded
         _utf8_subject_string = 'Subject: %s' % _utf8_content_string  # we NEVER want to see this
-        _ascii_subject = "Subject: %s" % _ascii_content
-        _header_plain_ascii = 'Content-Type: text/plain; charset="us-ascii"'
-        _header_plain_utf8 = 'Content-Type: text/plain; charset="utf-8"'
         _utf8_content_quoted_printable = "=CE=A4=CE=B7=20=CE=B3=CE=BB=CF=8E=CF=83=CF=83=CE=B1=20=CE=BC=CE=BF=CF=85=20=\n=CE=AD=CE=B4=CF=89=CF=83=CE=B1=CE=BD=20=CE=B5=CE=BB=CE=BB=CE=B7=CE=BD=CE=B9=\n=CE=BA=CE=AE"
 
         # body: ASCII
@@ -338,22 +358,16 @@ class TestMessage(unittest.TestCase):
         self.assertIn(_ascii_subject, string2)
         self.assertIn(_utf8_content_quoted_printable, string2)
 
+        #
         # pass 2, EMOJI
+        #
 
-        _ascii_content = 'testing'
         _utf8_content = "📌 PUSHPIN!"
         _utf8_content_string = _utf8_content
         _utf8_content_unicode = u"📌 PUSHPIN!"
-        if PY2:
-            _utf8_content_encoded = '=?utf-8?b?8J+TjCBQVVNIUElOIQ==?='
-        else:
-            _utf8_content_encoded = '=?utf-8?b?8J+TjCBQVVNIUElOIQ==?='
-        _ut8_email = "Dörte@Sörensen.example.com"  # via http://kermitproject.org/utf8.html
+        _utf8_content_encoded = '=?utf-8?b?8J+TjCBQVVNIUElOIQ==?='
         _utf8_subject_encoded = 'Subject: %s' % _utf8_content_encoded
         _utf8_subject_string = 'Subject: %s' % _utf8_content_string  # we NEVER want to see this
-        _ascii_subject = "Subject: %s" % _ascii_content
-        _header_plain_ascii = 'Content-Type: text/plain; charset="us-ascii"'
-        _header_plain_utf8 = 'Content-Type: text/plain; charset="utf-8"'
         _utf8_content_quoted_printable = "F0=9F=93=8C=20PUSHPIN!"
 
 
