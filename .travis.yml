@@ -26,7 +26,7 @@ matrix:
       env: TOXENV=py2-cover,py3-cover,coverage
     - python: 3.5
       env: TOXENV=docs
-allow_failures:
+  allow_failures:
     - env: TOXENV=py38
 
 install:
