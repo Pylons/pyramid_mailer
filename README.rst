@@ -9,7 +9,7 @@
    :alt: Documentation Status
 
 pyramid_mailer is a package for sending email from your Pyramid application.
-It is compatible with Python 2.7, 3.4, 3.5, and 3.6, as well as PyPy.
+It is compatible with Python 2.7, 3.4, 3.5, 3.6, and 3.7 as well as PyPy.
 
 This package includes:
 

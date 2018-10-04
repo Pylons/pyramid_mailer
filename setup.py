@@ -1,10 +1,10 @@
 from setuptools import setup
 
 docs_extras = [
-    'Sphinx',
+    'Sphinx >= 1.8.1',
     'docutils',
     'repoze.sphinx.autointerface',
-    'pylons-sphinx-themes >= 0.3',
+    'pylons-sphinx-themes >= 1.0.10',
     ]
 
 tests_require = []

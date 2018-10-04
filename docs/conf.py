@@ -71,7 +71,7 @@ today_fmt = '%B %d, %Y'
 # exclude_dirs = []
 
 # directories to ignore when looking for source files.
-exclude_patterns = ['_themes/README.rst', ]
+# exclude_patterns = ['_themes/README.rst', ]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -132,7 +132,14 @@ html_title = 'pyramid_mailer v%s' % release
 html_last_updated_fmt = '%b %d, %Y'
 
 # Custom sidebar templates, maps document names to template names.
-# html_sidebars = {}
+# Control display of sidebars and include ethical ads from RTD
+html_sidebars = {'**': [
+    'localtoc.html',
+    'ethicalads.html',
+    'relations.html',
+    'sourcelink.html',
+    'searchbox.html',
+]}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -197,6 +204,8 @@ latex_documents = [
 # If false, no module index is generated.
 # latex_use_modindex = False
 
+# Do not use smart quotes.
+smartquotes = False
 
 # -- Options for Epub output --------------------------------------------------
 

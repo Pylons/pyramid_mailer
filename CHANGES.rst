@@ -111,15 +111,15 @@ unreleased
 
 - Allow setting Content-Transfer-Encoding for body and html
   via Attachments.
-  https://github.com/Pylons/pyramid_mailer/issue/29
+  https://github.com/Pylons/pyramid_mailer/issues/29
 
 - Fix handling of messages with both HTML and plain text
   bodies that also have attachments.
-  https://github.com/Pylons/pyramid_mailer/issue/32
+  https://github.com/Pylons/pyramid_mailer/issues/32
 
 - ensure that ``pyramid_mailer.response.to_message`` returns
   text under Python 3.x.
-  https://github.com/Pylons/pyramid_mailer/issue/24
+  https://github.com/Pylons/pyramid_mailer/issues/24
 
 - Dropped support for Python 2.5.
 
