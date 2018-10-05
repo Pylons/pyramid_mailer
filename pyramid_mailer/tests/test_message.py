@@ -257,9 +257,19 @@ class TestMessage(unittest.TestCase):
 
         mailer.send(msg)
 
-    def test_utf8_body_subject(self):
+    def test_internationalized_message(self):
         """
-        This test is designed to ensure a UTF8 subject and body are encoded properly.
+        This test is designed to ensure unicode data, namely UTF-8, are encoded
+        properly in the subject and body fields, and that utf-8 email addresses
+        are not encoded for transport.
+
+        Relevant RFCs:        
+            RFC 6532 'Internationalized Email Headers'
+                https://tools.ietf.org/html/rfc6532
+            RFC 6531 'SMTP Extension for Internationalized Email'
+                https://tools.ietf.org/html/rfc6531
+           RFC 6530 'Overview and Framework for Internationalized Email'
+                https://tools.ietf.org/html/rfc6530
 
         Two scenarios are used:
 
