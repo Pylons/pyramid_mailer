@@ -527,9 +527,6 @@ API
    :members:
 
 
-Change History
---------------
-
 .. include:: ../CHANGES.rst
 
 
