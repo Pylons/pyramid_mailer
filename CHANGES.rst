@@ -19,6 +19,9 @@ unreleased
   ``pyramid_mailer.debug`` now add the ``request.mailer`` request attribute.
   https://github.com/Pylons/pyramid_mailer/pull/83
 
+
+.. _v0.15:
+
 0.15 (2016-12-06)
 ^^^^^^^^^^^^^^^^^
 
@@ -50,6 +53,9 @@ unreleased
   ``request.tm`` set by ``pyramid_tm``.
   https://github.com/Pylons/pyramid_mailer/pull/78
 
+
+.. _v0.14.1:
+
 0.14.1 (2015-05-21)
 ^^^^^^^^^^^^^^^^^^^
 
@@ -60,6 +66,9 @@ unreleased
   cast to an ``int``. This did not show up on Python 2 because string
   to int comparisons are valid there but it was a latent bug.
   See https://github.com/Pylons/pyramid_mailer/pull/68
+
+
+.. _v0.14:
 
 0.14 (2014-12-10)
 ^^^^^^^^^^^^^^^^^
@@ -80,12 +89,18 @@ unreleased
   them.
   https://github.com/Pylons/pyramid_mailer/pull/50
 
+
+.. _v0.13:
+
 0.13 (2013-07-13)
 ^^^^^^^^^^^^^^^^^
 
 - Default transfer encoding for mail messages is now
   'quoted-printable'.
   https://github.com/Pylons/pyramid_mailer/pull/45
+
+
+.. _v0.12:
 
 0.12 (2013-06-26)
 ^^^^^^^^^^^^^^^^^
@@ -106,6 +121,9 @@ unreleased
 
 - Requires repoze.sendmail >= 4.1
 
+
+.. _v0.11:
+
 0.11 (2013-03-28)
 ^^^^^^^^^^^^^^^^^
 
@@ -123,6 +141,9 @@ unreleased
 
 - Dropped support for Python 2.5.
 
+
+.. _v0.10:
+
 0.10 (2012-11-22)
 ^^^^^^^^^^^^^^^^^
 
@@ -137,6 +158,9 @@ unreleased
 
 - Use ``setup.py dev`` in tox.ini.
 
+
+.. _v0.9:
+
 0.9 (2012-05-03)
 ^^^^^^^^^^^^^^^^
 
@@ -144,6 +168,9 @@ unreleased
 
 - Depend on ``repoze.sendmail`` >= 3.2 (fixes unicode multipart message
   encoding).
+
+
+.. _v0.8:
 
 0.8 (2012-03-26)
 ^^^^^^^^^^^^^^^^
@@ -153,13 +180,19 @@ unreleased
   (no recipient= required anymore).  See
   https://github.com/Pylons/pyramid_mailer/issues/14.
 
+
+.. _v0.7:
+
 0.7 (2012-03-26)
 ^^^^^^^^^^^^^^^^
 
 - Packaging release
 
-0.6 (2012-03-20)
-^^^^^^^^^^^^^^^^
+
+.. _v0.7dev:
+
+0.7dev (2012-03-20)
+^^^^^^^^^^^^^^^^^^^
 
 - Python 2.5, 2.6, 2.7, 3.2, and pypy compatibility.
 
@@ -170,6 +203,9 @@ unreleased
 
 - More descriptive exception raised when attempting to send cc-only or
   bcc-only messages.  See https://github.com/Pylons/pyramid_mailer/issues/14
+
+
+.. _v0.6:
 
 0.6 (2012-01-22)
 ^^^^^^^^^^^^^^^^
@@ -183,17 +219,26 @@ unreleased
 - Don't include ``Bcc`` header in mail messages (breaks secrecy of BCC).
   See https://github.com/Pylons/pyramid_mailer/pull/10
 
+
+.. _v0.5.1:
+
 0.5.1 (2011-11-13)
 ^^^^^^^^^^^^^^^^^^
 
 - Fixed a bug where the mailer was only sending email to addresses in
   the "TO" field.
 
+
+.. _v0.5:
+
 0.5 (2011-10-24)
 ^^^^^^^^^^^^^^^^
 
 - Drop Lamson dependency by copying Lamson's MailResponse and dependent code
   into ``pyramid_mailer.response``.
+
+
+.. _v0.4.x:
 
 0.4.X
 ^^^^^
