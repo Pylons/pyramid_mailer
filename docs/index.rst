@@ -527,7 +527,13 @@ API
    :members:
 
 
-.. include:: ../CHANGES.rst
+Change History
+--------------
+
+.. toctree::
+    :maxdepth: 2
+
+    changes
 
 
 .. _Github: https://github.com/Pylons/pyramid_mailer

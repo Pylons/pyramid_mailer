@@ -1,10 +1,10 @@
 Change History
---------------
+==============
 
 .. _vunreleased:
 
 unreleased
-^^^^^^^^^^
+----------
 
 - Bring repo up to Pylons Project standards.
   See https://github.com/Pylons/pyramid_mailer/pull/89
@@ -15,7 +15,7 @@ unreleased
 .. _v0.15.1:
 
 0.15.1 (2016-12-13)
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 - Add the new ``.bind`` method to the ``DebugMailer`` and the
   ``DummyMailer``. Also ``pyramid_mailer.testing`` and
@@ -26,7 +26,7 @@ unreleased
 .. _v0.15:
 
 0.15 (2016-12-06)
-^^^^^^^^^^^^^^^^^
+-----------------
 
 - Support '7bit' and '8bit' transfer-encoding.
   https://github.com/Pylons/pyramid_mailer/pull/49
@@ -60,7 +60,7 @@ unreleased
 .. _v0.14.1:
 
 0.14.1 (2015-05-21)
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 - Enable compatibility testing with Pyramid all the way back to 1.2. It may
   work earlier but we aren't testing it any longer.
@@ -74,7 +74,7 @@ unreleased
 .. _v0.14:
 
 0.14 (2014-12-10)
-^^^^^^^^^^^^^^^^^
+-----------------
 
 - Added support for Python3.4, PyPy3.
 
@@ -96,7 +96,7 @@ unreleased
 .. _v0.13:
 
 0.13 (2013-07-13)
-^^^^^^^^^^^^^^^^^
+-----------------
 
 - Default transfer encoding for mail messages is now
   'quoted-printable'.
@@ -106,7 +106,7 @@ unreleased
 .. _v0.12:
 
 0.12 (2013-06-26)
-^^^^^^^^^^^^^^^^^
+-----------------
 
 - Added support for sendmail binary via repoze.sendmail >= 4.0b2.
   https://github.com/Pylons/pyramid_mailer/pull/35
@@ -128,7 +128,7 @@ unreleased
 .. _v0.11:
 
 0.11 (2013-03-28)
-^^^^^^^^^^^^^^^^^
+-----------------
 
 - Allow setting Content-Transfer-Encoding for body and html
   via Attachments.
@@ -148,7 +148,7 @@ unreleased
 .. _v0.10:
 
 0.10 (2012-11-22)
-^^^^^^^^^^^^^^^^^
+-----------------
 
 - Set default transfer encoding for attachments to ``base64`` and allow
   an optional ``transfer_encoding`` argument for attachments. This currently
@@ -165,7 +165,7 @@ unreleased
 .. _v0.9:
 
 0.9 (2012-05-03)
-^^^^^^^^^^^^^^^^
+----------------
 
 - Add a test for uncode encoding in multipart messages.
 
@@ -176,7 +176,7 @@ unreleased
 .. _v0.8:
 
 0.8 (2012-03-26)
-^^^^^^^^^^^^^^^^
+----------------
 
 - Work around a Python 3.2.0 bug in handling emails with empty headers.  This
   allows cc-only and bcc-only emails to be handled properly on all platforms
@@ -187,7 +187,7 @@ unreleased
 .. _v0.7:
 
 0.7 (2012-03-26)
-^^^^^^^^^^^^^^^^
+----------------
 
 - Packaging release
 
@@ -195,7 +195,7 @@ unreleased
 .. _v0.7dev:
 
 0.7dev (2012-03-20)
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 - Python 2.5, 2.6, 2.7, 3.2, and pypy compatibility.
 
@@ -211,7 +211,7 @@ unreleased
 .. _v0.6:
 
 0.6 (2012-01-22)
-^^^^^^^^^^^^^^^^
+----------------
 
 - Use ',' as an email header field separator rather than ';' when multiple
   values are in the same header (as per RFC822).
@@ -226,7 +226,7 @@ unreleased
 .. _v0.5.1:
 
 0.5.1 (2011-11-13)
-^^^^^^^^^^^^^^^^^^
+------------------
 
 - Fixed a bug where the mailer was only sending email to addresses in
   the "TO" field.
@@ -235,7 +235,7 @@ unreleased
 .. _v0.5:
 
 0.5 (2011-10-24)
-^^^^^^^^^^^^^^^^
+----------------
 
 - Drop Lamson dependency by copying Lamson's MailResponse and dependent code
   into ``pyramid_mailer.response``.
@@ -244,7 +244,7 @@ unreleased
 .. _v0.4.x:
 
 0.4.X
-^^^^^
+-----
 
 - ``pyramid_mailer.includeme`` function added for
   ``config.include('pyramid_mailer')`` support
