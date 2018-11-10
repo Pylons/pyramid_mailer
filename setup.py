@@ -1,10 +1,10 @@
 from setuptools import setup
 
 docs_extras = [
-    'Sphinx',
+    'Sphinx >= 1.8.1',
     'docutils',
     'repoze.sphinx.autointerface',
-    'pylons-sphinx-themes >= 0.3',
+    'pylons-sphinx-themes >= 1.0.10',
     ]
 
 tests_require = []
@@ -34,7 +34,7 @@ setup(
     author_email='danjac354@gmail.com',
     description='Sendmail package for Pyramid',
     long_description='\n\n'.join([README, CHANGES]),
-    url="http://docs.pylonsproject.org/projects/pyramid-mailer/en/latest/",
+    url="https://docs.pylonsproject.org/projects/pyramid-mailer/en/latest/",
     packages=[
         'pyramid_mailer',
     ],
@@ -59,8 +59,10 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Framework :: Pyramid",
