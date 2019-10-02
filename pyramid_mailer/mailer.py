@@ -401,7 +401,8 @@ class Mailer(object):
         message.sender = message.sender or self.default_sender
         # convert Lamson message to Python email package msessage
         msg = message.to_message()
-        return (message.sender, message.send_to, msg)
+        envelop_from = message.envelop_from or message.sender
+        return (envelop_from, message.send_to, msg)
 
     def send_sendmail(self, message ):
         """Send a message within the transaction manager.

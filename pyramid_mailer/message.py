@@ -105,7 +105,7 @@ class Attachment(object):
 
         if not data:
             raise RuntimeError('No data provided to attachment')
-        
+
         if filename and not content_type:
             content_type, _ = mimetypes.guess_type(filename)
 
@@ -120,7 +120,7 @@ class Attachment(object):
 
         if filename is None:
             filename = dparams.get('filename')
-        
+
         if filename:
             filename = os.path.split(filename)[1]
             ctparams['name'] = filename
@@ -128,9 +128,9 @@ class Attachment(object):
 
         base = MailBase()
         base.set_content_type(content_type, ctparams)
-        
+
         charset = ctparams.get('charset', None)
-        
+
         if content_type.startswith('text/'):
             if charset is None:
                 charset = best_charset(self.data)[0]
@@ -170,14 +170,16 @@ class Message(object):
         body=None,
         html=None,
         sender=None,
+        envelop_from=None,
         cc=None,
         bcc=None,
         extra_headers=None,
         attachments=None
         ):
-        
+
         self.subject = subject or ''
         self.sender = sender
+        self.envelop_from = envelop_from
         self.body = body
         self.html = html
 
@@ -197,7 +199,7 @@ class Message(object):
         """
 
         self.validate()
-        
+
         bodies = [(self.body, 'text/plain'), (self.html, 'text/html')]
 
         for idx, (val, content_type) in enumerate(bodies):
@@ -247,7 +249,7 @@ class Message(object):
 
         if self.cc:
             base['Cc'] = ', '.join(self.cc)
-            
+
         if self.extra_headers:
             base.update(dict(self.extra_headers))
 
@@ -257,7 +259,7 @@ class Message(object):
             base.attach_part(altpart)
         else:
             altpart = base
-            
+
         if body and html:
             altpart.set_content_type('multipart/alternative')
             altpart.set_body(None)
@@ -406,7 +408,7 @@ class MailBase(object):
     def __nonzero__(self):
         return self.body != None or len(
             self.headers) > 0 or len(self.parts) > 0
-    
+
     __bool__ = __nonzero__
 
     def keys(self):
