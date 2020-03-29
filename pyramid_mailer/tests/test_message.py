@@ -95,7 +95,7 @@ class TestAttachment(unittest.TestCase):
 
     def test_to_mailbase_text_type_sets_charset_unicode_utf8(self):
         charset = 'utf-8'
-        # greek small letter iota with dialtyika and tonos; this character
+        # greek small letter iota with dialytika and tonos; this character
         # cannot be encoded to either ascii or latin-1, so utf-8 is chosen
         text_encoded = b'\xce\x90'
         text = text_encoded.decode(charset)
@@ -423,7 +423,7 @@ class TestMessage(unittest.TestCase):
         from pyramid_mailer.message import Attachment
 
         charset = 'utf-8'
-        # greek small letter iota with dialtyika and tonos; this character
+        # greek small letter iota with dialytika and tonos; this character
         # cannot be encoded to either ascii or latin-1, so utf-8 is chosen
         text_encoded =  b'\xce\x90'
         text = text_encoded.decode(charset)
