@@ -43,6 +43,11 @@ from email.mime.multipart import MIMEMultipart
 
 from email.encoders import _bencode
 
+try:
+    from email.policy import Compat32
+except ImportError:
+    Compat32 = None
+
 from .exceptions import (
     BadHeaders,
     InvalidMessage,
@@ -491,6 +496,13 @@ def to_message(base):
     for part in base.parts:
         sub = to_message(part)
         out.attach(sub)
+
+    if not PY2:
+        # the default policy on Python 3.3+ is that of Compat32, with \n
+        # line endings. This does not conform to RFC 2822 which requires
+        # that \r\n be used. The Compat32 with \r\n is the minimal change
+        # to make the bodies RFC 2822 compliant for sending.
+        out.policy = Compat32(linesep="\r\n")
 
     return out
 
