@@ -7,11 +7,6 @@ try:
 except NameError:
     text_type = str
 
-if PY2:
-    from StringIO import StringIO
-else:
-    from io import StringIO
-
 try:
     from smtplib import SMTP_SSL
 except ImportError:  # pragma: no cover
