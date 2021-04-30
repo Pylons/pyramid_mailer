@@ -48,10 +48,7 @@ from .exceptions import (
     InvalidMessage,
     )
 
-from ._compat import (
-    PY2,
-    _qencode,
-    )
+from ._compat import _qencode
 
 
 class Attachment(object):
@@ -104,7 +101,7 @@ class Attachment(object):
 
         if not data:
             raise RuntimeError('No data provided to attachment')
-        
+
         if filename and not content_type:
             content_type, _ = mimetypes.guess_type(filename)
 
@@ -119,7 +116,7 @@ class Attachment(object):
 
         if filename is None:
             filename = dparams.get('filename')
-        
+
         if filename:
             filename = os.path.split(filename)[1]
             ctparams['name'] = filename
@@ -127,9 +124,9 @@ class Attachment(object):
 
         base = MailBase()
         base.set_content_type(content_type, ctparams)
-        
+
         charset = ctparams.get('charset', None)
-        
+
         if content_type.startswith('text/'):
             if charset is None:
                 charset = best_charset(self.data)[0]
@@ -174,7 +171,7 @@ class Message(object):
         extra_headers=None,
         attachments=None
         ):
-        
+
         self.subject = subject or ''
         self.sender = sender
         self.body = body
@@ -196,7 +193,7 @@ class Message(object):
         """
 
         self.validate()
-        
+
         bodies = [(self.body, 'text/plain'), (self.html, 'text/html')]
 
         for idx, (val, content_type) in enumerate(bodies):
@@ -246,7 +243,7 @@ class Message(object):
 
         if self.cc:
             base['Cc'] = ', '.join(self.cc)
-            
+
         if self.extra_headers:
             base.update(dict(self.extra_headers))
 
@@ -256,7 +253,7 @@ class Message(object):
             base.attach_part(altpart)
         else:
             altpart = base
-            
+
         if body and html:
             altpart.set_content_type('multipart/alternative')
             altpart.set_body(None)
@@ -405,7 +402,7 @@ class MailBase(object):
     def __nonzero__(self):
         return self.body != None or len(
             self.headers) > 0 or len(self.parts) > 0
-    
+
     __bool__ = __nonzero__
 
     def keys(self):
@@ -464,15 +461,12 @@ def to_message(base):
                     charset, _ = best_charset(body)
                 else:
                     charset = 'utf-8'
-            if PY2:
-                body = body.encode(charset)
-            else:
-                body = body.encode(charset, 'surrogateescape')
+            body = body.encode(charset, 'surrogateescape')
         if body is not None:
             if ctenc:
                 body = transfer_encode(ctenc, body)
-            if not PY2:
-                body = body.decode(charset or 'ascii', 'replace')
+
+            body = body.decode(charset or 'ascii', 'replace')
         out.set_payload(body, charset)
 
     for k in base.keys(): # returned sorted

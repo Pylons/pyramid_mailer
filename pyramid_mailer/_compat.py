@@ -1,8 +1,5 @@
-import sys
 import quopri
 
-
-PY2 = sys.version_info[0] < 3
 
 try:
     from smtplib import SMTP_SSL
