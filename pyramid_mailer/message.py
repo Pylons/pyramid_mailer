@@ -49,7 +49,6 @@ from .exceptions import (
     )
 
 from ._compat import (
-    text_type,
     PY2,
     _qencode,
     )
@@ -459,7 +458,7 @@ def to_message(base):
         out = MIMENonMultipart(maintype, subtype, **ctparams)
         if ctenc:
             out['Content-Transfer-Encoding'] = ctenc
-        if isinstance(body, text_type):
+        if isinstance(body, str):
             if not charset:
                 if is_text:
                     charset, _ = best_charset(body)
@@ -506,7 +505,7 @@ def transfer_encode(encoding, payload):
         return _qencode(payload)
     elif encoding == '7bit':
         try:
-            text_type(payload, 'ascii')
+            str(payload, 'ascii')
         except UnicodeDecodeError:
             raise RuntimeError('Payload contains an octet that is not 7bit safe')
         return payload

@@ -4,14 +4,10 @@ import unittest
 import os
 from io import StringIO
 
-from pyramid_mailer._compat import (
-    text_type,
-    _qencode,
-    )
+from pyramid_mailer._compat import _qencode
 
-from email.encoders import (
-    _bencode,
-    )
+from email.encoders import _bencode
+
 
 class TestAttachment(unittest.TestCase):
 
@@ -24,7 +20,7 @@ class TestAttachment(unittest.TestCase):
         self.assertEqual(a.data, "foo")
 
     def test_data_from_file_obj(self):
-        a = self._makeOne(data=StringIO(text_type("foo")))
+        a = self._makeOne(data=StringIO("foo"))
         self.assertEqual(a.data, "foo")
 
     def test_to_mailbase_no_data(self):
@@ -269,7 +265,7 @@ class TestMessage(unittest.TestCase):
             )
 
         response = msg.to_message()
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
 
     def test_cc_without_recipients(self):
 
@@ -286,7 +282,7 @@ class TestMessage(unittest.TestCase):
         msgid = mailer.send(msg)
         response = msg.to_message()
 
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
         self.assertTrue(msgid)
 
     def test_cc_without_recipients_2(self):
@@ -300,7 +296,7 @@ class TestMessage(unittest.TestCase):
             cc=["tosomeoneelse@example.com"]
             )
         response = msg.to_message()
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
 
     def test_bcc_without_recipients(self):
 
@@ -318,7 +314,7 @@ class TestMessage(unittest.TestCase):
         response = msg.to_message()
 
         self.assertFalse(
-            "Bcc: tosomeoneelse@example.com" in text_type(response))
+            "Bcc: tosomeoneelse@example.com" in str(response))
         self.assertTrue(msgid)
 
     def test_extra_headers(self):
@@ -334,7 +330,7 @@ class TestMessage(unittest.TestCase):
             )
 
         response = msg.to_message()
-        self.assertTrue("X-Foo: Joe" in text_type(response))
+        self.assertTrue("X-Foo: Joe" in str(response))
 
     def test_attach(self):
 
@@ -666,7 +662,7 @@ class TestMessage(unittest.TestCase):
             html="Html",
             )
         message = response.to_message()
-        self.assertEqual(text_type(message['To']),
+        self.assertEqual(str(message['To']),
                          'chrism@plope.com, billg@microsoft.com')
 
     def test_to_message_multipart(self):
@@ -827,7 +823,7 @@ class TestMessage(unittest.TestCase):
             )
 
         response = msg.to_message()
-        self.assertTrue("THISSHOULDBEINMESSAGEBODY" in text_type(response))
+        self.assertTrue("THISSHOULDBEINMESSAGEBODY" in str(response))
 
 class Test_normalize_header(unittest.TestCase):
     def _callFUT(self, header):

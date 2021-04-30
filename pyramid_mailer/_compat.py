@@ -3,11 +3,6 @@ import sys
 PY2 = sys.version_info[0] < 3
 
 try:
-    text_type = unicode
-except NameError:
-    text_type = str
-
-try:
     from smtplib import SMTP_SSL
 except ImportError:  # pragma: no cover
     SMTP_SSL = None
