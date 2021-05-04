@@ -22,6 +22,14 @@ matrix:
       env: TOXENV=py39
       dist: xenial
       sudo: true
+    - python: 3.9
+      env: TOXENV=py39-pyramid110
+      dist: xenial
+      sudo: true
+    - python: 3.9
+      env: TOXENV=py39-pyramid20
+      dist: xenial
+      sudo: true
     - python: pypy3
       env: TOXENV=pypy3
     - python: 3.9
