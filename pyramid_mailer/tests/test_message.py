@@ -2,16 +2,12 @@
 
 import unittest
 import os
+from io import StringIO
 
-from pyramid_mailer._compat import (
-    text_type,
-    StringIO,
-    _qencode,
-    )
+from pyramid_mailer._compat import _qencode
 
-from email.encoders import (
-    _bencode,
-    )
+from email.encoders import _bencode
+
 
 class TestAttachment(unittest.TestCase):
 
@@ -24,7 +20,7 @@ class TestAttachment(unittest.TestCase):
         self.assertEqual(a.data, "foo")
 
     def test_data_from_file_obj(self):
-        a = self._makeOne(data=StringIO(text_type("foo")))
+        a = self._makeOne(data=StringIO("foo"))
         self.assertEqual(a.data, "foo")
 
     def test_to_mailbase_no_data(self):
@@ -46,7 +42,7 @@ class TestAttachment(unittest.TestCase):
     def test_to_mailbase_content_type_cannot_be_derived_from_filename(self):
         a = self._makeOne(data='bar')
         self.assertRaises(RuntimeError, a.to_mailbase)
-        
+
     def test_to_mailbase_disposition_header_provides_filename(self):
         a = self._makeOne(
             data='bar',
@@ -134,7 +130,7 @@ class TestAttachment(unittest.TestCase):
             base['content-id'],
             'foo-content'
             )
-        
+
 class TestMessage(unittest.TestCase):
 
     def _read_filedata(self, filename, mode='r'):
@@ -144,7 +140,7 @@ class TestMessage(unittest.TestCase):
         finally:
             f.close()
         return data
-    
+
     def test_initialize(self):
 
         from pyramid_mailer.message import Message
@@ -269,7 +265,7 @@ class TestMessage(unittest.TestCase):
             )
 
         response = msg.to_message()
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
 
     def test_cc_without_recipients(self):
 
@@ -286,7 +282,7 @@ class TestMessage(unittest.TestCase):
         msgid = mailer.send(msg)
         response = msg.to_message()
 
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
         self.assertTrue(msgid)
 
     def test_cc_without_recipients_2(self):
@@ -300,7 +296,7 @@ class TestMessage(unittest.TestCase):
             cc=["tosomeoneelse@example.com"]
             )
         response = msg.to_message()
-        self.assertTrue("Cc: tosomeoneelse@example.com" in text_type(response))
+        self.assertTrue("Cc: tosomeoneelse@example.com" in str(response))
 
     def test_bcc_without_recipients(self):
 
@@ -318,7 +314,7 @@ class TestMessage(unittest.TestCase):
         response = msg.to_message()
 
         self.assertFalse(
-            "Bcc: tosomeoneelse@example.com" in text_type(response))
+            "Bcc: tosomeoneelse@example.com" in str(response))
         self.assertTrue(msgid)
 
     def test_extra_headers(self):
@@ -334,7 +330,7 @@ class TestMessage(unittest.TestCase):
             )
 
         response = msg.to_message()
-        self.assertTrue("X-Foo: Joe" in text_type(response))
+        self.assertTrue("X-Foo: Joe" in str(response))
 
     def test_attach(self):
 
@@ -405,7 +401,7 @@ class TestMessage(unittest.TestCase):
             )
 
         self.assertEqual(
-            html_part['Content-Type'], 
+            html_part['Content-Type'],
             'text/html; charset="iso-8859-1"'
             )
         self.assertEqual(
@@ -452,7 +448,7 @@ class TestMessage(unittest.TestCase):
             body_part['Content-Type'],
             'text/plain; charset="utf-8"'
             )
-        
+
         self.assertEqual(
             body_part['Content-Transfer-Encoding'],
             transfer_encoding
@@ -615,14 +611,14 @@ class TestMessage(unittest.TestCase):
             bcc=['anotherperson@example.com'],
             body="testing"
             )
-        
+
         self.assertEqual(
             msg.send_to,
             {"to@example.com",
              "somebodyelse@example.com",
              "anotherperson@example.com"}
             )
-        
+
     def test_is_bad_headers_if_no_bad_headers(self):
         from pyramid_mailer.message import Message
         msg = Message(
@@ -666,7 +662,7 @@ class TestMessage(unittest.TestCase):
             html="Html",
             )
         message = response.to_message()
-        self.assertEqual(text_type(message['To']),
+        self.assertEqual(str(message['To']),
                          'chrism@plope.com, billg@microsoft.com')
 
     def test_to_message_multipart(self):
@@ -710,7 +706,7 @@ class TestMessage(unittest.TestCase):
 
     def test_to_message_multipart_with_b64encoding(self):
         from pyramid_mailer.message import Message, Attachment
-        
+
         response = Message(
             recipients=['To'],
             sender='From',
@@ -827,7 +823,7 @@ class TestMessage(unittest.TestCase):
             )
 
         response = msg.to_message()
-        self.assertTrue("THISSHOULDBEINMESSAGEBODY" in text_type(response))
+        self.assertTrue("THISSHOULDBEINMESSAGEBODY" in str(response))
 
 class Test_normalize_header(unittest.TestCase):
     def _callFUT(self, header):
@@ -896,7 +892,7 @@ class TestMailBase(unittest.TestCase):
             base.content_encoding['Content-Transfer-Encoding'],
             'base64'
             )
-       
+
     def test_get_transfer_encoding(self):
         base = self._makeOne()
         self.assertEqual(
@@ -931,7 +927,7 @@ class TestMailBase(unittest.TestCase):
         base = self._makeOne()
         base.attach_part(1)
         self.assertEqual(base.parts, [1])
-        
+
     def test___getitem__hit(self):
         base = self._makeOne([('Content-Type', 'text/html')])
         self.assertEqual(base['content-type'], 'text/html')
@@ -1049,7 +1045,7 @@ class Test_to_message(unittest.TestCase):
         self.assertEqual(result['Content-Transfer-Encoding'], 'base64')
         payload = result.get_payload()
         self.assertEqual(payload, _bencode(b'foo').decode('ascii'))
-        
+
     def test_recursion(self):
         mail = self._makeBase()
         another = self._makeBase()
@@ -1058,7 +1054,7 @@ class Test_to_message(unittest.TestCase):
         mail.parts = [another]
         result = self._callFUT(mail)
         self.assertTrue('hello' in result.as_string())
-        
+
 class Test_transfer_encode(unittest.TestCase):
     def _callFUT(self, encoding, payload):
         from pyramid_mailer.message import transfer_encode
@@ -1089,7 +1085,7 @@ class Test_transfer_encode(unittest.TestCase):
             text_7bit
             )
         with self.assertRaises(RuntimeError):
-            self._callFUT('7bit', text_encoded) 
+            self._callFUT('7bit', text_encoded)
 
     def test_body_is_8bit(self):
         text_encoded = b'LaPe\xf1a'
@@ -1104,12 +1100,12 @@ class Test_transfer_encode(unittest.TestCase):
             RuntimeError,
             self._callFUT, 'bogus', text_encoded
             )
-        
+
 class TestFunctional(unittest.TestCase):
     def test_repoze_sendmail_send_to_queue_functional(self):
         # functest that emulates the interaction between pyramid_mailer and
         # repoze.maildir.add and queuedelivery.send.
-        
+
         import tempfile
         from email.generator import Generator
         from email.parser import Parser
@@ -1178,7 +1174,7 @@ class TestFunctional(unittest.TestCase):
                 parser = Parser()
                 reconstituted = parser.parse(foo)
                 checkit(reconstituted)
-                
+
         finally: # pragma: no cover
             try:
                 os.remove(fn)
