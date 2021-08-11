@@ -7,7 +7,7 @@ docs_extras = [
     'pylons-sphinx-themes >= 1.0.10',
     ]
 
-tests_require = []
+tests_require = ['pyramid']
 
 testing_extras = tests_require + [
     'nose',
@@ -41,7 +41,6 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'pyramid',
         'repoze.sendmail>=4.1',
         'transaction',
     ],

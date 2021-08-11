@@ -13,3 +13,9 @@ def _qencode(s):
     enc = quopri.encodestring(s, quotetabs=True)
     # Must encode spaces, which quopri.encodestring() doesn't do
     return enc.replace(b' ', b'=20')
+
+
+try:
+    string_types = (basestring,)
+except NameError:
+    string_types = (str,)
