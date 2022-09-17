@@ -14,7 +14,7 @@ It is compatible with Python 2.7, 3.4, 3.5, 3.6, and 3.7 as well as PyPy.
 This package includes:
 
 1. Wrapping the low-level Python ``email`` library with an easy-to-use
-   API, which includes attachments and mulipart content.
+   API, which includes attachments and multipart content.
 
 2. Sending emails immediately or add to a ``maildir`` queue.
 
@@ -24,7 +24,7 @@ This package includes:
 4. Features to help with unit testing.
 
 ``pyramid_mailer`` uses the ``repoze.sendmail`` library for managing email
-sending and transacton management, and borrows code (with permission) from
+sending and transaction management, and borrows code (with permission) from
 Zed Shaw's `lamson <https://github.com/zedshaw/lamson>`_  for wrapping email
 messages.  See the ``LICENSE.txt`` file for more information.
 
