@@ -1,7 +1,7 @@
 ``pyramid_mailer``
 ==================
 
-.. image:: https://travis-ci.org/Pylons/pyramid_mailer.png?branch=master
+.. image:: https://travis-ci.org/Pylons/pyramid_mailer.png?branch=main
    :target: https://travis-ci.org/Pylons/pyramid_mailer
 
 .. image:: https://readthedocs.org/projects/pyramid_mailer/badge/?version=latest

@@ -11,6 +11,8 @@ unreleased
 
 - Optionally include bcc information on send.
   See https://github.com/Pylons/pyramid_mailer/pull/87
+  
+- Rename "master" to "main"
 
 .. _v0.15.1:
 
