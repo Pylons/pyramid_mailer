@@ -32,7 +32,7 @@ Links
 -----
 
 - `documentation
-  <https://docs.pylonsproject.org/projects/pyramid_mailer/en/latest/>`_
+  <https://docs.pylonsproject.org/projects/pyramid-mailer/en/latest/>`_
 
 - `code repository
   <https://github.com/Pylons/pyramid_mailer>`_
