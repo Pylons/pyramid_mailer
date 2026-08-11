@@ -151,6 +151,7 @@ class Message(object):
     :param body: plain text message (may be an Attachment or text)
     :param html: HTML message (may be an Attachment or text)
     :param sender: email sender address
+    :param envelop_from: sender address to use as SMTP envelop from
     :param cc: CC list
     :param bcc: BCC list
     :param extra_headers: dict of extra email headers
@@ -167,6 +168,7 @@ class Message(object):
         body=None,
         html=None,
         sender=None,
+        envelop_from=None,
         cc=None,
         bcc=None,
         extra_headers=None,
@@ -175,6 +177,7 @@ class Message(object):
 
         self.subject = subject or ''
         self.sender = sender
+        self.envelop_from = envelop_from
         self.body = body
         self.html = html
 

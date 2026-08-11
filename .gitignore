@@ -19,3 +19,4 @@ docs/output
 docs/_build
 *\$py.class
 .python-version
+/.idea

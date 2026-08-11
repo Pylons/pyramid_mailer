@@ -191,8 +191,8 @@ class SMTP_SSLMailer(SMTPMailer):
         connection = self.smtp(
             self.hostname,
             str(self.port),
-            keyfile=self.keyfile,
-            certfile=self.certfile
+            # keyfile=self.keyfile,
+            # certfile=self.certfile
             )
         connection.set_debuglevel(self.debug_smtp)
         return connection
@@ -401,7 +401,8 @@ class Mailer(object):
         message.sender = message.sender or self.default_sender
         # convert Lamson message to Python email package message
         msg = message.to_message()
-        return (message.sender, message.send_to, msg)
+        envelop_from = message.envelop_from or message.sender
+        return (envelop_from, message.send_to, msg)
 
     def send_sendmail(self, message ):
         """Send a message within the transaction manager.
