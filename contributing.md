@@ -8,15 +8,15 @@ You can contribute to this project in several ways.
 *   Fork this project, create a new branch, commit your suggested change, and push to your fork on GitHub.
     When ready, submit a pull request for consideration.
     [GitHub Flow](https://guides.github.com/introduction/flow/index.html) describes the workflow process and why it's a good practice.
-    When submitting a pull request, sign [CONTRIBUTORS.txt](https://github.com/Pylons/pyramid_mailer/blob/master/CONTRIBUTORS.txt) if you have not yet done so.
+    When submitting a pull request, sign [CONTRIBUTORS.txt](https://github.com/Pylons/pyramid_mailer/blob/main/CONTRIBUTORS.txt) if you have not yet done so.
 *   Join the [IRC channel #pyramid on irc.freenode.net](https://webchat.freenode.net/?channels=pyramid).
 
 ## Git Branches
 
 Git branches and their purpose and status at the time of this writing are listed below.
 
-*   [master](https://github.com/Pylons/pyramid_mailer/) - The branch which should always be *deployable*. The default branch on GitHub.
-*   For development, create a new branch. If changes on your new branch are accepted, they will be merged into the master branch and deployed.
+*   [main](https://github.com/Pylons/pyramid_mailer/) - The branch which should always be *deployable*. The default branch on GitHub.
+*   For development, create a new branch. If changes on your new branch are accepted, they will be merged into the main branch and deployed.
 
 ## Running tests and building documentation
 

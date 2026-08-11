@@ -39,6 +39,7 @@ matrix:
 
 install:
   - travis_retry pip install tox
+  - travis_retry pip install --upgrade importlib-metadata
 
 script:
   - travis_retry tox
